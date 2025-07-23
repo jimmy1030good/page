@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아주르 정보 뷰어</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>아주르 정보 뷰어</h1>
+        <nav>
+            <button id="show-characters">캐릭터</button>
+            <button id="show-kibos">키보</button>
+        </nav>
+    </header>
+    <main>
+        <section id="list-section">
+            <div id="item-list"></div>
+        </section>
+        <section id="detail-section" class="hidden">
+            <button id="back-button">목록으로</button>
+            <div id="item-detail"></div>
+        </section>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
