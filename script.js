@@ -127,6 +127,22 @@ document.addEventListener('DOMContentLoaded', () => {
         owned: [],
         wishlist: []
     };
+    
+    // 속성에 맞는 이모지를 반환하는 함수
+    function getAttributeEmoji(attribute) {
+        switch(attribute) {
+            case '불': return '🔥 ';
+            case '물': return '💧 ';
+            case '땅': return '🌋 ';
+            case '번개': return '⚡ ';
+            case '바람': return '🌪️ ';
+            case '어둠': return '🌑 ';
+            case '빛': return '✨ ';
+            case '얼음': return '❄️ ';
+            case '나무': return '🌲 ';
+            default: return '';
+        }
+    }
 
     function setImageSource(imgElement, itemName) {
         if (!itemName) {
@@ -311,8 +327,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        // 공개채널 필터 옵션 생성 (BW 2024 제외)
-        channelFiltersDiv.innerHTML = '<div class="channel-links-header">공개채널 바로가기</div><hr class="channel-divider">';
+        // 공개채널 링크만 표시 (필터 제거)
+        channelFiltersDiv.innerHTML = '';
         
         // 공개채널 링크 정보
         const channelLinks = {
@@ -321,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
             '커뮤니티': 'https://arca.live/b/azurpromilia'
         };
         
-        // 공개채널을 링크로만 표시하고 필터에서 제외
+        // 공개채널을 링크로만 표시
         Object.entries(channelLinks).forEach(([name, link]) => {
             const linkElement = document.createElement('a');
             linkElement.href = link;
@@ -330,16 +346,6 @@ document.addEventListener('DOMContentLoaded', () => {
             linkElement.textContent = name;
             linkElement.title = `${name} 바로가기`;
             channelFiltersDiv.appendChild(linkElement);
-        });
-        
-        // 필터로 사용할 공개채널 옵션 생성 (별도 섹션)
-        channelFiltersDiv.innerHTML += '<hr class="channel-divider"><div class="channel-filter-header">공개채널 필터</div>';
-        
-        gameData.releaseChannels.forEach(channel => {
-            if (channel.count > 0 && channel.name !== 'BW 2024') {
-                const option = createFilterOption(channel.name, null, 'channel');
-                channelFiltersDiv.appendChild(option);
-            }
         });
         
         // 필터 이벤트 리스너 설정
@@ -573,20 +579,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 attribute.classList.add('attribute-tag');
                 
                 // 속성에 맞는 이모지 추가
-                let attributeEmoji = '';
-                switch(item.attribute) {
-                    case '불': attributeEmoji = '🔥 '; break;
-                    case '물': attributeEmoji = '💧 '; break;
-                    case '땅': attributeEmoji = '🌋 '; break;
-                    case '번개': attributeEmoji = '⚡ '; break;
-                    case '바람': attributeEmoji = '🌪️ '; break;
-                    case '어둠': attributeEmoji = '🌑 '; break;
-                    case '빛': attributeEmoji = '✨ '; break;
-                    case '얼음': attributeEmoji = '❄️ '; break;
-                    case '나무': attributeEmoji = '🌲 '; break;
-                    default: attributeEmoji = ''; break;
-                }
-                
+                let attributeEmoji = getAttributeEmoji(item.attribute);
                 attribute.textContent = attributeEmoji + (item.attribute || '미공개');
                 
                 // 컬렉션 버튼 비활성화
@@ -782,19 +775,7 @@ document.addEventListener('DOMContentLoaded', () => {
             infoGrid.classList.add('info-grid');
 
             // 기본 정보 표시 (속성에 이모지 추가)
-            let attributeEmoji = '';
-            switch(item.attribute) {
-                case '불': attributeEmoji = '🔥 '; break;
-                case '물': attributeEmoji = '💧 '; break;
-                case '땅': attributeEmoji = '🌋 '; break;
-                case '번개': attributeEmoji = '⚡ '; break;
-                case '바람': attributeEmoji = '🌪️ '; break;
-                case '어둠': attributeEmoji = '🌑 '; break;
-                case '빛': attributeEmoji = '✨ '; break;
-                case '얼음': attributeEmoji = '❄️ '; break;
-                case '나무': attributeEmoji = '🌲 '; break;
-                default: attributeEmoji = ''; break;
-            }
+            let attributeEmoji = getAttributeEmoji(item.attribute);
             
             const basicInfo = [
                 { key: '속성', value: attributeEmoji + (item.attribute || '미공개') },
@@ -860,23 +841,20 @@ document.addEventListener('DOMContentLoaded', () => {
         // 16강 토너먼트를 위한 설정
         const targetContestants = 16;
         
-        // 참가자가 16명 이상이면 16명으로 제한, 16명 미만이면 모두 사용
+        // 항상 정확히 16명의 참가자를 선택
         if (contestants.length > targetContestants) {
             // 랜덤으로 16명 선택
             contestants = contestants.sort(() => 0.5 - Math.random()).slice(0, targetContestants);
+        } else if (contestants.length < targetContestants) {
+            // 참가자가 16명 미만이면 부전승 추가
+            const byeCount = targetContestants - contestants.length;
+            for (let i = 0; i < byeCount; i++) {
+                contestants.push("부전승");
+            }
         }
         
-        // 토너먼트 라운드 설정 (2의 제곱수로 설정)
-        let roundSize = 2;
-        while (roundSize < contestants.length) {
-            roundSize *= 2;
-        }
-        
-        // 참가자 수가 라운드 크기보다 작으면 부전승 추가
-        const byeCount = roundSize - contestants.length;
-        for (let i = 0; i < byeCount; i++) {
-            contestants.push("부전승");
-        }
+        // 토너먼트 라운드 크기는 항상 16으로 고정
+        const roundSize = targetContestants;
         
         // 참가자 순서 섞기
         contestants = contestants.sort(() => 0.5 - Math.random());
@@ -936,18 +914,15 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 현재 라운드 크기 계산 및 표시
         let roundSize = 0;
-        if (tournamentContestants.length > 0) {
-            // 현재 라운드에 남은 참가자 수 + 이미 다음 라운드로 진출한 참가자 수
-            roundSize = tournamentContestants.length + tournamentWinners.length;
-            
-            // 홀수인 경우 올림하여 가장 가까운 2의 제곱수로 설정
-            if (roundSize % 2 !== 0) {
-                roundSize += 1;
-            }
-        } else if (tournamentWinners.length > 0) {
-            // 다음 라운드 참가자가 모두 결정된 경우
-            roundSize = tournamentWinners.length * 2;
-        }
+        
+        // 남은 참가자 수와 이미 진출한 참가자 수의 합으로 총 참가자 수 계산
+        const totalContestants = tournamentContestants.length + tournamentWinners.length;
+        
+        // 라운드 크기를 2의 제곱수로 설정 (16, 8, 4, 2)
+        if (totalContestants > 8) roundSize = 16;
+        else if (totalContestants > 4) roundSize = 8;
+        else if (totalContestants > 2) roundSize = 4;
+        else roundSize = 2;
         
         // 라운드 텍스트 설정
         let roundText;
@@ -955,7 +930,6 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (roundSize === 4) roundText = "4강";
         else if (roundSize === 8) roundText = "8강";
         else if (roundSize === 16) roundText = "16강";
-        else roundText = `${roundSize}강`;
         
         tournamentTitle.textContent = `${roundText} - ${currentTournamentType === 'characters' ? '캐릭터' : '키보'} 최애를 선택하세요!`;
 
@@ -1053,19 +1027,7 @@ document.addEventListener('DOMContentLoaded', () => {
             infoGrid.classList.add('info-grid');
             
             // 기본 정보 표시 (속성에 이모지 추가)
-            let attributeEmoji = '';
-            switch(winnerItem.attribute) {
-                case '불': attributeEmoji = '🔥 '; break;
-                case '물': attributeEmoji = '💧 '; break;
-                case '땅': attributeEmoji = '🌋 '; break;
-                case '번개': attributeEmoji = '⚡ '; break;
-                case '바람': attributeEmoji = '🌪️ '; break;
-                case '어둠': attributeEmoji = '🌑 '; break;
-                case '빛': attributeEmoji = '✨ '; break;
-                case '얼음': attributeEmoji = '❄️ '; break;
-                case '나무': attributeEmoji = '🌲 '; break;
-                default: attributeEmoji = ''; break;
-            }
+            let attributeEmoji = getAttributeEmoji(winnerItem.attribute);
             
             const basicInfo = [
                 { key: '속성', value: attributeEmoji + (winnerItem.attribute || '미공개') },

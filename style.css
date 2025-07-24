@@ -1445,7 +1445,7 @@ section.visible {
     border-radius: 8px;
     box-shadow: var(--shadow-md);
     background-color: #f8f9fa;
-    height: 500px;
+    height: 700px;
 }
 
 .iframe-container iframe {
