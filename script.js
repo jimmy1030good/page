@@ -3,7 +3,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // 경로 설정 및 오류 처리 개선
     const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
     const jsonDataPath = 'data.json';
-    const imageBasePath = 'images/';
+    // 이미지 경로를 절대 경로로 설정
+    const imageBasePath = baseUrl + 'images/';
+    
+    // 디버깅을 위한 로그
+    console.log("Base URL:", baseUrl);
+    console.log("Image Base Path:", imageBasePath);
 
     const mainContent = document.getElementById('main-content');
     const loader = document.getElementById('loader');
@@ -124,12 +129,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         if (imageUrl) {
-            imgElement.src = imageUrl;
+            // 이미지 URL이 상대 경로인 경우 절대 경로로 변환
+            if (imageUrl.startsWith('images/')) {
+                imgElement.src = baseUrl + imageUrl;
+            } else {
+                imgElement.src = imageUrl;
+            }
+            console.log("Image URL:", imgElement.src);
         } else {
-            imgElement.src = imageBasePath + 'placeholder.png';
+            imgElement.src = baseUrl + 'images/placeholder.png';
+            console.log("Using placeholder image:", imgElement.src);
         }
         
-        imgElement.onerror = () => { imgElement.src = imageBasePath + 'placeholder.png'; };
+        imgElement.onerror = () => {
+            console.log("Image load error, using placeholder");
+            imgElement.src = 'https://via.placeholder.com/150?text=' + encodeURIComponent(cleanItemName);
+        };
     }
 
     function setupDynamicBackground() {
@@ -144,7 +159,15 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const shuffled = characterImages.sort(() => 0.5 - Math.random());
         const backgroundDiv = document.getElementById('dynamic-background');
-        backgroundDiv.style.backgroundImage = `url('${shuffled[0]}')`;
+        
+        // 배경 이미지 URL이 상대 경로인 경우 절대 경로로 변환
+        let bgImageUrl = shuffled[0];
+        if (bgImageUrl && bgImageUrl.startsWith('images/')) {
+            bgImageUrl = baseUrl + bgImageUrl;
+        }
+        
+        console.log("Background image URL:", bgImageUrl);
+        backgroundDiv.style.backgroundImage = `url('${bgImageUrl}')`;
     }
 
     // --- Data Loading ---
