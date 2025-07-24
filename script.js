@@ -1,10 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
-    // GitHub Pages에서는 저장소 이름이 URL에 포함되므로 경로 조정
-    const isGitHubPages = window.location.hostname.includes('github.io');
-    const repoName = isGitHubPages ? '/page' : '';
-    const jsonDataPath = isGitHubPages ? `${repoName}/data.json` : './data.json';
-    const imageBasePath = isGitHubPages ? `${repoName}/images/` : './images/';
+    // 경로 설정 및 오류 처리 개선
+    const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
+    const jsonDataPath = 'data.json';
+    const imageBasePath = 'images/';
 
     const mainContent = document.getElementById('main-content');
     const loader = document.getElementById('loader');
@@ -150,14 +149,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Data Loading ---
     async function fetchJsonData(path) {
-        const response = await fetch(path);
-        if (!response.ok) throw new Error(`Failed to load ${path}`);
-        return await response.json();
+        try {
+            // 상대 경로로 시도
+            let response = await fetch(path);
+            if (!response.ok) {
+                // 절대 경로로 시도
+                response = await fetch(baseUrl + path);
+                if (!response.ok) {
+                    // GitHub Pages 경로로 시도
+                    response = await fetch(`https://jimmy1030good.github.io/page/${path}`);
+                    if (!response.ok) {
+                        throw new Error(`Failed to load ${path}`);
+                    }
+                }
+            }
+            return await response.json();
+        } catch (error) {
+            console.error("Fetch error:", error);
+            throw error;
+        }
     }
 
     async function loadData() {
         try {
+            console.log("Attempting to load data from:", jsonDataPath);
             gameData = await fetchJsonData(jsonDataPath);
+            console.log("Data loaded successfully:", gameData);
             
             // 필터 옵션 초기화
             initializeFilters();
@@ -178,7 +195,9 @@ document.addEventListener('DOMContentLoaded', () => {
             mainContent.classList.remove('hidden');
 
         } catch (error) {
-            loader.innerHTML = `<p style="color: red; font-weight: bold;">데이터를 불러오는 데 실패했습니다. JSON 파일 경로를 확인하고, 로컬 서버가 실행 중인지 확인해주세요.</p>`;
+            loader.innerHTML = `<p style="color: red; font-weight: bold;">데이터를 불러오는 데 실패했습니다. JSON 파일 경로를 확인하고, 로컬 서버가 실행 중인지 확인해주세요.</p>
+                               <p>오류 메시지: ${error.message}</p>
+                               <p>현재 URL: ${window.location.href}</p>`;
             console.error("데이터 로딩 실패:", error);
         }
     }
