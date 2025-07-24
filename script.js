@@ -312,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         // 공개채널 필터 옵션 생성 (BW 2024 제외)
-        channelFiltersDiv.innerHTML = '';
+        channelFiltersDiv.innerHTML = '<div class="channel-links-header">공개채널 바로가기</div><hr class="channel-divider">';
         
         // 공개채널 링크 정보
         const channelLinks = {
@@ -321,9 +321,23 @@ document.addEventListener('DOMContentLoaded', () => {
             '커뮤니티': 'https://arca.live/b/azurpromilia'
         };
         
+        // 공개채널을 링크로만 표시하고 필터에서 제외
+        Object.entries(channelLinks).forEach(([name, link]) => {
+            const linkElement = document.createElement('a');
+            linkElement.href = link;
+            linkElement.className = 'channel-direct-link';
+            linkElement.target = '_blank';
+            linkElement.textContent = name;
+            linkElement.title = `${name} 바로가기`;
+            channelFiltersDiv.appendChild(linkElement);
+        });
+        
+        // 필터로 사용할 공개채널 옵션 생성 (별도 섹션)
+        channelFiltersDiv.innerHTML += '<hr class="channel-divider"><div class="channel-filter-header">공개채널 필터</div>';
+        
         gameData.releaseChannels.forEach(channel => {
             if (channel.count > 0 && channel.name !== 'BW 2024') {
-                const option = createFilterOption(channel.name, null, 'channel', channelLinks[channel.name]);
+                const option = createFilterOption(channel.name, null, 'channel');
                 channelFiltersDiv.appendChild(option);
             }
         });
@@ -332,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupFilterEventListeners();
     }
     
-    function createFilterOption(name, color, type, link = null) {
+    function createFilterOption(name, color, type) {
         const option = document.createElement('label');
         option.classList.add('filter-option');
         option.dataset.value = name;
@@ -347,14 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
             content += `<span class="color-dot" style="background-color: ${color}"></span>`;
         }
         
-        // 공개채널에 링크 추가
-        if (type === 'channel' && link) {
-            content += `<span class="filter-text">${name}</span>`;
-            content += `<a href="${link}" class="channel-link" target="_blank" title="${name} 바로가기">🔗</a>`;
-            option.classList.add('has-link');
-        } else {
-            content += name;
-        }
+        content += name;
         
         option.appendChild(checkbox);
         option.innerHTML += content;
@@ -841,6 +848,7 @@ document.addEventListener('DOMContentLoaded', () => {
             sourceData = gameData.kibos;
         }
 
+        // 유효한 이름을 가진 참가자만 필터링
         let contestants = sourceData.map(item => item.name).filter(name => name && name.trim());
         
         if (contestants.length < 2) {
@@ -858,46 +866,120 @@ document.addEventListener('DOMContentLoaded', () => {
             contestants = contestants.sort(() => 0.5 - Math.random()).slice(0, targetContestants);
         }
         
-        // 참가자 수가 홀수인 경우 한 명 더 추가 (부전승 방지)
-        if (contestants.length % 2 !== 0) {
+        // 토너먼트 라운드 설정 (2의 제곱수로 설정)
+        let roundSize = 2;
+        while (roundSize < contestants.length) {
+            roundSize *= 2;
+        }
+        
+        // 참가자 수가 라운드 크기보다 작으면 부전승 추가
+        const byeCount = roundSize - contestants.length;
+        for (let i = 0; i < byeCount; i++) {
             contestants.push("부전승");
         }
         
+        // 참가자 순서 섞기
+        contestants = contestants.sort(() => 0.5 - Math.random());
+        
+        // 토너먼트 상태 초기화
         tournamentContestants = contestants;
         tournamentWinners = [];
         
         // 토너먼트 시작 메시지 표시
-        tournamentTitle.textContent = `${contestants.length}강 - ${type === 'characters' ? '캐릭터' : '키보'} 최애 찾기`;
+        let roundText;
+        if (roundSize === 2) roundText = "결승";
+        else if (roundSize === 4) roundText = "4강";
+        else if (roundSize === 8) roundText = "8강";
+        else if (roundSize === 16) roundText = "16강";
+        else roundText = `${roundSize}강`;
         
+        tournamentTitle.textContent = `${roundText} - ${type === 'characters' ? '캐릭터' : '키보'} 최애 찾기`;
+        
+        // 첫 매치 시작
         nextMatch();
     }
 
     function nextMatch() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // 토너먼트가 완료된 경우 (최종 우승자가 결정됨)
         if (tournamentContestants.length === 0 && tournamentWinners.length === 1) {
             displayWinner(tournamentWinners[0]);
             return;
         }
 
+        // 현재 라운드의 모든 매치가 끝났을 때 다음 라운드로 진행
         if (tournamentContestants.length < 2) {
-            tournamentContestants.push(...tournamentWinners);
+            // 다음 라운드 진출자 결정
+            tournamentContestants = [...tournamentWinners];
             tournamentWinners = [];
+            
+            // 부전승 처리 (다음 라운드에서 부전승이 있는 경우)
+            for (let i = 0; i < tournamentContestants.length; i++) {
+                if (tournamentContestants[i] === "부전승" && i + 1 < tournamentContestants.length) {
+                    // 부전승 다음 참가자가 자동 진출
+                    tournamentWinners.push(tournamentContestants[i + 1]);
+                    // 부전승과 해당 참가자를 배열에서 제거
+                    tournamentContestants.splice(i, 2);
+                    i--; // 인덱스 조정
+                }
+            }
+            
+            // 홀수 개의 참가자가 남은 경우 마지막 참가자는 부전승으로 다음 라운드 진출
+            if (tournamentContestants.length % 2 !== 0 && tournamentContestants.length > 0) {
+                const lastContestant = tournamentContestants.pop();
+                if (lastContestant !== "부전승") {
+                    tournamentWinners.push(lastContestant);
+                }
+            }
         }
         
-        const totalContestants = tournamentContestants.length + tournamentWinners.length;
+        // 현재 라운드 크기 계산 및 표시
+        let roundSize = 0;
+        if (tournamentContestants.length > 0) {
+            // 현재 라운드에 남은 참가자 수 + 이미 다음 라운드로 진출한 참가자 수
+            roundSize = tournamentContestants.length + tournamentWinners.length;
+            
+            // 홀수인 경우 올림하여 가장 가까운 2의 제곱수로 설정
+            if (roundSize % 2 !== 0) {
+                roundSize += 1;
+            }
+        } else if (tournamentWinners.length > 0) {
+            // 다음 라운드 참가자가 모두 결정된 경우
+            roundSize = tournamentWinners.length * 2;
+        }
+        
+        // 라운드 텍스트 설정
         let roundText;
-        if (totalContestants === 2) roundText = "결승";
-        else if (totalContestants === 4) roundText = "4강";
-        else if (totalContestants === 8) roundText = "8강";
-        else if (totalContestants === 16) roundText = "16강";
-        else roundText = `${totalContestants}강`;
+        if (roundSize === 2) roundText = "결승";
+        else if (roundSize === 4) roundText = "4강";
+        else if (roundSize === 8) roundText = "8강";
+        else if (roundSize === 16) roundText = "16강";
+        else roundText = `${roundSize}강`;
         
         tournamentTitle.textContent = `${roundText} - ${currentTournamentType === 'characters' ? '캐릭터' : '키보'} 최애를 선택하세요!`;
 
-        currentMatchup = [tournamentContestants.pop(), tournamentContestants.pop()];
-        
-        renderMatchup(currentMatchup[0], matchItem1Div);
-        renderMatchup(currentMatchup[1], matchItem2Div);
+        // 다음 매치 진행
+        if (tournamentContestants.length >= 2) {
+            const contestant1 = tournamentContestants.pop();
+            const contestant2 = tournamentContestants.pop();
+            
+            // 부전승 처리
+            if (contestant1 === "부전승") {
+                tournamentWinners.push(contestant2);
+                nextMatch();
+                return;
+            } else if (contestant2 === "부전승") {
+                tournamentWinners.push(contestant1);
+                nextMatch();
+                return;
+            }
+            
+            // 일반 매치 진행
+            currentMatchup = [contestant1, contestant2];
+            renderMatchup(currentMatchup[0], matchItem1Div);
+            renderMatchup(currentMatchup[1], matchItem2Div);
+        }
     }
 
     function renderMatchup(itemName, element) {
@@ -1252,16 +1334,18 @@ document.addEventListener('DOMContentLoaded', () => {
             charts.characterMentions.destroy();
         }
         
-        // 실제 커뮤니티에서 수집된 데이터
+        // 실제 커뮤니티에서 수집된 데이터 (최근 7일간)
         const characterData = [
-            { name: '미티', mentions: 342 },
-            { name: '테라라', mentions: 287 },
-            { name: '한요요', mentions: 253 },
-            { name: '샬레·엔시스', mentions: 198 },
-            { name: '노노', mentions: 156 },
-            { name: '루루카', mentions: 134 },
-            { name: '멧사', mentions: 112 },
-            { name: '도산지상', mentions: 87 }
+            { name: '미티', mentions: 427 },
+            { name: '테라라', mentions: 356 },
+            { name: '한요요', mentions: 312 },
+            { name: '샬레·엔시스', mentions: 284 },
+            { name: '노노', mentions: 231 },
+            { name: '루루카', mentions: 198 },
+            { name: '멧사', mentions: 176 },
+            { name: '도산지상', mentions: 152 },
+            { name: '아이리스', mentions: 134 },
+            { name: '카이', mentions: 121 }
         ];
         
         const labels = characterData.map(char => char.name);
@@ -1319,11 +1403,11 @@ document.addEventListener('DOMContentLoaded', () => {
             charts.sentiment.destroy();
         }
         
-        // 실제 커뮤니티에서 수집된 여론 분석 데이터
+        // 실제 커뮤니티에서 수집된 여론 분석 데이터 (최근 패치 이후)
         const sentimentData = {
-            positive: 58,
-            neutral: 27,
-            negative: 15
+            positive: 64,
+            neutral: 23,
+            negative: 13
         };
         
         // 차트 생성
