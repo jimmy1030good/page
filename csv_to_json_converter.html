@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV to JSON 변환기</title>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f7fa;
+            color: #37474f;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #5c6bc0;
+            text-align: center;
+        }
+        .step {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .step h2 {
+            margin-top: 0;
+            color: #5c6bc0;
+        }
+        button {
+            background-color: #5c6bc0;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #3f51b5;
+        }
+        .progress {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e8eaf6;
+            border-radius: 4px;
+        }
+        #log {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        .success {
+            color: #4caf50;
+        }
+        .error {
+            color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>아주르 데이터 CSV to JSON 변환기</h1>
+        
+        <div class="step">
+            <h2>1. CSV 파일 선택</h2>
+            <div>
+                <label for="characterFile">캐릭터.csv:</label>
+                <input type="file" id="characterFile" accept=".csv">
+            </div>
+            <div>
+                <label for="characterDetailFile">캐릭터 상세.csv:</label>
+                <input type="file" id="characterDetailFile" accept=".csv">
+            </div>
+            <div>
+                <label for="kiboFile">키보.csv:</label>
+                <input type="file" id="kiboFile" accept=".csv">
+            </div>
+            <div>
+                <label for="kiboDetailFile">키보 상세.csv:</label>
+                <input type="file" id="kiboDetailFile" accept=".csv">
+            </div>
+        </div>
+        
+        <div class="step">
+            <h2>2. 변환 실행</h2>
+            <button id="convertBtn">변환 시작</button>
+            <button id="downloadBtn" disabled>JSON 다운로드</button>
+            
+            <div class="progress" id="progressContainer" style="display: none;">
+                <div id="progressText">변환 중...</div>
+            </div>
+        </div>
+        
+        <div id="log"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="csv_to_json_converter.js"></script>
+</body>
+</html>

@@ -4,26 +4,144 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>아주르 정보 뷰어</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="loader" class="loader-container">
+        <div class="spinner"></div>
+        <p>데이터 로딩중...</p>
+    </div>
+
+    <div id="dynamic-background"></div>
     <header>
         <h1>아주르 정보 뷰어</h1>
         <nav>
             <button id="show-characters">캐릭터</button>
             <button id="show-kibos">키보</button>
+            <button id="show-stats">통계</button>
+            <button id="start-tournament-flow">최애 찾기</button>
         </nav>
     </header>
-    <main>
+    <main id="main-content" class="hidden">
         <section id="list-section">
+            <div class="filter-container">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="이름 또는 설명 검색...">
+                    <button id="search-button">검색</button>
+                </div>
+                
+                
+                <div class="filter-groups">
+                    <div class="filter-group">
+                        <h3>속성</h3>
+                        <div class="filter-options attribute-filters" id="attribute-filters">
+                            <!-- 속성 필터 옵션들이 자동으로 추가됩니다 -->
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <h3>종족</h3>
+                        <div class="filter-options race-filters" id="race-filters">
+                            <!-- 종족 필터 옵션들이 자동으로 추가됩니다 -->
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <h3>공개채널</h3>
+                        <div class="filter-options channel-filters" id="channel-filters">
+                            <!-- 공개채널 필터 옵션들이 자동으로 추가됩니다 -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="filter-actions">
+                    <button id="apply-filters">필터 적용</button>
+                    <button id="reset-filters">필터 초기화</button>
+                </div>
+                
+                <div class="filter-summary">
+                    <span id="result-count">0</span>개 결과
+                    <div id="active-filters">
+                        <!-- 활성화된 필터 태그들이 자동으로 추가됩니다 -->
+                    </div>
+                </div>
+            </div>
+            
             <div id="item-list"></div>
         </section>
+
         <section id="detail-section" class="hidden">
-            <button id="back-button">목록으로</button>
+            <button id="back-to-list-button">목록으로</button>
             <div id="item-detail"></div>
         </section>
+
+        <section id="selection-section" class="hidden modal-container">
+            <div class="modal-content">
+                <h2>어떤 최애를 찾아볼까요?</h2>
+                <div class="selection-buttons">
+                    <button id="select-char-tournament">캐릭터</button>
+                    <button id="select-kibo-tournament">키보</button>
+                </div>
+                <button class="close-modal-button">닫기</button>
+            </div>
+        </section>
+
+        <section id="tournament-section" class="hidden">
+            <h2 id="tournament-title">최애를 선택하세요!</h2>
+            <div id="matchup-container">
+                <div class="match-item" id="match-item-1"></div>
+                <div class="vs-divider">VS</div>
+                <div class="match-item" id="match-item-2"></div>
+            </div>
+            <div id="winner-display" class="hidden">
+                <div class="winner-content">
+                    <h2 class="winner-title">당신의 최애!</h2>
+                    <div id="final-winner"></div>
+                    <button id="restart-tournament">다시하기</button>
+                </div>
+            </div>
+            <button id="back-to-main-menu">메인 메뉴로</button>
+        </section>
+        
+        <!-- 내 컬렉션 섹션은 현재 비활성화되었습니다 -->
+        
+        <section id="stats-section" class="hidden">
+            <h2>데이터 통계</h2>
+            <div class="stats-container">
+                <div class="stats-card">
+                    <h3>속성별 분포</h3>
+                    <div class="chart-container">
+                        <canvas id="attribute-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="stats-card">
+                    <h3>종족별 분포</h3>
+                    <div class="chart-container">
+                        <canvas id="race-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="stats-card">
+                    <h3>공개채널별 분포</h3>
+                    <div class="chart-container">
+                        <canvas id="channel-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="stats-card">
+                    <h3>캐릭터 vs 키보 비율</h3>
+                    <div class="chart-container">
+                        <canvas id="type-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

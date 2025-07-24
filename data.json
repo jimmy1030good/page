@@ -1,0 +1,80 @@
+{
+  "metadata": {
+    "lastUpdated": "2025-07-24",
+    "version": "1.0"
+  },
+  "characters": [
+    {
+      "id": 1,
+      "name": "테라라",
+      "attribute": "불",
+      "race": "수인",
+      "releaseChannel": "홈페이지 & PV & 커뮤니티(CBT 소개 영상)",
+      "imageUrl": "images/terara.gif",
+      "details": {}
+    },
+    {
+      "id": 2,
+      "name": "한요요",
+      "attribute": "불",
+      "race": "휴먼",
+      "releaseChannel": "홈페이지 & 커뮤니티",
+      "imageUrl": "images/han_yoyo.gif",
+      "details": {}
+    },
+    {
+      "id": 3,
+      "name": "샬레·엔시스",
+      "attribute": "물",
+      "race": "하이 엘프",
+      "releaseChannel": "홈페이지",
+      "imageUrl": "images/shalle.gif",
+      "details": {}
+    }
+  ],
+  "kibos": [
+    {
+      "id": 1,
+      "name": "배추닭",
+      "attribute": "나무",
+      "note": "",
+      "releaseChannel": "홈페이지 & PV & 커뮤니티",
+      "imageUrl": "images/placeholder.png",
+      "details": {}
+    },
+    {
+      "id": 2,
+      "name": "배추닭(변종)*",
+      "attribute": "나무",
+      "note": "",
+      "releaseChannel": "커뮤니티(CBT 소개 영상)",
+      "imageUrl": "images/placeholder.png",
+      "details": {}
+    }
+  ],
+  "attributes": [
+    {"id": "불", "name": "불", "count": 4, "color": "#FF5722"},
+    {"id": "물", "name": "물", "count": 3, "color": "#2196F3"},
+    {"id": "땅", "name": "땅", "count": 1, "color": "#795548"},
+    {"id": "번개", "name": "번개", "count": 2, "color": "#FFEB3B"},
+    {"id": "바람", "name": "바람", "count": 2, "color": "#4CAF50"},
+    {"id": "어둠", "name": "어둠", "count": 1, "color": "#9C27B0"},
+    {"id": "빛", "name": "빛", "count": 0, "color": "#FFC107"},
+    {"id": "얼음", "name": "얼음", "count": 0, "color": "#00BCD4"},
+    {"id": "나무", "name": "나무", "count": 0, "color": "#8BC34A"}
+  ],
+  "races": [
+    {"id": "수인", "name": "수인", "count": 5},
+    {"id": "휴먼", "name": "휴먼", "count": 2},
+    {"id": "하이 엘프", "name": "하이 엘프", "count": 2},
+    {"id": "파미족", "name": "파미족", "count": 4},
+    {"id": "우드 엘프", "name": "우드 엘프", "count": 2},
+    {"id": "용인족", "name": "용인족", "count": 2}
+  ],
+  "releaseChannels": [
+    {"id": "홈페이지", "name": "홈페이지", "count": 5},
+    {"id": "PV", "name": "PV", "count": 8},
+    {"id": "커뮤니티", "name": "커뮤니티", "count": 10},
+    {"id": "BW 2024", "name": "BW 2024", "count": 3}
+  ]
+}
