@@ -182,11 +182,9 @@ document.addEventListener('DOMContentLoaded', () => {
             // 차트 초기화
             initializeCharts();
             
-            // 컬렉션 데이터 로드
-            loadCollection();
-            
-            // 컬렉션 필터 이벤트 리스너 설정
-            setupCollectionFilters();
+            // 컬렉션 기능 비활성화
+            // loadCollection();
+            // setupCollectionFilters();
             
             displayList('characters');
             setupDynamicBackground();
@@ -370,7 +368,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 return false;
             }
             
-            // 컬렉션 필터링 비활성화
+            // 컬렉션 필터링 완전히 비활성화
+            return true;
             
             return true;
         });
@@ -450,54 +449,12 @@ document.addEventListener('DOMContentLoaded', () => {
             attribute.classList.add('attribute-tag');
             attribute.textContent = item.attribute || '미공개';
             
-            // 컬렉션 버튼 추가
-            const collectionButtons = document.createElement('div');
-            collectionButtons.classList.add('collection-buttons');
-            
-            const ownedButton = document.createElement('button');
-            ownedButton.classList.add('collection-button', 'owned');
-            ownedButton.textContent = '보유';
-            if (collection.owned.includes(item.id)) {
-                ownedButton.classList.add('active');
-            }
-            
-            const wishlistButton = document.createElement('button');
-            wishlistButton.classList.add('collection-button', 'wishlist');
-            wishlistButton.textContent = '위시';
-            if (collection.wishlist.includes(item.id)) {
-                wishlistButton.classList.add('active');
-            }
-            
-            // 컬렉션 버튼 이벤트 리스너
-            ownedButton.addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleCollection(item.id, 'owned');
-                ownedButton.classList.toggle('active');
-                if (ownedButton.classList.contains('active') && wishlistButton.classList.contains('active')) {
-                    wishlistButton.classList.remove('active');
-                    collection.wishlist = collection.wishlist.filter(id => id !== item.id);
-                    saveCollection();
-                }
-            });
-            
-            wishlistButton.addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleCollection(item.id, 'wishlist');
-                wishlistButton.classList.toggle('active');
-                if (wishlistButton.classList.contains('active') && ownedButton.classList.contains('active')) {
-                    ownedButton.classList.remove('active');
-                    collection.owned = collection.owned.filter(id => id !== item.id);
-                    saveCollection();
-                }
-            });
-            
-            collectionButtons.appendChild(ownedButton);
-            collectionButtons.appendChild(wishlistButton);
+            // 컬렉션 버튼 비활성화
             
             card.appendChild(img);
             card.appendChild(name);
             card.appendChild(attribute);
-            card.appendChild(collectionButtons);
+            // 컬렉션 버튼 제거
             itemListDiv.appendChild(card);
             
             card.addEventListener('click', () => {
@@ -1056,190 +1013,44 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // --- Collection Functions ---
+    // 컬렉션 관련 기능 비활성화
     function loadCollection() {
-        const savedCollection = localStorage.getItem('azureCollection');
-        if (savedCollection) {
-            collection = JSON.parse(savedCollection);
-        }
-        
-        updateCollectionStats();
+        // 컬렉션 기능 비활성화됨
+        console.log("Collection feature is disabled");
     }
     
     function saveCollection() {
-        localStorage.setItem('azureCollection', JSON.stringify(collection));
-        updateCollectionStats();
+        // 컬렉션 기능 비활성화됨
     }
     
     function toggleCollection(itemId, type) {
-        if (collection[type].includes(itemId)) {
-            collection[type] = collection[type].filter(id => id !== itemId);
-        } else {
-            collection[type].push(itemId);
-        }
-        
-        saveCollection();
+        // 컬렉션 기능 비활성화됨
     }
     
     function setupCollectionFilters() {
-        // 컬렉션 필터 기능 비활성화
+        // 컬렉션 필터 기능 비활성화됨
     }
     
     function updateCollectionStats() {
-        // 캐릭터 보유율 계산
-        const totalCharacters = gameData.characters.length;
-        const ownedCharacters = gameData.characters.filter(char => collection.owned.includes(char.id)).length;
-        const characterPercentage = totalCharacters > 0 ? Math.round((ownedCharacters / totalCharacters) * 100) : 0;
-        
-        // 키보 보유율 계산
-        const totalKibos = gameData.kibos.length;
-        const ownedKibos = gameData.kibos.filter(kibo => collection.owned.includes(kibo.id)).length;
-        const kiboPercentage = totalKibos > 0 ? Math.round((ownedKibos / totalKibos) * 100) : 0;
-        
-        // 프로그레스 바 업데이트
-        characterProgressBar.style.width = `${characterPercentage}%`;
-        characterProgressText.textContent = `${ownedCharacters}/${totalCharacters} (${characterPercentage}%)`;
-        
-        kiboProgressBar.style.width = `${kiboPercentage}%`;
-        kiboProgressText.textContent = `${ownedKibos}/${totalKibos} (${kiboPercentage}%)`;
-        
-        // 속성별 보유 현황 차트 업데이트
-        updateCollectionAttributeChart();
-        
-        // 컬렉션 아이템 목록 업데이트
-        updateCollectionItems();
+        // 컬렉션 기능 비활성화됨
     }
     
     function updateCollectionAttributeChart() {
-        // 기존 차트 제거
-        if (charts.collectionAttribute) {
-            charts.collectionAttribute.destroy();
-        }
-        
-        // 속성별 보유 현황 데이터 준비
-        const attributeData = gameData.attributes.filter(attr => attr.count > 0);
-        const labels = attributeData.map(attr => attr.name);
-        
-        // 속성별 보유 캐릭터/키보 수 계산
-        const ownedCounts = [];
-        const totalCounts = [];
-        
-        attributeData.forEach(attr => {
-            const attrCharacters = gameData.characters.filter(char => char.attribute === attr.name);
-            const attrKibos = gameData.kibos.filter(kibo => kibo.attribute === attr.name);
-            const attrItems = [...attrCharacters, ...attrKibos];
-            
-            const ownedAttrItems = attrItems.filter(item => collection.owned.includes(item.id));
-            
-            ownedCounts.push(ownedAttrItems.length);
-            totalCounts.push(attrItems.length);
-        });
-        
-        // 차트 생성
-        const ctx = collectionAttributeChartCanvas.getContext('2d');
-        charts.collectionAttribute = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: '보유',
-                        data: ownedCounts,
-                        backgroundColor: attributeData.map(attr => attr.color),
-                        borderWidth: 1
-                    },
-                    {
-                        label: '미보유',
-                        data: totalCounts.map((total, i) => total - ownedCounts[i]),
-                        backgroundColor: attributeData.map(attr => {
-                            const color = attr.color;
-                            return color.replace('rgb', 'rgba').replace(')', ', 0.3)');
-                        }),
-                        borderWidth: 1
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        stacked: true
-                    },
-                    y: {
-                        stacked: true,
-                        beginAtZero: true,
-                        ticks: {
-                            precision: 0
-                        }
-                    }
-                }
-            }
-        });
+        // 컬렉션 기능 비활성화됨
     }
     
     function updateCollectionItems() {
-        // 보유 아이템 목록 업데이트
-        ownedItemsDiv.innerHTML = '';
-        const ownedItems = [...gameData.characters, ...gameData.kibos].filter(item => collection.owned.includes(item.id));
-        
-        ownedItems.forEach(item => {
-            const card = createCollectionItemCard(item);
-            ownedItemsDiv.appendChild(card);
-        });
-        
-        // 위시리스트 아이템 목록 업데이트
-        wishlistItemsDiv.innerHTML = '';
-        const wishlistItems = [...gameData.characters, ...gameData.kibos].filter(item => collection.wishlist.includes(item.id));
-        
-        wishlistItems.forEach(item => {
-            const card = createCollectionItemCard(item);
-            wishlistItemsDiv.appendChild(card);
-        });
+        // 컬렉션 기능 비활성화됨
     }
     
     function createCollectionItemCard(item) {
-        const card = document.createElement('div');
-        card.classList.add('item-card');
-        
-        // 속성에 따른 색상 적용
-        if (item.attribute && item.attribute !== '미공개') {
-            const attributeData = gameData.attributes.find(a => a.name === item.attribute);
-            if (attributeData) {
-                card.style.borderLeft = `4px solid ${attributeData.color}`;
-            }
-        }
-        
-        const img = document.createElement('img');
-        setImageSource(img, item.name);
-        img.alt = item.name;
-        
-        const name = document.createElement('h3');
-        name.textContent = item.name;
-        
-        const attribute = document.createElement('span');
-        attribute.classList.add('attribute-tag');
-        attribute.textContent = item.attribute || '미공개';
-        
-        const type = document.createElement('span');
-        type.classList.add('attribute-tag');
-        type.textContent = gameData.characters.includes(item) ? '캐릭터' : '키보';
-        
-        card.appendChild(img);
-        card.appendChild(name);
-        card.appendChild(attribute);
-        card.appendChild(type);
-        
-        card.addEventListener('click', () => {
-            const itemType = gameData.characters.includes(item) ? 'characters' : 'kibos';
-            displayDetail(item, itemType);
-        });
-        
-        return card;
+        // 컬렉션 기능 비활성화됨
+        return document.createElement('div');
     }
     
     function displayCollection() {
-        showScreen(collectionSection);
-        updateCollectionStats();
+        // 컬렉션 기능 비활성화됨
+        alert("컬렉션 기능이 비활성화되었습니다.");
     }
     
     // --- Event Listeners ---
