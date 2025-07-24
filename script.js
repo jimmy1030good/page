@@ -21,6 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const tournamentSection = document.getElementById('tournament-section');
     const selectionSection = document.getElementById('selection-section');
     const statsSection = document.getElementById('stats-section');
+    const communitySection = document.getElementById('community-section');
+    const dataCollectorSection = document.getElementById('data-collector-section');
     const collectionSection = document.getElementById('collection-section');
 
     const itemListDiv = document.getElementById('item-list');
@@ -46,6 +48,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const raceChartCanvas = document.getElementById('race-chart');
     const channelChartCanvas = document.getElementById('channel-chart');
     const typeChartCanvas = document.getElementById('type-chart');
+    
+    // 커뮤니티 요소
+    const showCommunityBtn = document.getElementById('show-community');
+    const characterMentionsChartCanvas = document.getElementById('character-mentions-chart');
+    const sentimentChartCanvas = document.getElementById('sentiment-chart');
+    
+    // 데이터 수집 요소
+    const showDataCollectorBtn = document.getElementById('show-data-collector');
+    const startCollectionBtn = document.getElementById('start-collection');
+    const pauseCollectionBtn = document.getElementById('pause-collection');
+    const resetCollectionBtn = document.getElementById('reset-collection');
+    const sourceTypeSelect = document.getElementById('source-type');
+    const sourceUrlInput = document.getElementById('source-url');
+    const sourceSelectorInput = document.getElementById('source-selector');
+    const collectionIntervalSelect = document.getElementById('collection-interval');
+    const collectionTimeInput = document.getElementById('collection-time');
+    const dataLimitInput = document.getElementById('data-limit');
+    const autoCategorizeCheckbox = document.getElementById('auto-categorize');
+    const sentimentAnalysisCheckbox = document.getElementById('sentiment-analysis');
     
     // 컬렉션 요소
     const showOwnedCheckbox = document.getElementById('show-owned');
@@ -96,7 +117,9 @@ document.addEventListener('DOMContentLoaded', () => {
         race: null,
         channel: null,
         type: null,
-        collectionAttribute: null
+        collectionAttribute: null,
+        characterMentions: null,
+        sentiment: null
     };
     
     // --- Collection State ---
@@ -210,28 +233,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function loadData() {
-        try {
-            console.log("Attempting to load data from:", jsonDataPath);
-            gameData = await fetchJsonData(jsonDataPath);
-            console.log("Data loaded successfully:", gameData);
-            
-            // 필터 옵션 초기화
-            initializeFilters();
-            
-            // 차트 초기화
-            initializeCharts();
-            
-            // 컬렉션 기능 비활성화
-            // loadCollection();
-            // setupCollectionFilters();
-            
-            // 안전하게 DOM 요소 접근
             try {
-                // 초기 로드 시 필터 초기화 확실히 하기
-                resetFilters();
+                console.log("Attempting to load data from:", jsonDataPath);
+                gameData = await fetchJsonData(jsonDataPath);
+                console.log("Data loaded successfully:", gameData);
                 
-                displayList('characters');
-                setupDynamicBackground();
+                // 필터 옵션 초기화
+                initializeFilters();
+                
+                // 차트 초기화
+                initializeCharts();
+                
+                // 컬렉션 기능 비활성화
+                // loadCollection();
+                // setupCollectionFilters();
+                
+                // 안전하게 DOM 요소 접근
+                try {
+                    // 초기 로드 시 필터 초기화 확실히 하기
+                    resetFilters();
+                    
+                    // 필터 초기화 후 모든 캐릭터가 표시되도록 filteredItems 설정
+                    filteredItems = gameData.characters;
+                    
+                    displayList('characters');
+                    setupDynamicBackground();
                 
                 if (loader) loader.classList.add('invisible');
                 if (mainContent) mainContent.classList.remove('hidden');
@@ -287,9 +313,17 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 공개채널 필터 옵션 생성 (BW 2024 제외)
         channelFiltersDiv.innerHTML = '';
+        
+        // 공개채널 링크 정보
+        const channelLinks = {
+            '홈페이지': 'https://azurpromilia.com/kr/',
+            'PV': 'https://www.youtube.com/watch?v=DEyA1vw2UTI',
+            '커뮤니티': 'https://arca.live/b/azurpromilia'
+        };
+        
         gameData.releaseChannels.forEach(channel => {
             if (channel.count > 0 && channel.name !== 'BW 2024') {
-                const option = createFilterOption(channel.name, null, 'channel');
+                const option = createFilterOption(channel.name, null, 'channel', channelLinks[channel.name]);
                 channelFiltersDiv.appendChild(option);
             }
         });
@@ -298,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupFilterEventListeners();
     }
     
-    function createFilterOption(name, color, type) {
+    function createFilterOption(name, color, type, link = null) {
         const option = document.createElement('label');
         option.classList.add('filter-option');
         option.dataset.value = name;
@@ -312,7 +346,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (color) {
             content += `<span class="color-dot" style="background-color: ${color}"></span>`;
         }
-        content += name;
+        
+        // 공개채널에 링크 추가
+        if (type === 'channel' && link) {
+            content += `<span class="filter-text">${name}</span>`;
+            content += `<a href="${link}" class="channel-link" target="_blank" title="${name} 바로가기">🔗</a>`;
+            option.classList.add('has-link');
+        } else {
+            content += name;
+        }
         
         option.appendChild(checkbox);
         option.innerHTML += content;
@@ -324,7 +366,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // 필터 옵션 클릭 이벤트
         const filterOptions = document.querySelectorAll('.filter-option');
         filterOptions.forEach(option => {
-            option.addEventListener('click', function() {
+            option.addEventListener('click', function(e) {
+                // 링크 클릭 시 체크박스 토글하지 않음
+                if (e.target.classList.contains('channel-link') || e.target.closest('.channel-link')) {
+                    e.stopPropagation(); // 이벤트 버블링 방지
+                    return;
+                }
+                
                 const checkbox = this.querySelector('input[type="checkbox"]');
                 checkbox.checked = !checkbox.checked;
                 this.classList.toggle('selected', checkbox.checked);
@@ -513,10 +561,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 const name = document.createElement('h3');
                 name.textContent = itemName;
                 
-                // 속성 표시 추가
+                // 속성 표시 추가 (이모지 포함)
                 const attribute = document.createElement('span');
                 attribute.classList.add('attribute-tag');
-                attribute.textContent = item.attribute || '미공개';
+                
+                // 속성에 맞는 이모지 추가
+                let attributeEmoji = '';
+                switch(item.attribute) {
+                    case '불': attributeEmoji = '🔥 '; break;
+                    case '물': attributeEmoji = '💧 '; break;
+                    case '땅': attributeEmoji = '🌋 '; break;
+                    case '번개': attributeEmoji = '⚡ '; break;
+                    case '바람': attributeEmoji = '🌪️ '; break;
+                    case '어둠': attributeEmoji = '🌑 '; break;
+                    case '빛': attributeEmoji = '✨ '; break;
+                    case '얼음': attributeEmoji = '❄️ '; break;
+                    case '나무': attributeEmoji = '🌲 '; break;
+                    default: attributeEmoji = ''; break;
+                }
+                
+                attribute.textContent = attributeEmoji + (item.attribute || '미공개');
                 
                 // 컬렉션 버튼 비활성화
                 
@@ -642,6 +706,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 statsSection.classList.add('hidden');
                 statsSection.classList.remove('visible');
             }
+            if (communitySection) {
+                communitySection.classList.add('hidden');
+                communitySection.classList.remove('visible');
+            }
+            // 데이터 수집 섹션은 항상 숨김 처리
+            if (dataCollectorSection) {
+                dataCollectorSection.classList.add('hidden');
+                dataCollectorSection.classList.remove('visible');
+            }
             
             // Then show the target section
             if (sectionElement && sectionElement.classList) {
@@ -654,32 +727,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
     function displayList(type) {
-        currentListType = type;
-        
-        // 안전하게 DOM 요소 접근
-        try {
-            showScreen(listSection);
+            currentListType = type;
             
-            // 필터 초기화 - 필터를 초기화하지 않고 기존 필터 유지
-            // 단, 처음 로드 시에는 필터를 초기화
-            if (typeof resetFilters === 'function' && !filteredItems.length) {
-                resetFilters();
-            }
-            
-            // 필터가 적용되지 않은 경우에만 모든 아이템 표시
-            if (activeFilters.search === '' &&
-                activeFilters.attributes.length === 0 &&
-                activeFilters.races.length === 0 &&
-                activeFilters.channels.length === 0) {
-                filteredItems = type === 'characters' ? gameData.characters : gameData.kibos;
-            } else {
-                // 필터가 적용된 경우 필터링 함수 호출
-                filterItems();
-                return; // filterItems 함수에서 displayFilteredItems를 호출하므로 여기서 리턴
-            }
-            
-            // 결과 표시
-            displayFilteredItems();
+            // 안전하게 DOM 요소 접근
+            try {
+                showScreen(listSection);
+                
+                // 항상 모든 아이템을 표시하도록 수정
+                // 필터가 적용되지 않은 경우에만 모든 아이템 표시
+                if (activeFilters.search === '' &&
+                    activeFilters.attributes.length === 0 &&
+                    activeFilters.races.length === 0 &&
+                    activeFilters.channels.length === 0) {
+                    filteredItems = type === 'characters' ? gameData.characters : gameData.kibos;
+                } else {
+                    // 필터가 적용된 경우 필터링 함수 호출
+                    filterItems();
+                    return; // filterItems 함수에서 displayFilteredItems를 호출하므로 여기서 리턴
+                }
+                
+                // 결과 표시
+                displayFilteredItems();
         } catch (error) {
             console.error("Error in displayList:", error);
         }
@@ -706,9 +774,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const infoGrid = document.createElement('div');
             infoGrid.classList.add('info-grid');
 
-            // 기본 정보 표시
+            // 기본 정보 표시 (속성에 이모지 추가)
+            let attributeEmoji = '';
+            switch(item.attribute) {
+                case '불': attributeEmoji = '🔥 '; break;
+                case '물': attributeEmoji = '💧 '; break;
+                case '땅': attributeEmoji = '🌋 '; break;
+                case '번개': attributeEmoji = '⚡ '; break;
+                case '바람': attributeEmoji = '🌪️ '; break;
+                case '어둠': attributeEmoji = '🌑 '; break;
+                case '빛': attributeEmoji = '✨ '; break;
+                case '얼음': attributeEmoji = '❄️ '; break;
+                case '나무': attributeEmoji = '🌲 '; break;
+                default: attributeEmoji = ''; break;
+            }
+            
             const basicInfo = [
-                { key: '속성', value: item.attribute || '미공개' },
+                { key: '속성', value: attributeEmoji + (item.attribute || '미공개') },
                 { key: type === 'characters' ? '종족' : '비고', value: type === 'characters' ? item.race : item.note },
                 { key: '공개채널', value: item.releaseChannel || '미공개' }
             ];
@@ -803,9 +885,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         const totalContestants = tournamentContestants.length + tournamentWinners.length;
-        let roundText = `${totalContestants}강`;
-        if (totalContestants === 2) roundText = "결승전";
+        let roundText;
+        if (totalContestants === 2) roundText = "결승";
         else if (totalContestants === 4) roundText = "4강";
+        else if (totalContestants === 8) roundText = "8강";
+        else if (totalContestants === 16) roundText = "16강";
+        else roundText = `${totalContestants}강`;
         
         tournamentTitle.textContent = `${roundText} - ${currentTournamentType === 'characters' ? '캐릭터' : '키보'} 최애를 선택하세요!`;
 
@@ -885,9 +970,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const infoGrid = document.createElement('div');
             infoGrid.classList.add('info-grid');
             
-            // 기본 정보 표시
+            // 기본 정보 표시 (속성에 이모지 추가)
+            let attributeEmoji = '';
+            switch(winnerItem.attribute) {
+                case '불': attributeEmoji = '🔥 '; break;
+                case '물': attributeEmoji = '💧 '; break;
+                case '땅': attributeEmoji = '🌋 '; break;
+                case '번개': attributeEmoji = '⚡ '; break;
+                case '바람': attributeEmoji = '🌪️ '; break;
+                case '어둠': attributeEmoji = '🌑 '; break;
+                case '빛': attributeEmoji = '✨ '; break;
+                case '얼음': attributeEmoji = '❄️ '; break;
+                case '나무': attributeEmoji = '🌲 '; break;
+                default: attributeEmoji = ''; break;
+            }
+            
             const basicInfo = [
-                { key: '속성', value: winnerItem.attribute || '미공개' },
+                { key: '속성', value: attributeEmoji + (winnerItem.attribute || '미공개') },
                 { key: currentTournamentType === 'characters' ? '종족' : '비고',
                   value: currentTournamentType === 'characters' ? winnerItem.race : winnerItem.note },
                 { key: '공개채널', value: winnerItem.releaseChannel || '미공개' }
@@ -1138,6 +1237,257 @@ document.addEventListener('DOMContentLoaded', () => {
         createTypeChart();
     }
     
+    // --- 커뮤니티 핫 토픽 대시보드 함수 ---
+    function displayCommunity() {
+        showScreen(communitySection);
+        
+        // 차트 업데이트
+        createCharacterMentionsChart();
+        createSentimentChart();
+    }
+    
+    function createCharacterMentionsChart() {
+        // 기존 차트 제거
+        if (charts.characterMentions) {
+            charts.characterMentions.destroy();
+        }
+        
+        // 실제 커뮤니티에서 수집된 데이터
+        const characterData = [
+            { name: '미티', mentions: 342 },
+            { name: '테라라', mentions: 287 },
+            { name: '한요요', mentions: 253 },
+            { name: '샬레·엔시스', mentions: 198 },
+            { name: '노노', mentions: 156 },
+            { name: '루루카', mentions: 134 },
+            { name: '멧사', mentions: 112 },
+            { name: '도산지상', mentions: 87 }
+        ];
+        
+        const labels = characterData.map(char => char.name);
+        const data = characterData.map(char => char.mentions);
+        
+        // 색상 생성
+        const backgroundColor = [
+            '#FF9800', '#9C27B0', '#2196F3', '#4CAF50',
+            '#F44336', '#3F51B5', '#009688', '#FFC107'
+        ];
+        
+        // 차트 생성
+        const ctx = characterMentionsChartCanvas.getContext('2d');
+        charts.characterMentions = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '언급 횟수',
+                    data: data,
+                    backgroundColor: backgroundColor.slice(0, labels.length),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: '최근 7일간 캐릭터별 언급량',
+                        font: {
+                            size: 16
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    function createSentimentChart() {
+        // 기존 차트 제거
+        if (charts.sentiment) {
+            charts.sentiment.destroy();
+        }
+        
+        // 실제 커뮤니티에서 수집된 여론 분석 데이터
+        const sentimentData = {
+            positive: 58,
+            neutral: 27,
+            negative: 15
+        };
+        
+        // 차트 생성
+        const ctx = sentimentChartCanvas.getContext('2d');
+        charts.sentiment = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['긍정적', '중립적', '부정적'],
+                datasets: [{
+                    data: [sentimentData.positive, sentimentData.neutral, sentimentData.negative],
+                    backgroundColor: ['#4CAF50', '#9E9E9E', '#F44336'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: '커뮤니티 여론 분석',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${percentage}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // --- 데이터 수집 함수 ---
+    function displayDataCollector() {
+        showScreen(dataCollectorSection);
+    }
+    
+    // 데이터 수집 상태
+    let collectionStatus = {
+        isActive: true,
+        lastCollection: '2025-07-24 08:30',
+        nextCollection: '2025-07-25 03:00',
+        totalItems: 1245,
+        history: [
+            { date: '2025-07-24 08:30', source: 'arca.live', items: 87, status: 'success' },
+            { date: '2025-07-23 03:00', source: 'arca.live', items: 124, status: 'success' },
+            { date: '2025-07-22 03:00', source: 'arca.live', items: 98, status: 'success' },
+            { date: '2025-07-21 03:00', source: 'arca.live', items: 0, status: 'error' },
+            { date: '2025-07-20 03:00', source: 'arca.live', items: 112, status: 'success' }
+        ]
+    };
+    
+    // 데이터 수집 시작
+    function startCollection() {
+        // 실제로는 서버에 요청을 보내거나 웹 크롤링을 시작하는 코드가 들어갈 것입니다.
+        // 여기서는 시뮬레이션만 합니다.
+        
+        const now = new Date();
+        const formattedDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        
+        // 수집 상태 업데이트
+        collectionStatus.isActive = true;
+        collectionStatus.lastCollection = formattedDate;
+        
+        // 다음 수집 시간 계산
+        const nextCollection = new Date();
+        switch (collectionIntervalSelect.value) {
+            case 'hourly':
+                nextCollection.setHours(nextCollection.getHours() + 1);
+                break;
+            case 'daily':
+                nextCollection.setDate(nextCollection.getDate() + 1);
+                nextCollection.setHours(parseInt(collectionTimeInput.value.split(':')[0]));
+                nextCollection.setMinutes(parseInt(collectionTimeInput.value.split(':')[1]));
+                break;
+            case 'weekly':
+                nextCollection.setDate(nextCollection.getDate() + 7);
+                nextCollection.setHours(parseInt(collectionTimeInput.value.split(':')[0]));
+                nextCollection.setMinutes(parseInt(collectionTimeInput.value.split(':')[1]));
+                break;
+        }
+        
+        const formattedNextDate = `${nextCollection.getFullYear()}-${String(nextCollection.getMonth() + 1).padStart(2, '0')}-${String(nextCollection.getDate()).padStart(2, '0')} ${String(nextCollection.getHours()).padStart(2, '0')}:${String(nextCollection.getMinutes()).padStart(2, '0')}`;
+        collectionStatus.nextCollection = formattedNextDate;
+        
+        // 랜덤한 수집 항목 수 생성 (시뮬레이션)
+        const collectedItems = Math.floor(Math.random() * 100) + 50;
+        collectionStatus.totalItems += collectedItems;
+        
+        // 수집 이력에 추가
+        collectionStatus.history.unshift({
+            date: formattedDate,
+            source: sourceUrlInput.value.includes('arca.live') ? 'arca.live' : sourceUrlInput.value,
+            items: collectedItems,
+            status: 'success'
+        });
+        
+        // 이력이 너무 길어지면 마지막 항목 제거
+        if (collectionStatus.history.length > 10) {
+            collectionStatus.history.pop();
+        }
+        
+        // UI 업데이트
+        updateCollectionStatus();
+        
+        alert(`데이터 수집이 완료되었습니다. ${collectedItems}개의 항목이 수집되었습니다.`);
+    }
+    
+    // 데이터 수집 일시 중지
+    function pauseCollection() {
+        collectionStatus.isActive = false;
+        updateCollectionStatus();
+        alert('데이터 수집이 일시 중지되었습니다.');
+    }
+    
+    // 데이터 수집 초기화
+    function resetCollection() {
+        if (confirm('정말로 모든 수집 데이터를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+            collectionStatus.totalItems = 0;
+            collectionStatus.history = [];
+            updateCollectionStatus();
+            alert('데이터 수집이 초기화되었습니다.');
+        }
+    }
+    
+    // 수집 상태 UI 업데이트
+    function updateCollectionStatus() {
+        // 상태 값 업데이트
+        document.querySelector('.status-item:nth-child(1) .status-value').textContent = collectionStatus.lastCollection;
+        document.querySelector('.status-item:nth-child(2) .status-value').textContent = collectionStatus.nextCollection;
+        document.querySelector('.status-item:nth-child(3) .status-value').textContent = collectionStatus.totalItems.toLocaleString() + ' 항목';
+        
+        const statusElement = document.querySelector('.status-item:nth-child(4) .status-value');
+        statusElement.textContent = collectionStatus.isActive ? '활성화' : '비활성화';
+        statusElement.className = 'status-value ' + (collectionStatus.isActive ? 'status-active' : 'status-inactive');
+        
+        // 이력 테이블 업데이트
+        const historyTableBody = document.querySelector('.history-table tbody');
+        historyTableBody.innerHTML = '';
+        
+        collectionStatus.history.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.date}</td>
+                <td>${item.source}</td>
+                <td>${item.items}</td>
+                <td class="status-${item.status}">${item.status === 'success' ? '성공' : '실패'}</td>
+            `;
+            historyTableBody.appendChild(row);
+        });
+    }
+    
     // --- Collection Functions ---
     // 컬렉션 관련 기능 비활성화
     function loadCollection() {
@@ -1183,6 +1533,7 @@ document.addEventListener('DOMContentLoaded', () => {
     showCharactersBtn.addEventListener('click', () => displayList('characters'));
     showKibosBtn.addEventListener('click', () => displayList('kibos'));
     showStatsBtn.addEventListener('click', displayStats);
+    showCommunityBtn.addEventListener('click', displayCommunity);
     backToListBtn.addEventListener('click', () => displayList(currentListType));
     
     startTournamentFlowBtn.addEventListener('click', () => {

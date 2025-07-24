@@ -22,6 +22,7 @@
             <button id="show-characters">캐릭터</button>
             <button id="show-kibos">키보</button>
             <button id="show-stats">통계</button>
+            <button id="show-community">커뮤니티</button>
             <button id="start-tournament-flow">최애 찾기</button>
         </nav>
     </header>
@@ -81,9 +82,10 @@
         <section id="selection-section" class="hidden modal-container">
             <div class="modal-content">
                 <h2>어떤 최애를 찾아볼까요?</h2>
+                <p>16강 → 8강 → 4강 → 결승 순으로 진행됩니다.</p>
                 <div class="selection-buttons">
-                    <button id="select-char-tournament">캐릭터</button>
-                    <button id="select-kibo-tournament">키보</button>
+                    <button id="select-char-tournament">캐릭터 최애 찾기</button>
+                    <button id="select-kibo-tournament">키보 최애 찾기</button>
                 </div>
                 <button class="close-modal-button">닫기</button>
             </div>
@@ -136,6 +138,293 @@
                     <h3>캐릭터 vs 키보 비율</h3>
                     <div class="chart-container">
                         <canvas id="type-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 커뮤니티 핫 토픽 대시보드 섹션 -->
+        <section id="community-section" class="hidden">
+            <h2>커뮤니티 핫 토픽 대시보드</h2>
+            <div class="community-container">
+                <!-- 핫 토픽 카드 -->
+                <div class="community-card">
+                    <h3>최근 핫 토픽</h3>
+                    <div class="hot-topics-list">
+                        <div class="hot-topic-item">
+                            <span class="topic-rank">1</span>
+                            <div class="topic-content">
+                                <h4>아주르 프로밀리아 신규 캐릭터 '미티' 공개</h4>
+                                <div class="topic-meta">
+                                    <span class="topic-views">조회수 2,341</span>
+                                    <span class="topic-comments">댓글 156</span>
+                                    <span class="topic-date">2023.07.23</span>
+                                </div>
+                            </div>
+                            <span class="topic-trend up">↑</span>
+                        </div>
+                        <div class="hot-topic-item">
+                            <span class="topic-rank">2</span>
+                            <div class="topic-content">
+                                <h4>7월 밸런스 패치 노트 분석 및 토론</h4>
+                                <div class="topic-meta">
+                                    <span class="topic-views">조회수 1,876</span>
+                                    <span class="topic-comments">댓글 124</span>
+                                    <span class="topic-date">2023.07.22</span>
+                                </div>
+                            </div>
+                            <span class="topic-trend up">↑</span>
+                        </div>
+                        <div class="hot-topic-item">
+                            <span class="topic-rank">3</span>
+                            <div class="topic-content">
+                                <h4>테라라 & 한요요 콤보 가이드 (상세 공략)</h4>
+                                <div class="topic-meta">
+                                    <span class="topic-views">조회수 1,543</span>
+                                    <span class="topic-comments">댓글 98</span>
+                                    <span class="topic-date">2023.07.21</span>
+                                </div>
+                            </div>
+                            <span class="topic-trend down">↓</span>
+                        </div>
+                        <div class="hot-topic-item">
+                            <span class="topic-rank">4</span>
+                            <div class="topic-content">
+                                <h4>아주르 프로밀리아 여름 이벤트 정보 및 보상</h4>
+                                <div class="topic-meta">
+                                    <span class="topic-views">조회수 1,298</span>
+                                    <span class="topic-comments">댓글 87</span>
+                                    <span class="topic-date">2023.07.20</span>
+                                </div>
+                            </div>
+                            <span class="topic-trend new">NEW</span>
+                        </div>
+                        <div class="hot-topic-item">
+                            <span class="topic-rank">5</span>
+                            <div class="topic-content">
+                                <h4>샬레·엔시스 스킨 투표 이벤트 (참여하세요!)</h4>
+                                <div class="topic-meta">
+                                    <span class="topic-views">조회수 1,154</span>
+                                    <span class="topic-comments">댓글 76</span>
+                                    <span class="topic-date">2023.07.19</span>
+                                </div>
+                            </div>
+                            <span class="topic-trend down">↓</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 캐릭터 언급량 차트 -->
+                <div class="community-card">
+                    <h3>캐릭터별 언급량</h3>
+                    <div class="chart-container">
+                        <canvas id="character-mentions-chart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- 여론 분석 -->
+                <div class="community-card">
+                    <h3>커뮤니티 여론 분석</h3>
+                    <div class="sentiment-container">
+                        <div class="sentiment-chart-container">
+                            <canvas id="sentiment-chart"></canvas>
+                        </div>
+                        <div class="sentiment-trends">
+                            <div class="sentiment-trend-item positive">
+                                <h4>긍정적 키워드</h4>
+                                <div class="keyword-cloud">
+                                    <span class="keyword" style="font-size: 1.4em;">밸런스</span>
+                                    <span class="keyword" style="font-size: 1.2em;">그래픽</span>
+                                    <span class="keyword" style="font-size: 1.6em;">이벤트</span>
+                                    <span class="keyword" style="font-size: 1.1em;">스토리</span>
+                                    <span class="keyword" style="font-size: 1.3em;">보상</span>
+                                </div>
+                            </div>
+                            <div class="sentiment-trend-item negative">
+                                <h4>부정적 키워드</h4>
+                                <div class="keyword-cloud">
+                                    <span class="keyword" style="font-size: 1.5em;">버그</span>
+                                    <span class="keyword" style="font-size: 1.3em;">과금</span>
+                                    <span class="keyword" style="font-size: 1.1em;">난이도</span>
+                                    <span class="keyword" style="font-size: 1.2em;">매칭</span>
+                                    <span class="keyword" style="font-size: 1.4em;">서버</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 최근 게시물 -->
+                <div class="community-card">
+                    <h3>최근 커뮤니티 게시물</h3>
+                    <div class="recent-posts">
+                        <div class="post-item">
+                            <div class="post-title">미티 캐릭터 리뷰 - 메타 체인저가 될까?</div>
+                            <div class="post-preview">신규 캐릭터 미티를 사용해본 후기입니다. 불속성 딜러로서 기존 메타를 완전히 바꿀 가능성이 있습니다. 특히 3스킬의 광역 공격과 지속 데미지는 현재 최고 수준...</div>
+                            <div class="post-meta">
+                                <span class="post-author">작성자: 프로밀리아마스터</span>
+                                <span class="post-date">2023.07.24</span>
+                            </div>
+                        </div>
+                        <div class="post-item">
+                            <div class="post-title">7월 패치 이후 PVP 티어 리스트 (상세 분석)</div>
+                            <div class="post-preview">이번 패치로 PVP 환경이 크게 변화했습니다. 테라라+한요요 조합이 최상위 티어로 올라섰고, 샬레·엔시스는 약간 하락했습니다. 속성별 밸런스는 불>물>바람>땅 순으로...</div>
+                            <div class="post-meta">
+                                <span class="post-author">작성자: 아레나챔피언</span>
+                                <span class="post-date">2023.07.23</span>
+                            </div>
+                        </div>
+                        <div class="post-item">
+                            <div class="post-title">여름 이벤트 보스 완벽 공략 (영상 포함)</div>
+                            <div class="post-preview">여름 이벤트 보스 '심해의 지배자' 공략입니다. 1페이즈에서는 물속성 캐릭터를 중심으로 팀을 구성하고, 2페이즈에서는 번개속성으로 전환하는 것이 핵심입니다. 영상 가이드 첨부...</div>
+                            <div class="post-meta">
+                                <span class="post-author">작성자: 프로밀리아가이드</span>
+                                <span class="post-date">2023.07.22</span>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="https://arca.live/b/azurpromilia" target="_blank" class="view-more-button">커뮤니티 더 보기</a>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 정보 자동 수집 섹션 -->
+        <section id="data-collector-section" class="hidden">
+            <h2>정보 자동 수집</h2>
+            <div class="data-collector-container">
+                <!-- 데이터 소스 설정 -->
+                <div class="collector-card">
+                    <h3>데이터 소스 설정</h3>
+                    <div class="source-settings">
+                        <div class="setting-group">
+                            <label for="source-type">데이터 소스 유형</label>
+                            <select id="source-type" class="setting-input">
+                                <option value="website">웹사이트</option>
+                                <option value="api">API</option>
+                                <option value="rss">RSS 피드</option>
+                            </select>
+                        </div>
+                        <div class="setting-group">
+                            <label for="source-url">URL</label>
+                            <input type="text" id="source-url" class="setting-input" placeholder="https://example.com" value="https://arca.live/b/azurpromilia">
+                        </div>
+                        <div class="setting-group">
+                            <label for="source-selector">데이터 선택자 (CSS/XPath)</label>
+                            <input type="text" id="source-selector" class="setting-input" placeholder=".post-item" value=".article-list .list-item">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 수집 설정 -->
+                <div class="collector-card">
+                    <h3>수집 설정</h3>
+                    <div class="collection-settings">
+                        <div class="setting-group">
+                            <label for="collection-interval">수집 주기</label>
+                            <select id="collection-interval" class="setting-input">
+                                <option value="hourly">매시간</option>
+                                <option value="daily" selected>매일</option>
+                                <option value="weekly">매주</option>
+                            </select>
+                        </div>
+                        <div class="setting-group">
+                            <label for="collection-time">수집 시간</label>
+                            <input type="time" id="collection-time" class="setting-input" value="03:00">
+                        </div>
+                        <div class="setting-group">
+                            <label for="data-limit">수집 데이터 제한</label>
+                            <input type="number" id="data-limit" class="setting-input" min="10" max="1000" value="100">
+                        </div>
+                        <div class="setting-group checkbox-group">
+                            <input type="checkbox" id="auto-categorize" checked>
+                            <label for="auto-categorize">자동 분류</label>
+                        </div>
+                        <div class="setting-group checkbox-group">
+                            <input type="checkbox" id="sentiment-analysis" checked>
+                            <label for="sentiment-analysis">감정 분석</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 수집 상태 -->
+                <div class="collector-card">
+                    <h3>수집 상태</h3>
+                    <div class="collection-status">
+                        <div class="status-item">
+                            <span class="status-label">마지막 수집:</span>
+                            <span class="status-value">2025-07-24 08:30</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">다음 예정 수집:</span>
+                            <span class="status-value">2025-07-25 03:00</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">수집된 데이터:</span>
+                            <span class="status-value">1,245 항목</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">상태:</span>
+                            <span class="status-value status-active">활성화</span>
+                        </div>
+                        <div class="collection-actions">
+                            <button id="start-collection" class="action-button">지금 수집</button>
+                            <button id="pause-collection" class="action-button">일시 중지</button>
+                            <button id="reset-collection" class="action-button danger">초기화</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 수집 이력 -->
+                <div class="collector-card">
+                    <h3>수집 이력</h3>
+                    <div class="collection-history">
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>날짜</th>
+                                    <th>소스</th>
+                                    <th>수집 항목</th>
+                                    <th>상태</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>2025-07-24 08:30</td>
+                                    <td>arca.live</td>
+                                    <td>87</td>
+                                    <td class="status-success">성공</td>
+                                </tr>
+                                <tr>
+                                    <td>2025-07-23 03:00</td>
+                                    <td>arca.live</td>
+                                    <td>124</td>
+                                    <td class="status-success">성공</td>
+                                </tr>
+                                <tr>
+                                    <td>2025-07-22 03:00</td>
+                                    <td>arca.live</td>
+                                    <td>98</td>
+                                    <td class="status-success">성공</td>
+                                </tr>
+                                <tr>
+                                    <td>2025-07-21 03:00</td>
+                                    <td>arca.live</td>
+                                    <td>0</td>
+                                    <td class="status-error">실패</td>
+                                </tr>
+                                <tr>
+                                    <td>2025-07-20 03:00</td>
+                                    <td>arca.live</td>
+                                    <td>112</td>
+                                    <td class="status-success">성공</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="history-pagination">
+                            <button class="pagination-button">이전</button>
+                            <span class="pagination-info">1/3 페이지</span>
+                            <button class="pagination-button">다음</button>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -30,25 +30,133 @@
       "releaseChannel": "홈페이지",
       "imageUrl": "images/shalle.gif",
       "details": {}
+    },
+    {
+      "id": 4,
+      "name": "노노",
+      "attribute": "물",
+      "race": "수인",
+      "releaseChannel": "PV",
+      "imageUrl": "images/노노.gif",
+      "details": {}
+    },
+    {
+      "id": 5,
+      "name": "루루카",
+      "attribute": "물",
+      "race": "하이 엘프",
+      "releaseChannel": "커뮤니티",
+      "imageUrl": "images/루루카.jpg",
+      "details": {}
+    },
+    {
+      "id": 6,
+      "name": "미티",
+      "attribute": "바람",
+      "race": "휴먼",
+      "releaseChannel": "PV",
+      "imageUrl": "images/미티.png",
+      "details": {}
+    },
+    {
+      "id": 7,
+      "name": "멧사",
+      "attribute": "바람",
+      "race": "우드 엘프",
+      "releaseChannel": "커뮤니티",
+      "imageUrl": "images/멧사.jpg",
+      "details": {}
+    },
+    {
+      "id": 8,
+      "name": "도산지상",
+      "attribute": "땅",
+      "race": "파미족",
+      "releaseChannel": "홈페이지 & PV",
+      "imageUrl": "images/도산지상.png",
+      "details": {}
+    },
+    {
+      "id": 9,
+      "name": "미나모토 치요",
+      "attribute": "번개",
+      "race": "용인족",
+      "releaseChannel": "PV",
+      "imageUrl": "images/미나모토 치요.jpg",
+      "details": {}
+    },
+    {
+      "id": 10,
+      "name": "코코",
+      "attribute": "번개",
+      "race": "용인족",
+      "releaseChannel": "커뮤니티",
+      "imageUrl": "images/코코.jpg",
+      "details": {}
+    },
+    {
+      "id": 11,
+      "name": "낙경",
+      "attribute": "어둠",
+      "race": "파미족",
+      "releaseChannel": "PV & 커뮤니티",
+      "imageUrl": "images/낙경.png",
+      "details": {}
+    },
+    {
+      "id": 12,
+      "name": "아비",
+      "attribute": "불",
+      "race": "수인",
+      "releaseChannel": "홈페이지 & 커뮤니티",
+      "imageUrl": "images/아비.png",
+      "details": {}
+    },
+    {
+      "id": 13,
+      "name": "캐시벨",
+      "attribute": "불",
+      "race": "파미족",
+      "releaseChannel": "PV",
+      "imageUrl": "images/캐시벨.jpg",
+      "details": {}
+    },
+    {
+      "id": 14,
+      "name": "심포리아·던윈드",
+      "attribute": "물",
+      "race": "수인",
+      "releaseChannel": "커뮤니티",
+      "imageUrl": "images/심포리아·던윈드.png",
+      "details": {}
+    },
+    {
+      "id": 15,
+      "name": "펭펭",
+      "attribute": "땅",
+      "race": "파미족",
+      "releaseChannel": "홈페이지 & PV",
+      "imageUrl": "images/펭펭.png",
+      "details": {}
     }
   ],
   "kibos": [
     {
       "id": 1,
-      "name": "배추닭",
+      "name": "페페",
       "attribute": "나무",
       "note": "",
       "releaseChannel": "홈페이지 & PV & 커뮤니티",
-      "imageUrl": "images/placeholder.png",
+      "imageUrl": "images/페페.gif",
       "details": {}
     },
     {
       "id": 2,
-      "name": "배추닭(변종)*",
+      "name": "파리다",
       "attribute": "나무",
       "note": "",
       "releaseChannel": "커뮤니티(CBT 소개 영상)",
-      "imageUrl": "images/placeholder.png",
+      "imageUrl": "images/파리다.jpg",
       "details": {}
     }
   ],
