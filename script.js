@@ -129,8 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         try {
-            // 이미지 로드 전에 placeholder 이미지 설정
-            imgElement.src = 'https://via.placeholder.com/150?text=' + encodeURIComponent(cleanItemName);
+            // 이미지 로드 전에 로컬 placeholder 이미지 설정
+            imgElement.src = imageBasePath + 'placeholder.png';
             
             if (imageUrl) {
                 // 이미지 URL이 상대 경로인 경우 절대 경로로 변환
@@ -151,6 +151,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 img.onerror = () => {
                     console.log("Image load error, keeping placeholder");
+                    // 명시적으로 placeholder 이미지 유지
+                    imgElement.src = imageBasePath + 'placeholder.png';
                 };
                 img.src = fullImageUrl;
             } else {
@@ -490,7 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setImageSource(img, itemName);
                 img.alt = itemName;
                 img.onerror = function() {
-                    this.src = 'https://via.placeholder.com/150?text=' + encodeURIComponent(itemName);
+                    this.src = imageBasePath + 'placeholder.png';
                 };
 
                 const name = document.createElement('h3');
@@ -651,7 +653,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setImageSource(img, item.name);
             img.alt = item.name;
             img.onerror = function() {
-                this.src = 'https://via.placeholder.com/300?text=' + encodeURIComponent(item.name);
+                this.src = imageBasePath + 'placeholder.png';
             };
 
             const title = document.createElement('h2');
@@ -768,7 +770,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setImageSource(img, itemName);
         img.alt = itemName;
         img.onerror = function() {
-            this.src = 'https://via.placeholder.com/300?text=' + encodeURIComponent(itemName);
+            this.src = imageBasePath + 'placeholder.png';
         };
 
         const name = document.createElement('h3');
@@ -809,7 +811,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setImageSource(img, winnerName);
         img.alt = winnerName;
         img.onerror = function() {
-            this.src = 'https://via.placeholder.com/400?text=' + encodeURIComponent(winnerName);
+            this.src = imageBasePath + 'placeholder.png';
         };
 
         const name = document.createElement('h3');
