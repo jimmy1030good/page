@@ -1,7 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
-    const jsonDataPath = './data.json';
-    const imageBasePath = './images/'; // 이미지 경로를 images 폴더로 다시 변경
+    // GitHub Pages에서는 저장소 이름이 URL에 포함되므로 경로 조정
+    const isGitHubPages = window.location.hostname.includes('github.io');
+    const repoName = isGitHubPages ? '/page' : '';
+    const jsonDataPath = isGitHubPages ? `${repoName}/data.json` : './data.json';
+    const imageBasePath = isGitHubPages ? `${repoName}/images/` : './images/';
 
     const mainContent = document.getElementById('main-content');
     const loader = document.getElementById('loader');
