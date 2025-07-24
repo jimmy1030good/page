@@ -227,6 +227,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // 안전하게 DOM 요소 접근
             try {
+                // 초기 로드 시 필터 초기화 확실히 하기
+                resetFilters();
+                
                 displayList('characters');
                 setupDynamicBackground();
                 
@@ -239,6 +242,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         section.classList.add('visible');
                     }, 10);
                 });
+                
+                // 선택 모달 스타일 설정
+                if (selectionSection) {
+                    selectionSection.style.display = 'none';
+                }
             } catch (displayError) {
                 console.error("Error displaying UI:", displayError);
                 if (loader) {
@@ -277,10 +285,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        // 공개채널 필터 옵션 생성
+        // 공개채널 필터 옵션 생성 (BW 2024 제외)
         channelFiltersDiv.innerHTML = '';
         gameData.releaseChannels.forEach(channel => {
-            if (channel.count > 0) {
+            if (channel.count > 0 && channel.name !== 'BW 2024') {
                 const option = createFilterOption(channel.name, null, 'channel');
                 channelFiltersDiv.appendChild(option);
             }
@@ -652,13 +660,23 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             showScreen(listSection);
             
-            // 필터 초기화
-            if (typeof resetFilters === 'function') {
+            // 필터 초기화 - 필터를 초기화하지 않고 기존 필터 유지
+            // 단, 처음 로드 시에는 필터를 초기화
+            if (typeof resetFilters === 'function' && !filteredItems.length) {
                 resetFilters();
             }
             
-            // 필터링된 아이템 설정
-            filteredItems = type === 'characters' ? gameData.characters : gameData.kibos;
+            // 필터가 적용되지 않은 경우에만 모든 아이템 표시
+            if (activeFilters.search === '' &&
+                activeFilters.attributes.length === 0 &&
+                activeFilters.races.length === 0 &&
+                activeFilters.channels.length === 0) {
+                filteredItems = type === 'characters' ? gameData.characters : gameData.kibos;
+            } else {
+                // 필터가 적용된 경우 필터링 함수 호출
+                filterItems();
+                return; // filterItems 함수에서 displayFilteredItems를 호출하므로 여기서 리턴
+            }
             
             // 결과 표시
             displayFilteredItems();
@@ -749,13 +767,25 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        let nextPowerOfTwo = 2;
-        while(nextPowerOfTwo < contestants.length) {
-            nextPowerOfTwo *= 2;
+        // 16강 토너먼트를 위한 설정
+        const targetContestants = 16;
+        
+        // 참가자가 16명 이상이면 16명으로 제한, 16명 미만이면 모두 사용
+        if (contestants.length > targetContestants) {
+            // 랜덤으로 16명 선택
+            contestants = contestants.sort(() => 0.5 - Math.random()).slice(0, targetContestants);
         }
         
-        tournamentContestants = contestants.sort(() => 0.5 - Math.random()).slice(0, nextPowerOfTwo);
+        // 참가자 수가 홀수인 경우 한 명 더 추가 (부전승 방지)
+        if (contestants.length % 2 !== 0) {
+            contestants.push("부전승");
+        }
+        
+        tournamentContestants = contestants;
         tournamentWinners = [];
+        
+        // 토너먼트 시작 메시지 표시
+        tournamentTitle.textContent = `${contestants.length}강 - ${type === 'characters' ? '캐릭터' : '키보'} 최애 찾기`;
         
         nextMatch();
     }
@@ -1157,8 +1187,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     startTournamentFlowBtn.addEventListener('click', () => {
         selectionSection.classList.remove('hidden');
+        selectionSection.style.display = 'flex';
     });
-    closeModalBtn.addEventListener('click', () => selectionSection.classList.add('hidden'));
+    closeModalBtn.addEventListener('click', () => {
+        selectionSection.classList.add('hidden');
+        selectionSection.style.display = 'none';
+    });
     selectCharBtn.addEventListener('click', () => startNewTournament('characters'));
     selectKiboBtn.addEventListener('click', () => startNewTournament('kibos'));
 
