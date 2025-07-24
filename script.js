@@ -232,6 +232,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (loader) loader.classList.add('invisible');
                 if (mainContent) mainContent.classList.remove('hidden');
+                
+                // 모든 섹션에 visible 클래스 추가
+                document.querySelectorAll('section:not(.hidden)').forEach(section => {
+                    setTimeout(() => {
+                        section.classList.add('visible');
+                    }, 10);
+                });
             } catch (displayError) {
                 console.error("Error displaying UI:", displayError);
                 if (loader) {
@@ -608,19 +615,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- UI Display Functions ---
     function showScreen(sectionElement) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        
-        // Hide all sections first - with null checks
-        if (listSection) listSection.classList.add('hidden');
-        if (detailSection) detailSection.classList.add('hidden');
-        if (tournamentSection) tournamentSection.classList.add('hidden');
-        if (statsSection) statsSection.classList.add('hidden');
-        
-        // Then show the target section
-        if (sectionElement && sectionElement.classList) {
-            sectionElement.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Hide all sections first - with null checks
+            if (listSection) {
+                listSection.classList.add('hidden');
+                listSection.classList.remove('visible');
+            }
+            if (detailSection) {
+                detailSection.classList.add('hidden');
+                detailSection.classList.remove('visible');
+            }
+            if (tournamentSection) {
+                tournamentSection.classList.add('hidden');
+                tournamentSection.classList.remove('visible');
+            }
+            if (statsSection) {
+                statsSection.classList.add('hidden');
+                statsSection.classList.remove('visible');
+            }
+            
+            // Then show the target section
+            if (sectionElement && sectionElement.classList) {
+                sectionElement.classList.remove('hidden');
+                // 중요: visible 클래스 추가
+                setTimeout(() => {
+                    sectionElement.classList.add('visible');
+                }, 10);
+            }
         }
-    }
 
     function displayList(type) {
         currentListType = type;
