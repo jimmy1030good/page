@@ -128,23 +128,37 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        if (imageUrl) {
-            // 이미지 URL이 상대 경로인 경우 절대 경로로 변환
-            if (imageUrl.startsWith('images/')) {
-                imgElement.src = baseUrl + imageUrl;
-            } else {
-                imgElement.src = imageUrl;
-            }
-            console.log("Image URL:", imgElement.src);
-        } else {
-            imgElement.src = baseUrl + 'images/placeholder.png';
-            console.log("Using placeholder image:", imgElement.src);
-        }
-        
-        imgElement.onerror = () => {
-            console.log("Image load error, using placeholder");
+        try {
+            // 이미지 로드 전에 placeholder 이미지 설정
             imgElement.src = 'https://via.placeholder.com/150?text=' + encodeURIComponent(cleanItemName);
-        };
+            
+            if (imageUrl) {
+                // 이미지 URL이 상대 경로인 경우 절대 경로로 변환
+                let fullImageUrl;
+                if (imageUrl.startsWith('images/')) {
+                    fullImageUrl = baseUrl + imageUrl;
+                } else {
+                    fullImageUrl = imageUrl;
+                }
+                
+                console.log("Trying to load image from:", fullImageUrl);
+                
+                // 이미지 로드 시도
+                const img = new Image();
+                img.onload = () => {
+                    console.log("Image loaded successfully:", fullImageUrl);
+                    imgElement.src = fullImageUrl;
+                };
+                img.onerror = () => {
+                    console.log("Image load error, keeping placeholder");
+                };
+                img.src = fullImageUrl;
+            } else {
+                console.log("No image URL provided, using placeholder");
+            }
+        } catch (error) {
+            console.error("Error setting image source:", error);
+        }
     }
 
     function setupDynamicBackground() {
