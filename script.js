@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
     const jsonDataPath = './data.json';
-    const imageBasePath = './'; // 이미지 경로를 현재 디렉토리로 변경
+    const imageBasePath = './images/'; // 이미지 경로를 images 폴더로 다시 변경
 
     const mainContent = document.getElementById('main-content');
     const loader = document.getElementById('loader');
