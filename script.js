@@ -186,11 +186,20 @@ document.addEventListener('DOMContentLoaded', () => {
             // loadCollection();
             // setupCollectionFilters();
             
-            displayList('characters');
-            setupDynamicBackground();
-            
-            loader.classList.add('invisible');
-            mainContent.classList.remove('hidden');
+            // 안전하게 DOM 요소 접근
+            try {
+                displayList('characters');
+                setupDynamicBackground();
+                
+                if (loader) loader.classList.add('invisible');
+                if (mainContent) mainContent.classList.remove('hidden');
+            } catch (displayError) {
+                console.error("Error displaying UI:", displayError);
+                if (loader) {
+                    loader.innerHTML = `<p style="color: red; font-weight: bold;">UI 표시 중 오류가 발생했습니다.</p>
+                                      <p>오류 메시지: ${displayError.message}</p>`;
+                }
+            }
 
         } catch (error) {
             loader.innerHTML = `<p style="color: red; font-weight: bold;">데이터를 불러오는 데 실패했습니다. JSON 파일 경로를 확인하고, 로컬 서버가 실행 중인지 확인해주세요.</p>
@@ -370,8 +379,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // 컬렉션 필터링 완전히 비활성화
             return true;
-            
-            return true;
         });
         
         // 결과 표시
@@ -412,79 +419,99 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function displayFilteredItems() {
-        // 결과 카운트 업데이트
-        resultCountSpan.textContent = filteredItems.length;
-        
-        // 아이템 목록 표시
-        itemListDiv.innerHTML = '';
-        
-        filteredItems.forEach(item => {
-            const itemName = item.name;
-            if (!itemName || !itemName.trim()) return;
-
-            const card = document.createElement('div');
-            card.classList.add('item-card');
-            card.dataset.id = item.id;
-            
-            // 속성에 따른 색상 적용
-            if (item.attribute && item.attribute !== '미공개') {
-                const attributeData = gameData.attributes.find(a => a.name === item.attribute);
-                if (attributeData) {
-                    card.style.borderLeft = `4px solid ${attributeData.color}`;
-                }
+        try {
+            // 결과 카운트 업데이트
+            if (resultCountSpan) {
+                resultCountSpan.textContent = filteredItems.length;
             }
             
-            const img = document.createElement('img');
-            setImageSource(img, itemName);
-            img.alt = itemName;
-            img.onerror = function() {
-                this.src = 'https://via.placeholder.com/150?text=' + encodeURIComponent(itemName);
-            };
+            // 아이템 목록 표시
+            if (!itemListDiv) {
+                console.error("Item list div not found");
+                return;
+            }
+            
+            itemListDiv.innerHTML = '';
+            
+            filteredItems.forEach(item => {
+                const itemName = item.name;
+                if (!itemName || !itemName.trim()) return;
 
-            const name = document.createElement('h3');
-            name.textContent = itemName;
-            
-            // 속성 표시 추가
-            const attribute = document.createElement('span');
-            attribute.classList.add('attribute-tag');
-            attribute.textContent = item.attribute || '미공개';
-            
-            // 컬렉션 버튼 비활성화
-            
-            card.appendChild(img);
-            card.appendChild(name);
-            card.appendChild(attribute);
-            // 컬렉션 버튼 제거
-            itemListDiv.appendChild(card);
-            
-            card.addEventListener('click', () => {
-                displayDetail(item, currentListType);
+                const card = document.createElement('div');
+                card.classList.add('item-card');
+                card.dataset.id = item.id;
+                
+                // 속성에 따른 색상 적용
+                if (item.attribute && item.attribute !== '미공개') {
+                    const attributeData = gameData.attributes.find(a => a.name === item.attribute);
+                    if (attributeData) {
+                        card.style.borderLeft = `4px solid ${attributeData.color}`;
+                    }
+                }
+                
+                const img = document.createElement('img');
+                setImageSource(img, itemName);
+                img.alt = itemName;
+                img.onerror = function() {
+                    this.src = 'https://via.placeholder.com/150?text=' + encodeURIComponent(itemName);
+                };
+
+                const name = document.createElement('h3');
+                name.textContent = itemName;
+                
+                // 속성 표시 추가
+                const attribute = document.createElement('span');
+                attribute.classList.add('attribute-tag');
+                attribute.textContent = item.attribute || '미공개';
+                
+                // 컬렉션 버튼 비활성화
+                
+                card.appendChild(img);
+                card.appendChild(name);
+                card.appendChild(attribute);
+                // 컬렉션 버튼 제거
+                itemListDiv.appendChild(card);
+                
+                card.addEventListener('click', () => {
+                    displayDetail(item, currentListType);
+                });
             });
-        });
+        } catch (error) {
+            console.error("Error displaying filtered items:", error);
+        }
     }
     
     function updateActiveFilters() {
-        activeFiltersDiv.innerHTML = '';
-        
-        // 검색어 필터 태그
-        if (activeFilters.search) {
-            addActiveFilterTag('검색어', activeFilters.search);
+        try {
+            if (!activeFiltersDiv) {
+                console.error("Active filters div not found");
+                return;
+            }
+            
+            activeFiltersDiv.innerHTML = '';
+            
+            // 검색어 필터 태그
+            if (activeFilters.search) {
+                addActiveFilterTag('검색어', activeFilters.search);
+            }
+            
+            // 속성 필터 태그
+            activeFilters.attributes.forEach(attr => {
+                addActiveFilterTag('속성', attr);
+            });
+            
+            // 종족 필터 태그
+            activeFilters.races.forEach(race => {
+                addActiveFilterTag('종족', race);
+            });
+            
+            // 공개채널 필터 태그
+            activeFilters.channels.forEach(channel => {
+                addActiveFilterTag('공개채널', channel);
+            });
+        } catch (error) {
+            console.error("Error updating active filters:", error);
         }
-        
-        // 속성 필터 태그
-        activeFilters.attributes.forEach(attr => {
-            addActiveFilterTag('속성', attr);
-        });
-        
-        // 종족 필터 태그
-        activeFilters.races.forEach(race => {
-            addActiveFilterTag('종족', race);
-        });
-        
-        // 공개채널 필터 태그
-        activeFilters.channels.forEach(channel => {
-            addActiveFilterTag('공개채널', channel);
-        });
     }
     
     function addActiveFilterTag(type, value) {
@@ -544,31 +571,38 @@ document.addEventListener('DOMContentLoaded', () => {
     function showScreen(sectionElement) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         
-        // Hide all sections first
-        listSection.classList.add('hidden');
-        detailSection.classList.add('hidden');
-        tournamentSection.classList.add('hidden');
-        statsSection.classList.add('hidden');
-        collectionSection.classList.add('hidden');
+        // Hide all sections first - with null checks
+        if (listSection) listSection.classList.add('hidden');
+        if (detailSection) detailSection.classList.add('hidden');
+        if (tournamentSection) tournamentSection.classList.add('hidden');
+        if (statsSection) statsSection.classList.add('hidden');
         
         // Then show the target section
-        if (sectionElement) {
+        if (sectionElement && sectionElement.classList) {
             sectionElement.classList.remove('hidden');
         }
     }
 
     function displayList(type) {
         currentListType = type;
-        showScreen(listSection);
         
-        // 필터 초기화
-        resetFilters();
-        
-        // 필터링된 아이템 설정
-        filteredItems = type === 'characters' ? gameData.characters : gameData.kibos;
-        
-        // 결과 표시
-        displayFilteredItems();
+        // 안전하게 DOM 요소 접근
+        try {
+            showScreen(listSection);
+            
+            // 필터 초기화
+            if (typeof resetFilters === 'function') {
+                resetFilters();
+            }
+            
+            // 필터링된 아이템 설정
+            filteredItems = type === 'characters' ? gameData.characters : gameData.kibos;
+            
+            // 결과 표시
+            displayFilteredItems();
+        } catch (error) {
+            console.error("Error in displayList:", error);
+        }
     }
 
     function displayDetail(item, type) {
