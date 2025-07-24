@@ -1188,13 +1188,36 @@ document.addEventListener('DOMContentLoaded', () => {
     startTournamentFlowBtn.addEventListener('click', () => {
         selectionSection.classList.remove('hidden');
         selectionSection.style.display = 'flex';
+        // 중요: visible 클래스 추가
+        setTimeout(() => {
+            selectionSection.classList.add('visible');
+        }, 10);
     });
     closeModalBtn.addEventListener('click', () => {
-        selectionSection.classList.add('hidden');
-        selectionSection.style.display = 'none';
+        // 먼저 visible 클래스 제거
+        selectionSection.classList.remove('visible');
+        // 트랜지션 후 hidden 클래스 추가
+        setTimeout(() => {
+            selectionSection.classList.add('hidden');
+            selectionSection.style.display = 'none';
+        }, 300); // 트랜지션 시간과 일치시킴
     });
-    selectCharBtn.addEventListener('click', () => startNewTournament('characters'));
-    selectKiboBtn.addEventListener('click', () => startNewTournament('kibos'));
+    selectCharBtn.addEventListener('click', () => {
+        selectionSection.classList.remove('visible');
+        setTimeout(() => {
+            selectionSection.classList.add('hidden');
+            selectionSection.style.display = 'none';
+            startNewTournament('characters');
+        }, 300);
+    });
+    selectKiboBtn.addEventListener('click', () => {
+        selectionSection.classList.remove('visible');
+        setTimeout(() => {
+            selectionSection.classList.add('hidden');
+            selectionSection.style.display = 'none';
+            startNewTournament('kibos');
+        }, 300);
+    });
 
     matchItem1Div.addEventListener('click', () => handleVote(0, matchItem1Div));
     matchItem2Div.addEventListener('click', () => handleVote(1, matchItem2Div));
