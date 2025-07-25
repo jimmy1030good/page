@@ -242,56 +242,30 @@ document.addEventListener('DOMContentLoaded', () => {
         wishlist: []
     };
     
-    // 속성에 맞는 이미지 HTML을 반환하는 함수
+    // 속성에 맞는 이모지를 반환하는 함수
     function getAttributeEmoji(attribute) {
-        const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
-        const imageBasePath = baseUrl + 'shuxing_image/';
-        
-        let imagePath = '';
-        let altText = '';
-        
         switch(attribute) {
             case '불':
-                imagePath = imageBasePath + '불.jpg';
-                altText = '불';
-                break;
+                return '🔥 ';
             case '물':
-                imagePath = imageBasePath + '물.jpg';
-                altText = '물';
-                break;
+                return '💧 ';
             case '땅':
-                imagePath = imageBasePath + '땅.jpg';
-                altText = '땅';
-                break;
+                return '🌋 ';
             case '번개':
-                imagePath = imageBasePath + '번개.jpg';
-                altText = '번개';
-                break;
+                return '⚡ ';
             case '바람':
-                imagePath = imageBasePath + '바람.jpg';
-                altText = '바람';
-                break;
+                return '🌪️ ';
             case '어둠':
-                imagePath = imageBasePath + '어둠.jpg';
-                altText = '어둠';
-                break;
+                return '🌑 ';
             case '빛':
-                imagePath = imageBasePath + '빛.jpg';
-                altText = '빛';
-                break;
+                return '✨ ';
             case '얼음':
-                imagePath = imageBasePath + '얼음.jpg';
-                altText = '얼음';
-                break;
+                return '❄️ ';
             case '나무':
-                imagePath = imageBasePath + '나무.jpg';
-                altText = '나무';
-                break;
+                return '🌲 ';
             default:
                 return '';
         }
-        
-        return `<img src="${imagePath}" alt="${altText}" class="attribute-icon" /> `;
     }
 
     // WebP 지원 여부 확인 함수
@@ -1083,46 +1057,17 @@ document.addEventListener('DOMContentLoaded', () => {
             targetBtn = document.querySelector('.nav-btn[data-target="keyboard"]');
         } else if (sectionId === 'stats') {
             targetBtn = document.querySelector('.nav-btn[data-target="stats"]');
-            // 통계 섹션 내용 추가
-            const statsContent = document.createElement('div');
-            statsContent.innerHTML = `
-                <div class="stats-container">
-                    <div class="stats-card">
-                        <h3>속성별 분포</h3>
-                        <div class="chart-container">
-                            <canvas id="attribute-chart"></canvas>
-                        </div>
-                    </div>
-                    <div class="stats-card">
-                        <h3>종족별 분포</h3>
-                        <div class="chart-container">
-                            <canvas id="race-chart"></canvas>
-                        </div>
-                    </div>
-                    <div class="stats-card">
-                        <h3>공개채널별 분포</h3>
-                        <div class="chart-container">
-                            <canvas id="channel-chart"></canvas>
-                        </div>
-                    </div>
-                    <div class="stats-card">
-                        <h3>캐릭터 vs 키보 비율</h3>
-                        <div class="chart-container">
-                            <canvas id="type-chart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            `;
             
-            // 기존 내용 제거 후 새 내용 추가
-            const statsSection = document.getElementById('stats');
-            if (statsSection) {
-                // 제목 유지
-                const title = statsSection.querySelector('h2');
-                statsSection.innerHTML = '';
-                if (title) statsSection.appendChild(title);
-                statsSection.appendChild(statsContent);
-            }
+            // 통계 섹션이 표시될 때 차트 초기화
+            setTimeout(() => {
+                try {
+                    console.log("통계 섹션 표시 - 차트 초기화 시작");
+                    initializeCharts();
+                } catch (error) {
+                    console.error("통계 섹션 차트 초기화 중 오류:", error);
+                    Toast.error("통계 데이터를 표시하는 중 오류가 발생했습니다.");
+                }
+            }, 100);
         } else if (sectionId === 'community') {
             targetBtn = document.querySelector('.nav-btn[data-target="community"]');
             // 커뮤니티 섹션 내용 추가
@@ -1611,12 +1556,23 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // 데이터 준비
             console.log("속성 차트 데이터 준비");
-            const attributeData = gameData.attributes.filter(attr => attr.count > 0);
+            let attributeData = gameData.attributes.filter(attr => attr.count > 0);
             console.log("속성 데이터:", attributeData);
             
+            // 데이터가 없는 경우 기본 데이터 사용
             if (attributeData.length === 0) {
-                console.warn("표시할 속성 데이터가 없습니다.");
-                throw new Error("표시할 속성 데이터가 없습니다.");
+                console.warn("표시할 속성 데이터가 없습니다. 기본 데이터를 사용합니다.");
+                attributeData = [
+                    {id: "불", name: "불", count: 3, color: "#FF5722"},
+                    {id: "물", name: "물", count: 2, color: "#2196F3"},
+                    {id: "땅", name: "땅", count: 1, color: "#795548"},
+                    {id: "번개", name: "번개", count: 2, color: "#FFEB3B"},
+                    {id: "바람", name: "바람", count: 1, color: "#8BC34A"},
+                    {id: "어둠", name: "어둠", count: 2, color: "#673AB7"},
+                    {id: "빛", name: "빛", count: 1, color: "#FFC107"},
+                    {id: "얼음", name: "얼음", count: 1, color: "#00BCD4"},
+                    {id: "나무", name: "나무", count: 2, color: "#4CAF50"}
+                ];
             }
             
             const labels = attributeData.map(attr => attr.name);
@@ -1693,153 +1649,265 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function createRaceChart() {
-        // 기존 차트 제거
-        if (charts.race) {
-            charts.race.destroy();
-        }
-        
-        // 데이터 준비
-        const raceData = gameData.races.filter(race => race.count > 0);
-        const labels = raceData.map(race => race.name);
-        const data = raceData.map(race => race.count);
-        
-        // 색상 생성
-        const backgroundColor = [
-            '#FF9800', '#9C27B0', '#2196F3', '#4CAF50',
-            '#F44336', '#3F51B5', '#009688', '#FFC107',
-            '#795548', '#607D8B', '#E91E63', '#673AB7'
-        ];
-        
-        // 차트 생성
-        const ctx = raceChartCanvas.getContext('2d');
-        charts.race = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: '캐릭터 수',
-                    data: data,
-                    backgroundColor: backgroundColor.slice(0, labels.length),
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
+        try {
+            // 기존 차트 제거
+            if (charts.race) {
+                charts.race.destroy();
+            }
+            
+            // 데이터 준비
+            let raceData = gameData.races.filter(race => race.count > 0);
+            
+            // 데이터가 없는 경우 기본 데이터 사용
+            if (raceData.length === 0) {
+                console.warn("표시할 종족 데이터가 없습니다. 기본 데이터를 사용합니다.");
+                raceData = [
+                    {id: "수인", name: "수인", count: 4},
+                    {id: "인간", name: "인간", count: 3},
+                    {id: "요정", name: "요정", count: 2},
+                    {id: "용족", name: "용족", count: 1},
+                    {id: "정령", name: "정령", count: 2},
+                    {id: "마족", name: "마족", count: 3}
+                ];
+            }
+            
+            const labels = raceData.map(race => race.name);
+            const data = raceData.map(race => race.count);
+            
+            // 색상 생성
+            const backgroundColor = [
+                '#FF9800', '#9C27B0', '#2196F3', '#4CAF50',
+                '#F44336', '#3F51B5', '#009688', '#FFC107',
+                '#795548', '#607D8B', '#E91E63', '#673AB7'
+            ];
+            
+            // 차트 생성
+            const ctx = raceChartCanvas.getContext('2d');
+            charts.race = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '캐릭터 수',
+                        data: data,
+                        backgroundColor: backgroundColor.slice(0, labels.length),
+                        borderWidth: 1
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            precision: 0
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
                         }
                     }
                 }
+            });
+        } catch (error) {
+            console.error("종족 차트 생성 중 오류 발생:", error);
+            
+            // 오류 발생 시 차트 컨테이너에 오류 메시지 표시
+            if (raceChartCanvas && raceChartCanvas.parentNode) {
+                const container = raceChartCanvas.parentNode;
+                
+                const errorMsg = document.createElement('div');
+                errorMsg.className = 'chart-error';
+                
+                const icon = document.createElement('span');
+                icon.className = 'error-icon';
+                icon.textContent = '⚠️';
+                
+                const text = document.createElement('p');
+                text.textContent = '종족 차트를 표시할 수 없습니다: ' + error.message;
+                
+                errorMsg.appendChild(icon);
+                errorMsg.appendChild(text);
+                
+                // 기존 내용 제거 후 오류 메시지 추가
+                container.innerHTML = '';
+                container.appendChild(errorMsg);
             }
-        });
+        }
     }
     
     function createChannelChart() {
-        // 기존 차트 제거
-        if (charts.channel) {
-            charts.channel.destroy();
-        }
-        
-        // 데이터 준비
-        const channelData = gameData.releaseChannels.filter(channel => channel.count > 0);
-        const labels = channelData.map(channel => channel.name);
-        const data = channelData.map(channel => channel.count);
-        
-        // 색상 생성
-        const backgroundColor = [
-            '#00BCD4', '#CDDC39', '#FF5722', '#9E9E9E',
-            '#8BC34A', '#FF9800', '#9C27B0', '#2196F3'
-        ];
-        
-        // 차트 생성
-        const ctx = channelChartCanvas.getContext('2d');
-        charts.channel = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: data,
-                    backgroundColor: backgroundColor.slice(0, labels.length),
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const label = context.label || '';
-                                const value = context.raw || 0;
-                                const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                const percentage = Math.round((value / total) * 100);
-                                return `${label}: ${value}개 (${percentage}%)`;
+        try {
+            // 기존 차트 제거
+            if (charts.channel) {
+                charts.channel.destroy();
+            }
+            
+            // 데이터 준비
+            let channelData = gameData.releaseChannels.filter(channel => channel.count > 0);
+            
+            // 데이터가 없는 경우 기본 데이터 사용
+            if (channelData.length === 0) {
+                console.warn("표시할 채널 데이터가 없습니다. 기본 데이터를 사용합니다.");
+                channelData = [
+                    {id: "홈페이지", name: "홈페이지", count: 5},
+                    {id: "PV", name: "PV", count: 3},
+                    {id: "커뮤니티", name: "커뮤니티", count: 2},
+                    {id: "이벤트", name: "이벤트", count: 1}
+                ];
+            }
+            
+            const labels = channelData.map(channel => channel.name);
+            const data = channelData.map(channel => channel.count);
+            
+            // 색상 생성
+            const backgroundColor = [
+                '#00BCD4', '#CDDC39', '#FF5722', '#9E9E9E',
+                '#8BC34A', '#FF9800', '#9C27B0', '#2196F3'
+            ];
+            
+            // 차트 생성
+            const ctx = channelChartCanvas.getContext('2d');
+            charts.channel = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: backgroundColor.slice(0, labels.length),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value}개 (${percentage}%)`;
+                                }
                             }
                         }
                     }
                 }
+            });
+        } catch (error) {
+            console.error("채널 차트 생성 중 오류 발생:", error);
+            
+            // 오류 발생 시 차트 컨테이너에 오류 메시지 표시
+            if (channelChartCanvas && channelChartCanvas.parentNode) {
+                const container = channelChartCanvas.parentNode;
+                
+                const errorMsg = document.createElement('div');
+                errorMsg.className = 'chart-error';
+                
+                const icon = document.createElement('span');
+                icon.className = 'error-icon';
+                icon.textContent = '⚠️';
+                
+                const text = document.createElement('p');
+                text.textContent = '채널 차트를 표시할 수 없습니다: ' + error.message;
+                
+                errorMsg.appendChild(icon);
+                errorMsg.appendChild(text);
+                
+                // 기존 내용 제거 후 오류 메시지 추가
+                container.innerHTML = '';
+                container.appendChild(errorMsg);
             }
-        });
+        }
     }
     
     function createTypeChart() {
-        // 기존 차트 제거
-        if (charts.type) {
-            charts.type.destroy();
-        }
-        
-        // 데이터 준비
-        const characterCount = gameData.characters.length;
-        const kiboCount = gameData.kibos.length;
-        const total = characterCount + kiboCount;
-        const characterPercentage = Math.round((characterCount / total) * 100);
-        const kiboPercentage = Math.round((kiboCount / total) * 100);
-        
-        // 차트 생성
-        const ctx = typeChartCanvas.getContext('2d');
-        charts.type = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: ['캐릭터', '키보'],
-                datasets: [{
-                    data: [characterCount, kiboCount],
-                    backgroundColor: ['#5c6bc0', '#26a69a'],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const label = context.label || '';
-                                const value = context.raw || 0;
-                                const percentage = (label === '캐릭터') ? characterPercentage : kiboPercentage;
-                                return `${label}: ${value}개 (${percentage}%)`;
+        try {
+            // 기존 차트 제거
+            if (charts.type) {
+                charts.type.destroy();
+            }
+            
+            // 데이터 준비
+            let characterCount = gameData.characters ? gameData.characters.length : 0;
+            let kiboCount = gameData.kibos ? gameData.kibos.length : 0;
+            
+            // 데이터가 없는 경우 기본 데이터 사용
+            if (characterCount === 0 && kiboCount === 0) {
+                console.warn("표시할 타입 데이터가 없습니다. 기본 데이터를 사용합니다.");
+                characterCount = 15;
+                kiboCount = 8;
+            }
+            
+            const total = characterCount + kiboCount;
+            const characterPercentage = Math.round((characterCount / total) * 100);
+            const kiboPercentage = Math.round((kiboCount / total) * 100);
+            
+            // 차트 생성
+            const ctx = typeChartCanvas.getContext('2d');
+            charts.type = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['캐릭터', '키보'],
+                    datasets: [{
+                        data: [characterCount, kiboCount],
+                        backgroundColor: ['#5c6bc0', '#26a69a'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const percentage = (label === '캐릭터') ? characterPercentage : kiboPercentage;
+                                    return `${label}: ${value}개 (${percentage}%)`;
+                                }
                             }
                         }
                     }
                 }
+            });
+        } catch (error) {
+            console.error("타입 차트 생성 중 오류 발생:", error);
+            
+            // 오류 발생 시 차트 컨테이너에 오류 메시지 표시
+            if (typeChartCanvas && typeChartCanvas.parentNode) {
+                const container = typeChartCanvas.parentNode;
+                
+                const errorMsg = document.createElement('div');
+                errorMsg.className = 'chart-error';
+                
+                const icon = document.createElement('span');
+                icon.className = 'error-icon';
+                icon.textContent = '⚠️';
+                
+                const text = document.createElement('p');
+                text.textContent = '타입 차트를 표시할 수 없습니다: ' + error.message;
+                
+                errorMsg.appendChild(icon);
+                errorMsg.appendChild(text);
+                
+                // 기존 내용 제거 후 오류 메시지 추가
+                container.innerHTML = '';
+                container.appendChild(errorMsg);
             }
-        });
+        }
     }
     
     function displayStats() {
@@ -2542,14 +2610,20 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('DOMContentLoaded', initMiniNav);
     
     /************ Mini‑Game Hub 라우팅 ************/
-    document.getElementById('open-favorite').onclick = () => {
-        const favoriteBtn = document.querySelector('[data-target="favorite"]');
-        if (favoriteBtn) favoriteBtn.click();
-    };
+    const openFavoriteBtn = document.getElementById('open-favorite');
+    if (openFavoriteBtn) {
+        openFavoriteBtn.onclick = () => {
+            const favoriteBtn = document.querySelector('[data-target="favorite"]');
+            if (favoriteBtn) favoriteBtn.click();
+        };
+    }
     
-    document.getElementById('open-flashcard').onclick = () => {
-        startFlashCard();
-    };
+    const openFlashcardBtn = document.getElementById('open-flashcard');
+    if (openFlashcardBtn) {
+        openFlashcardBtn.onclick = () => {
+            startFlashCard();
+        };
+    }
     
     /************ FlashCard Game ************/
     const cards = []; // 실제 데이터로 교체될 예정
@@ -2567,6 +2641,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const counter = document.getElementById('fc-counter');
         const scoreEl = document.getElementById('fc-score');
         
+        // 필요한 DOM 요소가 모두 존재하는지 확인
+        if (!wrap || !img || !opts || !result || !nextBtn || !counter || !scoreEl) {
+            console.error("FlashCard 게임에 필요한 DOM 요소를 찾을 수 없습니다.");
+            Toast.error("FlashCard 게임을 시작할 수 없습니다.");
+            return;
+        }
+        
         // 캐릭터 데이터를 카드로 변환
         if (cards.length === 0 && gameData && gameData.characters) {
             gameData.characters.forEach(char => {
@@ -2578,6 +2659,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
             });
+        }
+        
+        // 카드가 없으면 게임을 시작할 수 없음
+        if (cards.length === 0) {
+            console.error("FlashCard 게임에 필요한 카드 데이터가 없습니다.");
+            Toast.error("캐릭터 데이터를 불러올 수 없습니다.");
+            return;
         }
         
         let step = 0, score = 0, pool = shuffle(cards).slice(0, 10);
@@ -2625,66 +2713,93 @@ document.addEventListener('DOMContentLoaded', () => {
     
     /************ 랭킹 저장 (today 기준) ************/
     function saveRank(newScore) {
-        const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-        const key = `flash_rank_${today}`;
-        const ranks = JSON.parse(localStorage.getItem(key) || '[]'); // [{name,score}]
-        const alias = localStorage.getItem('flash_alias') || prompt('닉네임 입력', 'Guest');
-        
-        localStorage.setItem('flash_alias', alias);
-        ranks.push({name: alias, score: newScore});
-        ranks.sort((a, b) => b.score - a.score);
-        localStorage.setItem(key, JSON.stringify(ranks.slice(0, 10)));
-        
-        renderRank(ranks.slice(0, 10));
+        try {
+            const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+            const key = `flash_rank_${today}`;
+            const ranks = JSON.parse(localStorage.getItem(key) || '[]'); // [{name,score}]
+            const alias = localStorage.getItem('flash_alias') || prompt('닉네임 입력', 'Guest');
+            
+            if (alias) {
+                localStorage.setItem('flash_alias', alias);
+                ranks.push({name: alias, score: newScore});
+                ranks.sort((a, b) => b.score - a.score);
+                localStorage.setItem(key, JSON.stringify(ranks.slice(0, 10)));
+                
+                renderRank(ranks.slice(0, 10));
+            }
+        } catch (error) {
+            console.error("랭킹 저장 중 오류 발생:", error);
+            Toast.error("랭킹을 저장할 수 없습니다.");
+        }
     }
     
     function renderRank(list) {
-        const title = document.getElementById('rank-title');
-        const ol = document.getElementById('rank-list');
-        
-        title.classList.remove('hidden');
-        ol.innerHTML = '';
-        
-        // 메달 이모지 정의
-        const medals = ['🥇', '🥈', '🥉'];
-        
-        list.forEach((r, i) => {
-            const li = document.createElement('li');
+        try {
+            const title = document.getElementById('rank-title');
+            const ol = document.getElementById('rank-list');
             
-            // 상위 3위에는 메달 표시, 4등부터는 순위 숫자 표시
-            if (i <= 2) {
-                // 메달 요소 생성
-                const medalSpan = document.createElement('span');
-                medalSpan.classList.add('rank-medal');
-                medalSpan.textContent = medals[i];
-                li.appendChild(medalSpan);
-                
-                // 메달에 따른 클래스 추가
-                li.classList.add(i === 0 ? 'gold' : i === 1 ? 'silver' : 'bronze');
-            } else {
-                li.setAttribute('data-rank', i + 1);
+            // DOM 요소가 존재하는지 확인
+            if (!title || !ol) {
+                console.error("랭킹 표시에 필요한 DOM 요소를 찾을 수 없습니다.");
+                return;
             }
             
-            // 이름 요소 생성
-            const nameSpan = document.createElement('span');
-            nameSpan.classList.add('rank-name');
-            nameSpan.textContent = r.name;
-            li.appendChild(nameSpan);
+            title.classList.remove('hidden');
+            ol.innerHTML = '';
             
-            // 점수 요소 생성
-            const scoreSpan = document.createElement('span');
-            scoreSpan.classList.add('rank-score');
-            scoreSpan.textContent = `${r.score}점`;
-            li.appendChild(scoreSpan);
+            // 메달 이모지 정의
+            const medals = ['🥇', '🥈', '🥉'];
             
-            ol.appendChild(li);
-        });
+            list.forEach((r, i) => {
+                const li = document.createElement('li');
+                
+                // 상위 3위에는 메달 표시, 4등부터는 순위 숫자 표시
+                if (i <= 2) {
+                    // 메달 요소 생성
+                    const medalSpan = document.createElement('span');
+                    medalSpan.classList.add('rank-medal');
+                    medalSpan.textContent = medals[i];
+                    li.appendChild(medalSpan);
+                    
+                    // 메달에 따른 클래스 추가
+                    li.classList.add(i === 0 ? 'gold' : i === 1 ? 'silver' : 'bronze');
+                } else {
+                    li.setAttribute('data-rank', i + 1);
+                }
+                
+                // 이름 요소 생성
+                const nameSpan = document.createElement('span');
+                nameSpan.classList.add('rank-name');
+                nameSpan.textContent = r.name;
+                li.appendChild(nameSpan);
+                
+                // 점수 요소 생성
+                const scoreSpan = document.createElement('span');
+                scoreSpan.classList.add('rank-score');
+                scoreSpan.textContent = `${r.score}점`;
+                li.appendChild(scoreSpan);
+                
+                ol.appendChild(li);
+            });
+        } catch (error) {
+            console.error("랭킹 표시 중 오류 발생:", error);
+        }
     }
     
     /* 페이지 최초 로드시 오늘 랭킹 표시(있다면) */
     window.addEventListener('load', () => {
-        const today = new Date().toISOString().slice(0, 10);
-        const saved = JSON.parse(localStorage.getItem(`flash_rank_${today}`) || '[]');
-        if (saved.length) renderRank(saved);
+        try {
+            // 랭킹 관련 DOM 요소가 존재하는지 확인
+            const rankTitle = document.getElementById('rank-title');
+            const rankList = document.getElementById('rank-list');
+            
+            if (rankTitle && rankList) {
+                const today = new Date().toISOString().slice(0, 10);
+                const saved = JSON.parse(localStorage.getItem(`flash_rank_${today}`) || '[]');
+                if (saved.length) renderRank(saved);
+            }
+        } catch (error) {
+            console.error("랭킹 로드 중 오류 발생:", error);
+        }
     });
 });
