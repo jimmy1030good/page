@@ -112,7 +112,18 @@ const Toast = {
     }
 };
 
+// 모든 DOM 요소에 대한 안전한 참조를 위한 헬퍼 함수
+function safeGetElement(id) {
+    const element = document.getElementById(id);
+    if (!element) {
+        console.warn(`Element with id '${id}' not found`);
+    }
+    return element;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM Content Loaded");
+    
     // 토스트 시스템 초기화
     Toast.init();
     // --- DOM Elements ---
@@ -126,86 +137,73 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("Base URL:", baseUrl);
     console.log("Image Base Path:", imageBasePath);
 
-    const mainContent = document.getElementById('main-content');
-    const loader = document.getElementById('loader');
-    const showCharactersBtn = document.getElementById('show-characters');
-    const showKibosBtn = document.getElementById('show-kibos');
-    const startTournamentFlowBtn = document.getElementById('start-tournament-flow');
+    // 안전하게 DOM 요소 참조
+    const mainContent = safeGetElement('main-content');
+    const loader = safeGetElement('loader');
+    const startTournamentFlowBtn = safeGetElement('start-tournament-flow');
     
-    const listSection = document.getElementById('list-section');
-    const detailSection = document.getElementById('detail-section');
-    const tournamentSection = document.getElementById('tournament-section');
-    const selectionSection = document.getElementById('selection-section');
-    const statsSection = document.getElementById('stats-section');
-    const communitySection = document.getElementById('community-section');
-    const dataCollectorSection = document.getElementById('data-collector-section');
-    const collectionSection = document.getElementById('collection-section');
-
-    const itemListDiv = document.getElementById('item-list');
-    const itemDetailDiv = document.getElementById('item-detail');
-    const backToListBtn = document.getElementById('back-to-list-button');
-
-    const tournamentTitle = document.getElementById('tournament-title');
-    const matchupContainer = document.getElementById('matchup-container');
-    const matchItem1Div = document.getElementById('match-item-1');
-    const matchItem2Div = document.getElementById('match-item-2');
-    const winnerDisplay = document.getElementById('winner-display');
-    const finalWinnerDiv = document.getElementById('final-winner');
-    const restartTournamentBtn = document.getElementById('restart-tournament');
-    const backToMainMenuBtn = document.getElementById('back-to-main-menu');
-
-    const selectCharBtn = document.getElementById('select-char-tournament');
-    const selectKiboBtn = document.getElementById('select-kibo-tournament');
+    // 섹션 요소들
+    const character = safeGetElement('character');
+    const keyboard = safeGetElement('keyboard');
+    const detailSection = safeGetElement('detail-section');
+    const tournamentSection = safeGetElement('tournament-section');
+    const statsSection = safeGetElement('stats-section');
+    const communitySection = safeGetElement('community-section');
+    const dataCollectorSection = safeGetElement('data-collector-section');
+    
+    // 아이템 관련 요소들
+    const itemListDiv = safeGetElement('item-list');
+    const itemDetailDiv = safeGetElement('item-detail');
+    const backToListBtn = safeGetElement('back-to-list-button');
+    
+    // 토너먼트 관련 요소들
+    const tournamentTitle = safeGetElement('tournament-title');
+    const matchupContainer = safeGetElement('matchup-container');
+    const matchItem1Div = safeGetElement('match-item-1');
+    const matchItem2Div = safeGetElement('match-item-2');
+    const winnerDisplay = safeGetElement('winner-display');
+    const finalWinnerDiv = safeGetElement('final-winner');
+    const restartTournamentBtn = safeGetElement('restart-tournament');
+    const backToMainMenuBtn = safeGetElement('back-to-main-menu');
+    
+    // 선택 관련 요소들
+    const selectCharBtn = safeGetElement('select-char-tournament');
+    const selectKiboBtn = safeGetElement('select-kibo-tournament');
     const closeModalBtn = document.querySelector('.close-modal-button');
     
-    // 통계 요소
-    const showStatsBtn = document.getElementById('show-stats');
-    const attributeChartCanvas = document.getElementById('attribute-chart');
-    const raceChartCanvas = document.getElementById('race-chart');
-    const channelChartCanvas = document.getElementById('channel-chart');
-    const typeChartCanvas = document.getElementById('type-chart');
+    // 통계 요소들
+    const attributeChartCanvas = safeGetElement('attribute-chart');
+    const raceChartCanvas = safeGetElement('race-chart');
+    const channelChartCanvas = safeGetElement('channel-chart');
+    const typeChartCanvas = safeGetElement('type-chart');
     
-    // 커뮤니티 요소
-    const showCommunityBtn = document.getElementById('show-community');
-    const characterMentionsChartCanvas = document.getElementById('character-mentions-chart');
-    const sentimentChartCanvas = document.getElementById('sentiment-chart');
+    // 커뮤니티 요소들
+    const characterMentionsChartCanvas = safeGetElement('character-mentions-chart');
+    const sentimentChartCanvas = safeGetElement('sentiment-chart');
     
-    // 데이터 수집 요소
-    const showDataCollectorBtn = document.getElementById('show-data-collector');
-    const startCollectionBtn = document.getElementById('start-collection');
-    const pauseCollectionBtn = document.getElementById('pause-collection');
-    const resetCollectionBtn = document.getElementById('reset-collection');
-    const sourceTypeSelect = document.getElementById('source-type');
-    const sourceUrlInput = document.getElementById('source-url');
-    const sourceSelectorInput = document.getElementById('source-selector');
-    const collectionIntervalSelect = document.getElementById('collection-interval');
-    const collectionTimeInput = document.getElementById('collection-time');
-    const dataLimitInput = document.getElementById('data-limit');
-    const autoCategorizeCheckbox = document.getElementById('auto-categorize');
-    const sentimentAnalysisCheckbox = document.getElementById('sentiment-analysis');
+    // 데이터 수집 요소들
+    const startCollectionBtn = safeGetElement('start-collection');
+    const pauseCollectionBtn = safeGetElement('pause-collection');
+    const resetCollectionBtn = safeGetElement('reset-collection');
+    const sourceTypeSelect = safeGetElement('source-type');
+    const sourceUrlInput = safeGetElement('source-url');
+    const sourceSelectorInput = safeGetElement('source-selector');
+    const collectionIntervalSelect = safeGetElement('collection-interval');
+    const collectionTimeInput = safeGetElement('collection-time');
+    const dataLimitInput = safeGetElement('data-limit');
+    const autoCategorizeCheckbox = safeGetElement('auto-categorize');
+    const sentimentAnalysisCheckbox = safeGetElement('sentiment-analysis');
     
-    // 컬렉션 요소
-    const showOwnedCheckbox = document.getElementById('show-owned');
-    const showWishlistCheckbox = document.getElementById('show-wishlist');
-    const characterProgressBar = document.getElementById('character-progress');
-    const characterProgressText = document.getElementById('character-progress-text');
-    const kiboProgressBar = document.getElementById('kibo-progress');
-    const kiboProgressText = document.getElementById('kibo-progress-text');
-    const collectionAttributeChartCanvas = document.getElementById('collection-attribute-chart');
-    const collectionTabs = document.querySelectorAll('.collection-tab');
-    const ownedItemsDiv = document.getElementById('owned-items');
-    const wishlistItemsDiv = document.getElementById('wishlist-items');
-    
-    // 검색 및 필터 요소
-    const searchInput = document.getElementById('search-input');
-    const searchButton = document.getElementById('search-button');
-    const attributeFiltersDiv = document.getElementById('attribute-filters');
-    const raceFiltersDiv = document.getElementById('race-filters');
-    const channelFiltersDiv = document.getElementById('channel-filters');
-    const applyFiltersBtn = document.getElementById('apply-filters');
-    const resetFiltersBtn = document.getElementById('reset-filters');
-    const resultCountSpan = document.getElementById('result-count');
-    const activeFiltersDiv = document.getElementById('active-filters');
+    // 검색 및 필터 요소들
+    const searchInput = safeGetElement('search-input');
+    const searchButton = safeGetElement('search-button');
+    const attributeFiltersDiv = safeGetElement('attribute-filters');
+    const raceFiltersDiv = safeGetElement('race-filters');
+    const channelFiltersDiv = safeGetElement('channel-filters');
+    const applyFiltersBtn = safeGetElement('apply-filters');
+    const resetFiltersBtn = safeGetElement('reset-filters');
+    const resultCountSpan = safeGetElement('result-count');
+    const activeFiltersDiv = safeGetElement('active-filters');
 
     // --- Data Store ---
     let gameData = null;
@@ -244,20 +242,56 @@ document.addEventListener('DOMContentLoaded', () => {
         wishlist: []
     };
     
-    // 속성에 맞는 이모지를 반환하는 함수
+    // 속성에 맞는 이미지 HTML을 반환하는 함수
     function getAttributeEmoji(attribute) {
+        const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
+        const imageBasePath = baseUrl + 'shuxing_image/';
+        
+        let imagePath = '';
+        let altText = '';
+        
         switch(attribute) {
-            case '불': return '🔥 ';
-            case '물': return '💧 ';
-            case '땅': return '🌋 ';
-            case '번개': return '⚡ ';
-            case '바람': return '🌪️ ';
-            case '어둠': return '🌑 ';
-            case '빛': return '✨ ';
-            case '얼음': return '❄️ ';
-            case '나무': return '🌲 ';
-            default: return '';
+            case '불':
+                imagePath = imageBasePath + '불.jpg';
+                altText = '불';
+                break;
+            case '물':
+                imagePath = imageBasePath + '물.jpg';
+                altText = '물';
+                break;
+            case '땅':
+                imagePath = imageBasePath + '땅.jpg';
+                altText = '땅';
+                break;
+            case '번개':
+                imagePath = imageBasePath + '번개.jpg';
+                altText = '번개';
+                break;
+            case '바람':
+                imagePath = imageBasePath + '바람.jpg';
+                altText = '바람';
+                break;
+            case '어둠':
+                imagePath = imageBasePath + '어둠.jpg';
+                altText = '어둠';
+                break;
+            case '빛':
+                imagePath = imageBasePath + '빛.jpg';
+                altText = '빛';
+                break;
+            case '얼음':
+                imagePath = imageBasePath + '얼음.jpg';
+                altText = '얼음';
+                break;
+            case '나무':
+                imagePath = imageBasePath + '나무.jpg';
+                altText = '나무';
+                break;
+            default:
+                return '';
         }
+        
+        return `<img src="${imagePath}" alt="${altText}" class="attribute-icon" /> `;
     }
 
     // WebP 지원 여부 확인 함수
@@ -410,55 +444,129 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Data Loading ---
     async function fetchJsonData(path) {
         try {
-            // 상대 경로로 시도
-            let response = await fetch(path);
-            if (!response.ok) {
-                // 절대 경로로 시도
-                response = await fetch(baseUrl + path);
-                if (!response.ok) {
-                    // GitHub Pages 경로로 시도
-                    response = await fetch(`https://jimmy1030good.github.io/page/${path}`);
-                    if (!response.ok) {
-                        throw new Error(`Failed to load ${path}`);
+            console.log("Trying to fetch data from path:", path);
+            
+            // 다양한 경로로 시도
+            const pathsToTry = [
+                path,                                              // 상대 경로
+                baseUrl + path,                                    // 절대 경로
+                `https://jimmy1030good.github.io/page/${path}`,    // GitHub Pages 경로
+                `/page/${path}`,                                   // GitHub Pages 상대 경로
+                `/${path}`                                         // 루트 상대 경로
+            ];
+            
+            let response = null;
+            let error = null;
+            
+            // 모든 경로 시도
+            for (const pathToTry of pathsToTry) {
+                try {
+                    console.log("Attempting to fetch from:", pathToTry);
+                    response = await fetch(pathToTry);
+                    if (response.ok) {
+                        console.log("Successfully fetched data from:", pathToTry);
+                        return await response.json();
                     }
+                } catch (e) {
+                    error = e;
+                    console.error(`Failed to fetch from ${pathToTry}:`, e);
                 }
             }
-            return await response.json();
+            
+            // 모든 시도가 실패한 경우
+            throw new Error(`Failed to load ${path} from any location. Last error: ${error?.message}`);
         } catch (error) {
             console.error("Fetch error:", error);
+            Toast.error(`데이터를 불러오는 데 실패했습니다: ${error.message}`);
             throw error;
         }
     }
 
     async function loadData() {
+        try {
+            console.log("Attempting to load data from:", jsonDataPath);
+            
+            // 데이터 로딩 시도
             try {
-                console.log("Attempting to load data from:", jsonDataPath);
                 gameData = await fetchJsonData(jsonDataPath);
                 console.log("Data loaded successfully:", gameData);
+            } catch (dataError) {
+                console.error("Failed to load data, using fallback data:", dataError);
                 
-                // 필터 옵션 초기화
+                // 폴백 데이터 - 하드코딩된 최소 데이터
+                gameData = {
+                    characters: [
+                        {
+                            id: 1,
+                            name: "테라라",
+                            attribute: "불",
+                            race: "수인",
+                            releaseChannel: "홈페이지",
+                            imageUrl: "images/placeholder.png",
+                            details: {}
+                        }
+                    ],
+                    kibos: [
+                        {
+                            id: 1,
+                            name: "페페",
+                            attribute: "나무",
+                            note: "",
+                            releaseChannel: "홈페이지",
+                            imageUrl: "images/placeholder.png",
+                            details: {}
+                        }
+                    ],
+                    attributes: [
+                        {id: "불", name: "불", count: 1, color: "#FF5722"},
+                        {id: "나무", name: "나무", count: 1, color: "#8BC34A"}
+                    ],
+                    races: [
+                        {id: "수인", name: "수인", count: 1}
+                    ],
+                    releaseChannels: [
+                        {id: "홈페이지", name: "홈페이지", count: 2}
+                    ]
+                };
+                
+                // 오류 알림 표시
+                if (Toast && Toast.error) {
+                    Toast.error("데이터 로딩에 실패했습니다. 기본 데이터를 사용합니다.");
+                }
+            }
+            
+            // 필터 옵션 초기화
+            if (typeof initializeFilters === 'function') {
                 initializeFilters();
-                
-                // 차트 초기화
+            }
+            
+            // 차트 초기화
+            if (typeof initializeCharts === 'function') {
                 initializeCharts();
-                
-                // 컬렉션 기능 비활성화
-                // loadCollection();
-                // setupCollectionFilters();
-                
-                // 안전하게 DOM 요소 접근
-                try {
-                    // 초기 로드 시 필터 초기화 확실히 하기
+            }
+            
+            // 안전하게 DOM 요소 접근
+            try {
+                // 초기 로드 시 필터 초기화 확실히 하기
+                if (typeof resetFilters === 'function') {
                     resetFilters();
-                    
-                    // 필터 초기화 후 모든 캐릭터가 표시되도록 filteredItems 설정
-                    filteredItems = gameData.characters;
-                    
+                }
+                
+                // 필터 초기화 후 모든 캐릭터가 표시되도록 filteredItems 설정
+                filteredItems = gameData.characters;
+                
+                if (typeof displayList === 'function') {
                     displayList('characters');
+                }
+                
+                if (typeof setupDynamicBackground === 'function') {
                     setupDynamicBackground();
-                    
-                    // 캐러셀 초기화
+                }
+                
+                // 캐러셀 초기화
+                if (typeof initCarousel === 'function') {
                     initCarousel();
+                }
                 
                 if (loader) loader.classList.add('invisible');
                 if (mainContent) mainContent.classList.remove('hidden');
@@ -469,11 +577,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         section.classList.add('visible');
                     }, 10);
                 });
-                
-                // 선택 모달 스타일 설정
-                if (selectionSection) {
-                    selectionSection.style.display = 'none';
-                }
             } catch (displayError) {
                 console.error("Error displaying UI:", displayError);
                 if (loader) {
@@ -491,26 +594,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     loader.appendChild(errorDetail);
                 }
             }
-
         } catch (error) {
-            // innerHTML 대신 DOM 요소 생성 방식으로 변경
-            loader.textContent = ''; // 기존 내용 제거
+            console.error("Critical error in loadData:", error);
             
-            const errorMsg = document.createElement('p');
-            errorMsg.style.color = 'red';
-            errorMsg.style.fontWeight = 'bold';
-            errorMsg.textContent = '데이터를 불러오는 데 실패했습니다. JSON 파일 경로를 확인하고, 로컬 서버가 실행 중인지 확인해주세요.';
-            
-            const errorDetail = document.createElement('p');
-            errorDetail.textContent = `오류 메시지: ${error.message}`;
-            
-            const urlInfo = document.createElement('p');
-            urlInfo.textContent = `현재 URL: ${window.location.href}`;
-            
-            loader.appendChild(errorMsg);
-            loader.appendChild(errorDetail);
-            loader.appendChild(urlInfo);
-            console.error("데이터 로딩 실패:", error);
+            if (loader) {
+                // innerHTML 대신 DOM 요소 생성 방식으로 변경
+                loader.textContent = ''; // 기존 내용 제거
+                
+                const errorMsg = document.createElement('p');
+                errorMsg.style.color = 'red';
+                errorMsg.style.fontWeight = 'bold';
+                errorMsg.textContent = '데이터를 불러오는 데 실패했습니다. JSON 파일 경로를 확인하고, 로컬 서버가 실행 중인지 확인해주세요.';
+                
+                const errorDetail = document.createElement('p');
+                errorDetail.textContent = `오류 메시지: ${error.message}`;
+                
+                const urlInfo = document.createElement('p');
+                urlInfo.textContent = `현재 URL: ${window.location.href}`;
+                
+                loader.appendChild(errorMsg);
+                loader.appendChild(errorDetail);
+                loader.appendChild(urlInfo);
+            }
         }
     }
     
@@ -784,13 +889,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const name = document.createElement('h3');
                 name.textContent = itemName;
                 
-                // 속성 표시 추가 (이모지 포함)
+                // 속성 표시 추가 (아이콘 포함)
                 const attribute = document.createElement('span');
                 attribute.classList.add('attribute-tag');
                 
-                // 속성에 맞는 이모지 추가
+                // 속성에 맞는 아이콘 추가
                 let attributeEmoji = getAttributeEmoji(item.attribute);
-                attribute.textContent = attributeEmoji + (item.attribute || '미공개');
+                attribute.innerHTML = attributeEmoji + (item.attribute || '미공개');
                 
                 // 컬렉션 버튼 비활성화
                 
@@ -906,69 +1011,185 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- UI Display Functions ---
     function showScreen(sectionElement) {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // 현재 표시 중인 섹션 저장
+        currentVisibleSection = sectionElement;
+        
+        // 모든 섹션 요소 가져오기
+        const allSections = document.querySelectorAll('section.panel');
+        
+        // 모든 섹션 숨기기
+        allSections.forEach(section => {
+            section.classList.add('hidden');
+            section.classList.remove('visible');
+        });
+        
+        // 대상 섹션 표시
+        if (sectionElement && sectionElement.classList) {
+            sectionElement.classList.remove('hidden');
             
-            // Hide all sections first - with null checks
-            if (listSection) {
-                listSection.classList.add('hidden');
-                listSection.classList.remove('visible');
-            }
-            if (detailSection) {
-                detailSection.classList.add('hidden');
-                detailSection.classList.remove('visible');
-            }
-            if (tournamentSection) {
-                tournamentSection.classList.add('hidden');
-                tournamentSection.classList.remove('visible');
-            }
-            if (statsSection) {
-                statsSection.classList.add('hidden');
-                statsSection.classList.remove('visible');
-            }
-            if (communitySection) {
-                communitySection.classList.add('hidden');
-                communitySection.classList.remove('visible');
-            }
-            // 데이터 수집 섹션은 항상 숨김 처리
-            if (dataCollectorSection) {
-                dataCollectorSection.classList.add('hidden');
-                dataCollectorSection.classList.remove('visible');
+            // 특정 섹션에 대한 추가 처리
+            if (sectionElement.id === 'stats') {
+                // 통계 섹션인 경우 차트 초기화
+                try {
+                    initializeCharts();
+                } catch (error) {
+                    console.error("차트 초기화 중 오류 발생:", error);
+                }
+            } else if (sectionElement.id === 'community') {
+                // 커뮤니티 섹션인 경우 iframe 로딩 확인
+                try {
+                    const iframe = sectionElement.querySelector('iframe');
+                    if (iframe) {
+                        // iframe 소스 재설정으로 로딩 강제
+                        const currentSrc = iframe.src;
+                        iframe.src = '';
+                        setTimeout(() => {
+                            iframe.src = currentSrc;
+                        }, 100);
+                    }
+                } catch (error) {
+                    console.error("iframe 초기화 중 오류 발생:", error);
+                }
             }
             
-            // Then show the target section
-            if (sectionElement && sectionElement.classList) {
-                sectionElement.classList.remove('hidden');
-                // 중요: visible 클래스 추가
-                setTimeout(() => {
-                    sectionElement.classList.add('visible');
-                }, 10);
-            }
+            // 중요: visible 클래스 추가
+            setTimeout(() => {
+                sectionElement.classList.add('visible');
+            }, 10);
         }
+        
+        // 네비게이션 버튼 활성화 상태 업데이트
+        updateActiveNavButton(sectionElement);
+    }
+    
+    // 네비게이션 버튼 활성화 상태 업데이트 함수
+    function updateActiveNavButton(activeSection) {
+        if (!activeSection) return;
+        
+        // 모든 네비게이션 버튼 비활성화
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // 현재 섹션에 해당하는 버튼 활성화
+        const sectionId = activeSection.id;
+        let targetBtn;
+        
+        if (sectionId === 'character') {
+            targetBtn = document.querySelector('.nav-btn[data-target="character"]');
+        } else if (sectionId === 'keyboard') {
+            targetBtn = document.querySelector('.nav-btn[data-target="keyboard"]');
+        } else if (sectionId === 'stats') {
+            targetBtn = document.querySelector('.nav-btn[data-target="stats"]');
+            // 통계 섹션 내용 추가
+            const statsContent = document.createElement('div');
+            statsContent.innerHTML = `
+                <div class="stats-container">
+                    <div class="stats-card">
+                        <h3>속성별 분포</h3>
+                        <div class="chart-container">
+                            <canvas id="attribute-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="stats-card">
+                        <h3>종족별 분포</h3>
+                        <div class="chart-container">
+                            <canvas id="race-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="stats-card">
+                        <h3>공개채널별 분포</h3>
+                        <div class="chart-container">
+                            <canvas id="channel-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="stats-card">
+                        <h3>캐릭터 vs 키보 비율</h3>
+                        <div class="chart-container">
+                            <canvas id="type-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 기존 내용 제거 후 새 내용 추가
+            const statsSection = document.getElementById('stats');
+            if (statsSection) {
+                // 제목 유지
+                const title = statsSection.querySelector('h2');
+                statsSection.innerHTML = '';
+                if (title) statsSection.appendChild(title);
+                statsSection.appendChild(statsContent);
+            }
+        } else if (sectionId === 'community') {
+            targetBtn = document.querySelector('.nav-btn[data-target="community"]');
+            // 커뮤니티 섹션 내용 추가
+            const communityContent = document.createElement('div');
+            communityContent.innerHTML = `
+                <div class="community-container">
+                    <div class="community-card">
+                        <h3>아카라이브 커뮤니티</h3>
+                        <div class="arcalive-container">
+                            <p class="arcalive-notice">아주르 프로밀리아 게시판의 내용입니다.</p>
+                            <div class="iframe-container">
+                                <iframe src="https://arca.live/b/azurpromilia" width="100%" height="500" frameborder="0"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 기존 내용 제거 후 새 내용 추가
+            const communitySection = document.getElementById('community');
+            if (communitySection) {
+                // 제목 유지
+                const title = communitySection.querySelector('h2');
+                communitySection.innerHTML = '';
+                if (title) communitySection.appendChild(title);
+                communitySection.appendChild(communityContent);
+            }
+        } else if (sectionId === 'minigame') {
+            targetBtn = document.querySelector('.nav-btn[data-target="minigame"]');
+        } else if (sectionId === 'tournament-section') {
+            targetBtn = document.querySelector('.nav-btn[data-target="favorite"]');
+        }
+        
+        if (targetBtn) {
+            targetBtn.classList.add('active');
+        }
+    }
 
     function displayList(type) {
-            currentListType = type;
+        currentListType = type;
+        
+        // 안전하게 DOM 요소 접근
+        try {
+            // 타입에 따라 적절한 섹션 표시
+            if (type === 'characters') {
+                showScreen(character);
+            } else if (type === 'kibos') {
+                showScreen(keyboard);
+            }
             
-            // 안전하게 DOM 요소 접근
-            try {
-                showScreen(listSection);
-                
-                // 항상 모든 아이템을 표시하도록 수정
-                // 필터가 적용되지 않은 경우에만 모든 아이템 표시
-                if (activeFilters.search === '' &&
-                    activeFilters.attributes.length === 0 &&
-                    activeFilters.races.length === 0 &&
-                    activeFilters.channels.length === 0) {
-                    filteredItems = type === 'characters' ? gameData.characters : gameData.kibos;
-                } else {
-                    // 필터가 적용된 경우 필터링 함수 호출
-                    filterItems();
-                    return; // filterItems 함수에서 displayFilteredItems를 호출하므로 여기서 리턴
-                }
-                
-                // 결과 표시
-                displayFilteredItems();
+            // 필터가 적용되지 않은 경우에만 모든 아이템 표시
+            if (activeFilters.search === '' &&
+                activeFilters.attributes.length === 0 &&
+                activeFilters.races.length === 0 &&
+                activeFilters.channels.length === 0) {
+                filteredItems = type === 'characters' ? gameData.characters : gameData.kibos;
+            } else {
+                // 필터가 적용된 경우 필터링 함수 호출
+                filterItems();
+                return; // filterItems 함수에서 displayFilteredItems를 호출하므로 여기서 리턴
+            }
+            
+            // 결과 표시
+            displayFilteredItems();
         } catch (error) {
             console.error("Error in displayList:", error);
+            Toast.error("목록을 표시하는 중 오류가 발생했습니다.");
         }
     }
 
@@ -993,13 +1214,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const infoGrid = document.createElement('div');
             infoGrid.classList.add('info-grid');
 
-            // 기본 정보 표시 (속성에 이모지 추가)
+            // 기본 정보 표시 (속성에 아이콘 추가)
             let attributeEmoji = getAttributeEmoji(item.attribute);
             
             const basicInfo = [
-                { key: '속성', value: attributeEmoji + (item.attribute || '미공개') },
-                { key: type === 'characters' ? '종족' : '비고', value: type === 'characters' ? item.race : item.note },
-                { key: '공개채널', value: item.releaseChannel || '미공개' }
+                { key: '속성', value: attributeEmoji + (item.attribute || '미공개'), isHTML: true },
+                { key: type === 'characters' ? '종족' : '비고', value: type === 'characters' ? item.race : item.note, isHTML: false },
+                { key: '공개채널', value: item.releaseChannel || '미공개', isHTML: false }
             ];
             
             basicInfo.forEach(info => {
@@ -1007,7 +1228,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     const strong = document.createElement('strong');
                     strong.textContent = info.key + ':';
                     const span = document.createElement('span');
-                    span.textContent = info.value;
+                    
+                    if (info.isHTML) {
+                        span.innerHTML = info.value;
+                    } else {
+                        span.textContent = info.value;
+                    }
+                    
                     infoGrid.appendChild(strong);
                     infoGrid.appendChild(span);
                 }
@@ -1251,14 +1478,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const infoGrid = document.createElement('div');
             infoGrid.classList.add('info-grid');
             
-            // 기본 정보 표시 (속성에 이모지 추가)
+            // 기본 정보 표시 (속성에 아이콘 추가)
             let attributeEmoji = getAttributeEmoji(winnerItem.attribute);
             
             const basicInfo = [
-                { key: '속성', value: attributeEmoji + (winnerItem.attribute || '미공개') },
+                { key: '속성', value: attributeEmoji + (winnerItem.attribute || '미공개'), isHTML: true },
                 { key: currentTournamentType === 'characters' ? '종족' : '비고',
-                  value: currentTournamentType === 'characters' ? winnerItem.race : winnerItem.note },
-                { key: '공개채널', value: winnerItem.releaseChannel || '미공개' }
+                  value: currentTournamentType === 'characters' ? winnerItem.race : winnerItem.note, isHTML: false },
+                { key: '공개채널', value: winnerItem.releaseChannel || '미공개', isHTML: false }
             ];
             
             basicInfo.forEach(info => {
@@ -1266,7 +1493,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     const strong = document.createElement('strong');
                     strong.textContent = info.key + ':';
                     const span = document.createElement('span');
-                    span.textContent = info.value;
+                    
+                    if (info.isHTML) {
+                        span.innerHTML = info.value;
+                    } else {
+                        span.textContent = info.value;
+                    }
+                    
                     infoGrid.appendChild(strong);
                     infoGrid.appendChild(span);
                 }
@@ -1292,58 +1525,171 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Chart Functions ---
     function initializeCharts() {
-        // 차트 생성
-        createAttributeChart();
-        createRaceChart();
-        createChannelChart();
-        createTypeChart();
+        try {
+            console.log("차트 초기화 시작");
+            
+            // Chart.js 라이브러리 로드 확인
+            if (typeof Chart === 'undefined') {
+                console.error("Chart.js 라이브러리가 로드되지 않았습니다.");
+                throw new Error("Chart.js 라이브러리가 로드되지 않았습니다.");
+            }
+            
+            console.log("Chart.js 라이브러리 로드됨:", Chart.version);
+            
+            // 차트 생성 시도
+            if (document.getElementById('attribute-chart')) {
+                console.log("속성 차트 생성 시도");
+                createAttributeChart();
+            } else {
+                console.warn("속성 차트 캔버스 요소를 찾을 수 없습니다.");
+            }
+            
+            if (document.getElementById('race-chart')) {
+                console.log("종족 차트 생성 시도");
+                createRaceChart();
+            } else {
+                console.warn("종족 차트 캔버스 요소를 찾을 수 없습니다.");
+            }
+            
+            if (document.getElementById('channel-chart')) {
+                console.log("채널 차트 생성 시도");
+                createChannelChart();
+            } else {
+                console.warn("채널 차트 캔버스 요소를 찾을 수 없습니다.");
+            }
+            
+            if (document.getElementById('type-chart')) {
+                console.log("타입 차트 생성 시도");
+                createTypeChart();
+            } else {
+                console.warn("타입 차트 캔버스 요소를 찾을 수 없습니다.");
+            }
+            
+            console.log("차트 초기화 완료");
+        } catch (error) {
+            console.error("차트 초기화 중 오류 발생:", error);
+            Toast.error("차트를 초기화하는 중 오류가 발생했습니다.");
+            
+            // 오류 발생 시 차트 대신 텍스트 표시
+            const chartContainers = document.querySelectorAll('.chart-container');
+            chartContainers.forEach(container => {
+                const errorMsg = document.createElement('div');
+                errorMsg.className = 'chart-error';
+                
+                const icon = document.createElement('span');
+                icon.className = 'error-icon';
+                icon.textContent = '⚠️';
+                
+                const text = document.createElement('p');
+                text.textContent = '차트를 표시할 수 없습니다: ' + error.message;
+                
+                errorMsg.appendChild(icon);
+                errorMsg.appendChild(text);
+                
+                // 기존 내용 제거 후 오류 메시지 추가
+                container.innerHTML = '';
+                container.appendChild(errorMsg);
+            });
+        }
     }
     
     function createAttributeChart() {
-        // 기존 차트 제거
-        if (charts.attribute) {
-            charts.attribute.destroy();
-        }
-        
-        // 데이터 준비
-        const attributeData = gameData.attributes.filter(attr => attr.count > 0);
-        const labels = attributeData.map(attr => attr.name);
-        const data = attributeData.map(attr => attr.count);
-        const backgroundColor = attributeData.map(attr => attr.color);
-        
-        // 차트 생성
-        const ctx = attributeChartCanvas.getContext('2d');
-        charts.attribute = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: data,
-                    backgroundColor: backgroundColor,
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const label = context.label || '';
-                                const value = context.raw || 0;
-                                const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                const percentage = Math.round((value / total) * 100);
-                                return `${label}: ${value}개 (${percentage}%)`;
+        try {
+            console.log("속성 차트 생성 시작");
+            
+            // 캔버스 요소 확인
+            if (!attributeChartCanvas) {
+                console.error("속성 차트 캔버스 요소가 없습니다.");
+                throw new Error("속성 차트 캔버스 요소가 없습니다.");
+            }
+            
+            // 기존 차트 제거
+            if (charts.attribute) {
+                console.log("기존 속성 차트 제거");
+                charts.attribute.destroy();
+            }
+            
+            // 데이터 준비
+            console.log("속성 차트 데이터 준비");
+            const attributeData = gameData.attributes.filter(attr => attr.count > 0);
+            console.log("속성 데이터:", attributeData);
+            
+            if (attributeData.length === 0) {
+                console.warn("표시할 속성 데이터가 없습니다.");
+                throw new Error("표시할 속성 데이터가 없습니다.");
+            }
+            
+            const labels = attributeData.map(attr => attr.name);
+            const data = attributeData.map(attr => attr.count);
+            const backgroundColor = attributeData.map(attr => attr.color);
+            
+            console.log("속성 차트 라벨:", labels);
+            console.log("속성 차트 데이터:", data);
+            
+            // 차트 생성
+            console.log("속성 차트 생성");
+            const ctx = attributeChartCanvas.getContext('2d');
+            
+            charts.attribute = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: backgroundColor,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value}개 (${percentage}%)`;
+                                }
                             }
                         }
                     }
                 }
+            });
+            
+            console.log("속성 차트 생성 완료");
+        } catch (error) {
+            console.error("속성 차트 생성 중 오류 발생:", error);
+            
+            // 오류 발생 시 차트 컨테이너에 오류 메시지 표시
+            if (attributeChartCanvas && attributeChartCanvas.parentNode) {
+                const container = attributeChartCanvas.parentNode;
+                
+                const errorMsg = document.createElement('div');
+                errorMsg.className = 'chart-error';
+                
+                const icon = document.createElement('span');
+                icon.className = 'error-icon';
+                icon.textContent = '⚠️';
+                
+                const text = document.createElement('p');
+                text.textContent = '속성 차트를 표시할 수 없습니다: ' + error.message;
+                
+                errorMsg.appendChild(icon);
+                errorMsg.appendChild(text);
+                
+                // 기존 내용 제거 후 오류 메시지 추가
+                container.innerHTML = '';
+                container.appendChild(errorMsg);
             }
-        });
+            
+            // 오류를 상위로 전파하지 않고 여기서 처리
+        }
     }
     
     function createRaceChart() {
@@ -1497,22 +1843,120 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function displayStats() {
-        showScreen(statsSection);
-        
-        // 차트 업데이트
-        createAttributeChart();
-        createRaceChart();
-        createChannelChart();
-        createTypeChart();
+        const statsSection = document.getElementById('stats');
+        if (statsSection) {
+            showScreen(statsSection);
+            
+            try {
+                // 차트 업데이트 시도
+                if (document.getElementById('attribute-chart')) {
+                    createAttributeChart();
+                }
+                if (document.getElementById('race-chart')) {
+                    createRaceChart();
+                }
+                if (document.getElementById('channel-chart')) {
+                    createChannelChart();
+                }
+                if (document.getElementById('type-chart')) {
+                    createTypeChart();
+                }
+            } catch (error) {
+                console.error("차트 업데이트 중 오류 발생:", error);
+                Toast.error("차트 데이터를 불러오는 중 오류가 발생했습니다.");
+                
+                // 오류 발생 시 차트 대신 더 자세한 오류 메시지와 함께 텍스트 표시
+                const chartContainers = document.querySelectorAll('.chart-container');
+                chartContainers.forEach(container => {
+                    const errorMsg = document.createElement('div');
+                    errorMsg.className = 'chart-error';
+                    
+                    const icon = document.createElement('span');
+                    icon.className = 'error-icon';
+                    icon.textContent = '⚠️';
+                    
+                    const text = document.createElement('p');
+                    text.textContent = '차트 데이터를 표시할 수 없습니다.';
+                    
+                    errorMsg.appendChild(icon);
+                    errorMsg.appendChild(text);
+                    
+                    // 기존 내용 제거 후 오류 메시지 추가
+                    container.innerHTML = '';
+                    container.appendChild(errorMsg);
+                });
+            }
+        }
     }
     
     // --- 커뮤니티 핫 토픽 대시보드 함수 ---
     function displayCommunity() {
-        showScreen(communitySection);
-        
-        // 차트 업데이트
-        createCharacterMentionsChart();
-        createSentimentChart();
+        const communitySection = document.getElementById('community');
+        if (communitySection) {
+            showScreen(communitySection);
+            
+            try {
+                // iframe 로딩 확인
+                const iframe = communitySection.querySelector('iframe');
+                if (iframe) {
+                    // iframe 로딩 이벤트 리스너 추가
+                    iframe.onload = function() {
+                        console.log("iframe 로딩 완료");
+                    };
+                    
+                    iframe.onerror = function() {
+                        console.error("iframe 로딩 실패");
+                        const container = iframe.closest('.iframe-container');
+                        if (container) {
+                            const errorMsg = document.createElement('div');
+                            errorMsg.className = 'iframe-error';
+                            errorMsg.innerHTML = '<span class="error-icon">⚠️</span><p>커뮤니티 콘텐츠를 불러올 수 없습니다.</p>';
+                            container.innerHTML = '';
+                            container.appendChild(errorMsg);
+                        }
+                    };
+                    
+                    // iframe 소스 재설정으로 로딩 강제
+                    const currentSrc = iframe.src;
+                    iframe.src = '';
+                    setTimeout(() => {
+                        iframe.src = currentSrc;
+                    }, 100);
+                }
+                
+                // 차트 업데이트 시도
+                if (document.getElementById('character-mentions-chart')) {
+                    createCharacterMentionsChart();
+                }
+                if (document.getElementById('sentiment-chart')) {
+                    createSentimentChart();
+                }
+            } catch (error) {
+                console.error("커뮤니티 섹션 업데이트 중 오류 발생:", error);
+                Toast.error("커뮤니티 데이터를 불러오는 중 오류가 발생했습니다.");
+                
+                // 오류 발생 시 차트 대신 더 자세한 오류 메시지와 함께 텍스트 표시
+                const chartContainers = communitySection.querySelectorAll('.chart-container');
+                chartContainers.forEach(container => {
+                    const errorMsg = document.createElement('div');
+                    errorMsg.className = 'chart-error';
+                    
+                    const icon = document.createElement('span');
+                    icon.className = 'error-icon';
+                    icon.textContent = '⚠️';
+                    
+                    const text = document.createElement('p');
+                    text.textContent = '차트 데이터를 표시할 수 없습니다.';
+                    
+                    errorMsg.appendChild(icon);
+                    errorMsg.appendChild(text);
+                    
+                    // 기존 내용 제거 후 오류 메시지 추가
+                    container.innerHTML = '';
+                    container.appendChild(errorMsg);
+                });
+            }
+        }
     }
     
     function createCharacterMentionsChart() {
@@ -1817,51 +2261,112 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // --- Event Listeners ---
-    showCharactersBtn.addEventListener('click', () => displayList('characters'));
-    showKibosBtn.addEventListener('click', () => displayList('kibos'));
-    showStatsBtn.addEventListener('click', displayStats);
-    showCommunityBtn.addEventListener('click', displayCommunity);
-    backToListBtn.addEventListener('click', () => displayList(currentListType));
+    // 이벤트 리스너 추가 전에 요소가 존재하는지 확인
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // 모든 버튼에서 active 클래스 제거
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            // 클릭된 버튼에 active 클래스 추가
+            this.classList.add('active');
+            
+            const target = this.getAttribute('data-target');
+            if (target === 'character') {
+                displayList('characters');
+            } else if (target === 'keyboard') {
+                displayList('kibos');
+            } else if (target === 'stats') {
+                displayStats();
+            } else if (target === 'community') {
+                displayCommunity();
+            } else if (target === 'favorite') {
+                startTournamentFlowBtn.click();
+            } else if (target === 'minigame') {
+                const minigameSection = document.getElementById('minigame');
+                if (minigameSection) {
+                    showScreen(minigameSection);
+                }
+            }
+        });
+    });
     
-    startTournamentFlowBtn.addEventListener('click', () => {
-        selectionSection.classList.remove('hidden');
-        selectionSection.style.display = 'flex';
-        // 중요: visible 클래스 추가
-        setTimeout(() => {
-            selectionSection.classList.add('visible');
-        }, 10);
-    });
-    closeModalBtn.addEventListener('click', () => {
-        // 먼저 visible 클래스 제거
-        selectionSection.classList.remove('visible');
-        // 트랜지션 후 hidden 클래스 추가
-        setTimeout(() => {
-            selectionSection.classList.add('hidden');
-            selectionSection.style.display = 'none';
-        }, 300); // 트랜지션 시간과 일치시킴
-    });
-    selectCharBtn.addEventListener('click', () => {
-        selectionSection.classList.remove('visible');
-        setTimeout(() => {
-            selectionSection.classList.add('hidden');
-            selectionSection.style.display = 'none';
-            startNewTournament('characters');
-        }, 300);
-    });
-    selectKiboBtn.addEventListener('click', () => {
-        selectionSection.classList.remove('visible');
-        setTimeout(() => {
-            selectionSection.classList.add('hidden');
-            selectionSection.style.display = 'none';
-            startNewTournament('kibos');
-        }, 300);
-    });
+    if (backToListBtn) {
+        backToListBtn.addEventListener('click', () => displayList(currentListType));
+    }
+    
+    // 토너먼트 시작 버튼 이벤트 리스너
+    if (startTournamentFlowBtn) {
+        startTournamentFlowBtn.addEventListener('click', () => {
+            const selectionSection = document.getElementById('selection-section');
+            if (selectionSection) {
+                selectionSection.classList.remove('hidden');
+                selectionSection.style.display = 'flex';
+                // 중요: visible 클래스 추가
+                setTimeout(() => {
+                    selectionSection.classList.add('visible');
+                }, 10);
+            }
+        });
+    }
+    // 모달 닫기 버튼 이벤트 리스너
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => {
+            const selectionSection = document.getElementById('selection-section');
+            if (selectionSection) {
+                // 먼저 visible 클래스 제거
+                selectionSection.classList.remove('visible');
+                // 트랜지션 후 hidden 클래스 추가
+                setTimeout(() => {
+                    selectionSection.classList.add('hidden');
+                    selectionSection.style.display = 'none';
+                }, 300); // 트랜지션 시간과 일치시킴
+            }
+        });
+    }
+    // 캐릭터 선택 버튼 이벤트 리스너
+    if (selectCharBtn) {
+        selectCharBtn.addEventListener('click', () => {
+            const selectionSection = document.getElementById('selection-section');
+            if (selectionSection) {
+                selectionSection.classList.remove('visible');
+                setTimeout(() => {
+                    selectionSection.classList.add('hidden');
+                    selectionSection.style.display = 'none';
+                    startNewTournament('characters');
+                }, 300);
+            }
+        });
+    }
+    // 키보 선택 버튼 이벤트 리스너
+    if (selectKiboBtn) {
+        selectKiboBtn.addEventListener('click', () => {
+            const selectionSection = document.getElementById('selection-section');
+            if (selectionSection) {
+                selectionSection.classList.remove('visible');
+                setTimeout(() => {
+                    selectionSection.classList.add('hidden');
+                    selectionSection.style.display = 'none';
+                    startNewTournament('kibos');
+                }, 300);
+            }
+        });
+    }
 
-    matchItem1Div.addEventListener('click', () => handleVote(0, matchItem1Div));
-    matchItem2Div.addEventListener('click', () => handleVote(1, matchItem2Div));
+    // 요소가 존재하는지 확인 후 이벤트 리스너 추가
+    if (matchItem1Div) {
+        matchItem1Div.addEventListener('click', () => handleVote(0, matchItem1Div));
+    }
+    if (matchItem2Div) {
+        matchItem2Div.addEventListener('click', () => handleVote(1, matchItem2Div));
+    }
     
-    restartTournamentBtn.addEventListener('click', () => startNewTournament(currentTournamentType));
-    backToMainMenuBtn.addEventListener('click', () => showScreen(listSection));
+    // 요소가 존재하는지 확인 후 이벤트 리스너 추가
+    if (restartTournamentBtn) {
+        restartTournamentBtn.addEventListener('click', () => startNewTournament(currentTournamentType));
+    }
+    if (backToMainMenuBtn) {
+        backToMainMenuBtn.addEventListener('click', () => showScreen(listSection));
+    }
     
     // 컬렉션 버튼 추가 코드 비활성화
     
@@ -2140,9 +2645,38 @@ document.addEventListener('DOMContentLoaded', () => {
         title.classList.remove('hidden');
         ol.innerHTML = '';
         
+        // 메달 이모지 정의
+        const medals = ['🥇', '🥈', '🥉'];
+        
         list.forEach((r, i) => {
             const li = document.createElement('li');
-            li.textContent = `${i + 1}. ${r.name} — ${r.score}점`;
+            
+            // 상위 3위에는 메달 표시, 4등부터는 순위 숫자 표시
+            if (i <= 2) {
+                // 메달 요소 생성
+                const medalSpan = document.createElement('span');
+                medalSpan.classList.add('rank-medal');
+                medalSpan.textContent = medals[i];
+                li.appendChild(medalSpan);
+                
+                // 메달에 따른 클래스 추가
+                li.classList.add(i === 0 ? 'gold' : i === 1 ? 'silver' : 'bronze');
+            } else {
+                li.setAttribute('data-rank', i + 1);
+            }
+            
+            // 이름 요소 생성
+            const nameSpan = document.createElement('span');
+            nameSpan.classList.add('rank-name');
+            nameSpan.textContent = r.name;
+            li.appendChild(nameSpan);
+            
+            // 점수 요소 생성
+            const scoreSpan = document.createElement('span');
+            scoreSpan.classList.add('rank-score');
+            scoreSpan.textContent = `${r.score}점`;
+            li.appendChild(scoreSpan);
+            
             ol.appendChild(li);
         });
     }

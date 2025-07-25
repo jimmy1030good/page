@@ -19,13 +19,13 @@
     
     <!-- 토스트 알림 컨테이너 -->
     <div id="toast-container"></div>
-    <header class="top-nav">
+    <header>
+        <h1>아주르 정보 뷰어</h1>
         <nav>
             <button data-target="character" class="nav-btn">캐릭터</button>
             <button data-target="keyboard" class="nav-btn">키보</button>
             <button data-target="stats" class="nav-btn">통계</button>
             <button data-target="community" class="nav-btn">커뮤니티</button>
-            <button data-target="favorite" class="nav-btn">최애 찾기</button>
             <button data-target="minigame" class="nav-btn">미니게임</button>
         </nav>
     </header>
@@ -92,9 +92,9 @@
         </section>
         
         <section id="keyboard" class="panel">
-            <h2>키보</h2>
+            <h2>키보드 캐릭터</h2>
             <div class="section-content">
-                <p>아주르 프로밀리아의 키보 정보를 확인하세요.</p>
+                <p>아주르 프로밀리아의 키보드 캐릭터 정보를 확인하세요.</p>
                 <div class="keyboard-list"></div>
             </div>
         </section>
@@ -148,13 +148,6 @@
             </div>
         </section>
         
-        <section id="favorite" class="panel">
-            <h2>최애 찾기</h2>
-            <div class="selection-buttons">
-                <button id="select-char-tournament" class="btn btn-primary">캐릭터 최애 찾기</button>
-                <button id="select-kibo-tournament" class="btn btn-primary">키보 최애 찾기</button>
-            </div>
-        </section>
 
         <!-- 상세 정보 섹션 -->
         <section id="detail-section" class="panel hidden">
@@ -164,11 +157,11 @@
 
         <!-- 미니게임 허브 섹션 -->
         <section id="minigame" class="panel">
-            <h2>Mini Game</h2>
-            <p>소소한 재미 + 정보 암기를 위한 미니게임!</p>
+            <h2>미니게임 허브</h2>
+            <p>소소한 재미와 정보 암기를 위한 미니게임 모음</p>
             <div class="game-grid">
-                <button id="open-favorite" class="game-btn">최애 찾기</button>
-                <button id="open-flashcard" class="game-btn">플래시 카드</button>
+                <button id="open-favorite" class="game-btn teal"><span>💖</span> 최애 찾기</button>
+                <button id="open-flashcard" class="game-btn orange"><span>🂠</span> 플래시 카드</button>
             </div>
 
             <!-- FlashCard Game Container (숨김) -->
@@ -185,7 +178,9 @@
 
             <!-- Daily Rank -->
             <h3 id="rank-title" class="hidden">오늘의 랭킹</h3>
-            <ol id="rank-list"></ol>
+            <div class="rank-container">
+                <ol id="rank-list" class="rank-board"></ol>
+            </div>
         </section>
 
         <!-- 토너먼트 섹션 -->

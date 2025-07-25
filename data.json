@@ -158,18 +158,54 @@
       "releaseChannel": "커뮤니티(CBT 소개 영상)",
       "imageUrl": "images/파리다.jpg",
       "details": {}
+    },
+    {
+      "id": 3,
+      "name": "레피디릭",
+      "attribute": "물",
+      "note": "희귀 키보",
+      "releaseChannel": "커뮤니티",
+      "imageUrl": "kibo_image/레피디릭.webp",
+      "details": {}
+    },
+    {
+      "id": 4,
+      "name": "배추닭",
+      "attribute": "나무",
+      "note": "희귀 키보",
+      "releaseChannel": "PV",
+      "imageUrl": "kibo_image/배추닭.webp",
+      "details": {}
+    },
+    {
+      "id": 5,
+      "name": "비버",
+      "attribute": "물",
+      "note": "일반 키보",
+      "releaseChannel": "홈페이지",
+      "imageUrl": "kibo_image/비버.webp",
+      "details": {}
+    },
+    {
+      "id": 6,
+      "name": "여우",
+      "attribute": "불",
+      "note": "일반 키보",
+      "releaseChannel": "커뮤니티",
+      "imageUrl": "kibo_image/여우.webp",
+      "details": {}
     }
   ],
   "attributes": [
-    {"id": "불", "name": "불", "count": 4, "color": "#FF5722"},
-    {"id": "물", "name": "물", "count": 3, "color": "#2196F3"},
+    {"id": "불", "name": "불", "count": 5, "color": "#FF5722"},
+    {"id": "물", "name": "물", "count": 5, "color": "#2196F3"},
     {"id": "땅", "name": "땅", "count": 1, "color": "#795548"},
     {"id": "번개", "name": "번개", "count": 2, "color": "#FFEB3B"},
     {"id": "바람", "name": "바람", "count": 2, "color": "#4CAF50"},
     {"id": "어둠", "name": "어둠", "count": 1, "color": "#9C27B0"},
     {"id": "빛", "name": "빛", "count": 0, "color": "#FFC107"},
     {"id": "얼음", "name": "얼음", "count": 0, "color": "#00BCD4"},
-    {"id": "나무", "name": "나무", "count": 0, "color": "#8BC34A"}
+    {"id": "나무", "name": "나무", "count": 3, "color": "#8BC34A"}
   ],
   "races": [
     {"id": "수인", "name": "수인", "count": 5},
