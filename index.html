@@ -16,51 +16,54 @@
     </div>
 
     <div id="dynamic-background"></div>
-    <header>
-        <h1>아주르 정보 뷰어</h1>
+    
+    <!-- 토스트 알림 컨테이너 -->
+    <div id="toast-container"></div>
+    <header class="top-nav">
         <nav>
-            <button id="show-characters">캐릭터</button>
-            <button id="show-kibos">키보</button>
-            <button id="show-stats">통계</button>
-            <button id="show-community">커뮤니티</button>
-            <button id="start-tournament-flow">최애 찾기</button>
+            <button data-target="character" class="nav-btn">캐릭터</button>
+            <button data-target="keyboard" class="nav-btn">키보</button>
+            <button data-target="stats" class="nav-btn">통계</button>
+            <button data-target="community" class="nav-btn">커뮤니티</button>
+            <button data-target="favorite" class="nav-btn">최애 찾기</button>
+            <button data-target="minigame" class="nav-btn">미니게임</button>
         </nav>
     </header>
     <main id="main-content" class="hidden">
-        <section id="list-section">
+        <!-- ───────── MAIN ────────── -->
+        <section id="character" class="panel">
             <div class="filter-container">
                 <div class="search-box">
                     <input type="text" id="search-input" placeholder="이름 또는 설명 검색...">
-                    <button id="search-button">검색</button>
+                    <button id="search-button" class="btn btn-primary">검색</button>
                 </div>
                 
-                
-                <div class="filter-groups">
+                <div class="filter-panel">
                     <div class="filter-group">
                         <h3>속성</h3>
-                        <div class="filter-options attribute-filters" id="attribute-filters">
+                        <div class="chip-group attribute-filters" id="attribute-filters">
                             <!-- 속성 필터 옵션들이 자동으로 추가됩니다 -->
                         </div>
                     </div>
                     
                     <div class="filter-group">
                         <h3>종족</h3>
-                        <div class="filter-options race-filters" id="race-filters">
+                        <div class="chip-group race-filters" id="race-filters">
                             <!-- 종족 필터 옵션들이 자동으로 추가됩니다 -->
                         </div>
                     </div>
                     
                     <div class="filter-group">
                         <h3>공개채널</h3>
-                        <div class="filter-options channel-filters" id="channel-filters">
+                        <div class="chip-group channel-filters" id="channel-filters">
                             <!-- 공개채널 필터 옵션들이 자동으로 추가됩니다 -->
                         </div>
                     </div>
                 </div>
                 
                 <div class="filter-actions">
-                    <button id="apply-filters">필터 적용</button>
-                    <button id="reset-filters">필터 초기화</button>
+                    <button id="apply-filters" class="btn btn-primary">필터 적용</button>
+                    <button id="reset-filters" class="btn btn-secondary">필터 초기화</button>
                 </div>
                 
                 <div class="filter-summary">
@@ -71,47 +74,33 @@
                 </div>
             </div>
             
+            <!-- MiniNav 추가 -->
+            <nav id="mini-nav" class="sticky top-0 bg-backdrop-40 backdrop-blur z-50">
+                <a href="#character" class="mini-nav-link">캐릭터</a>
+                <a href="#keyboard" class="mini-nav-link">키보</a>
+                <a href="#boss" class="mini-nav-link">보스</a>
+            </nav>
+            
             <div id="item-list"></div>
-        </section>
-
-        <section id="detail-section" class="hidden">
-            <button id="back-to-list-button">목록으로</button>
-            <div id="item-detail"></div>
-        </section>
-
-        <section id="selection-section" class="hidden modal-container">
-            <div class="modal-content">
-                <h2>어떤 최애를 찾아볼까요?</h2>
-                <p>16강 → 8강 → 4강 → 결승 순으로 진행됩니다.</p>
-                <div class="selection-buttons">
-                    <button id="select-char-tournament">캐릭터 최애 찾기</button>
-                    <button id="select-kibo-tournament">키보 최애 찾기</button>
-                </div>
-                <button class="close-modal-button">닫기</button>
-            </div>
-        </section>
-
-        <section id="tournament-section" class="hidden">
-            <h2 id="tournament-title">최애를 선택하세요!</h2>
-            <div id="matchup-container">
-                <div class="match-item" id="match-item-1"></div>
-                <div class="vs-divider">VS</div>
-                <div class="match-item" id="match-item-2"></div>
-            </div>
-            <div id="winner-display" class="hidden">
-                <div class="winner-content">
-                    <h2 class="winner-title">당신의 최애!</h2>
-                    <div id="final-winner"></div>
-                    <button id="restart-tournament">다시하기</button>
+            
+            <!-- 캐러셀 추가 -->
+            <div class="carousel-container">
+                <div class="carousel-track">
+                    <!-- 썸네일 이미지들이 자동으로 추가됩니다 -->
                 </div>
             </div>
-            <button id="back-to-main-menu">메인 메뉴로</button>
         </section>
         
-        <!-- 내 컬렉션 섹션은 현재 비활성화되었습니다 -->
+        <section id="keyboard" class="panel">
+            <h2>키보</h2>
+            <div class="section-content">
+                <p>아주르 프로밀리아의 키보 정보를 확인하세요.</p>
+                <div class="keyboard-list"></div>
+            </div>
+        </section>
         
-        <section id="stats-section" class="hidden">
-            <h2>데이터 통계</h2>
+        <section id="stats" class="panel">
+            <h2>통계</h2>
             <div class="stats-container">
                 <div class="stats-card">
                     <h3>속성별 분포</h3>
@@ -143,303 +132,78 @@
             </div>
         </section>
         
-        <!-- 커뮤니티 핫 토픽 대시보드 섹션 -->
-        <section id="community-section" class="hidden">
-            <h2>커뮤니티 핫 토픽 대시보드</h2>
+        <section id="community" class="panel">
+            <h2>커뮤니티</h2>
             <div class="community-container">
-                <!-- 실제 아카라이브 커뮤니티 내용 (상단으로 이동) -->
+                <!-- 실제 아카라이브 커뮤니티 내용 -->
                 <div class="community-card">
                     <h3>실제 아카라이브 커뮤니티</h3>
                     <div class="arcalive-container">
-                        <p class="arcalive-notice">아래는 실제 아카라이브 아주르 프로밀리아 게시판의 내용입니다. 외부 사이트 정책에 따라 일부 내용이 제한될 수 있습니다.</p>
+                        <p class="arcalive-notice">아래는 실제 아카라이브 아주르 프로밀리아 게시판의 내용입니다.</p>
                         <div class="iframe-container">
                             <iframe src="https://arca.live/b/azurpromilia" width="100%" height="500" frameborder="0"></iframe>
                         </div>
-                        <p class="arcalive-fallback">iframe이 로드되지 않는 경우 <a href="https://arca.live/b/azurpromilia" target="_blank">여기</a>를 클릭하여 직접 방문하세요.</p>
                     </div>
-                </div>
-                
-                <!-- 핫 토픽 카드 -->
-                <div class="community-card">
-                    <h3>최근 핫 토픽</h3>
-                    <div class="hot-topics-list">
-                        <div class="hot-topic-item">
-                            <span class="topic-rank">1</span>
-                            <div class="topic-content">
-                                <h4>[공략] 미티+아이리스 연계 극대화 가이드 (불/빛 시너지)</h4>
-                                <div class="topic-meta">
-                                    <span class="topic-views">조회수 4,872</span>
-                                    <span class="topic-comments">댓글 342</span>
-                                    <span class="topic-date">2025.07.24</span>
-                                </div>
-                            </div>
-                            <span class="topic-trend up">↑</span>
-                        </div>
-                        <div class="hot-topic-item">
-                            <span class="topic-rank">2</span>
-                            <div class="topic-content">
-                                <h4>[정보] 8월 업데이트 프리뷰 - 신규 캐릭터 '루나' 스킬셋 분석</h4>
-                                <div class="topic-meta">
-                                    <span class="topic-views">조회수 3,945</span>
-                                    <span class="topic-comments">댓글 287</span>
-                                    <span class="topic-date">2025.07.23</span>
-                                </div>
-                            </div>
-                            <span class="topic-trend up">↑</span>
-                        </div>
-                        <div class="hot-topic-item">
-                            <span class="topic-rank">3</span>
-                            <div class="topic-content">
-                                <h4>[토론] 테라라+한요요+카이 트리플 코어 조합의 메타 분석</h4>
-                                <div class="topic-meta">
-                                    <span class="topic-views">조회수 3,218</span>
-                                    <span class="topic-comments">댓글 253</span>
-                                    <span class="topic-date">2025.07.23</span>
-                                </div>
-                            </div>
-                            <span class="topic-trend up">↑</span>
-                        </div>
-                        <div class="hot-topic-item">
-                            <span class="topic-rank">4</span>
-                            <div class="topic-content">
-                                <h4>[이벤트] '심해의 비밀' 여름 이벤트 - 한정 코스튬 획득 가이드</h4>
-                                <div class="topic-meta">
-                                    <span class="topic-views">조회수 2,756</span>
-                                    <span class="topic-comments">댓글 198</span>
-                                    <span class="topic-date">2025.07.22</span>
-                                </div>
-                            </div>
-                            <span class="topic-trend new">NEW</span>
-                        </div>
-                        <div class="hot-topic-item">
-                            <span class="topic-rank">5</span>
-                            <div class="topic-content">
-                                <h4>[PVP] 현 시즌 상위권 메타 덱 분석 및 카운터 전략</h4>
-                                <div class="topic-meta">
-                                    <span class="topic-views">조회수 2,431</span>
-                                    <span class="topic-comments">댓글 176</span>
-                                    <span class="topic-date">2025.07.21</span>
-                                </div>
-                            </div>
-                            <span class="topic-trend up">↑</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 캐릭터 언급량 차트 -->
-                <div class="community-card">
-                    <h3>캐릭터별 언급량</h3>
-                    <div class="chart-container">
-                        <canvas id="character-mentions-chart"></canvas>
-                    </div>
-                </div>
-                
-                <!-- 여론 분석 -->
-                <div class="community-card">
-                    <h3>커뮤니티 여론 분석</h3>
-                    <div class="sentiment-container">
-                        <div class="sentiment-chart-container">
-                            <canvas id="sentiment-chart"></canvas>
-                        </div>
-                        <div class="sentiment-trends">
-                            <div class="sentiment-trend-item positive">
-                                <h4>긍정적 키워드</h4>
-                                <div class="keyword-cloud">
-                                    <span class="keyword" style="font-size: 1.4em;">밸런스</span>
-                                    <span class="keyword" style="font-size: 1.2em;">그래픽</span>
-                                    <span class="keyword" style="font-size: 1.6em;">이벤트</span>
-                                    <span class="keyword" style="font-size: 1.1em;">스토리</span>
-                                    <span class="keyword" style="font-size: 1.3em;">보상</span>
-                                </div>
-                            </div>
-                            <div class="sentiment-trend-item negative">
-                                <h4>부정적 키워드</h4>
-                                <div class="keyword-cloud">
-                                    <span class="keyword" style="font-size: 1.5em;">버그</span>
-                                    <span class="keyword" style="font-size: 1.3em;">과금</span>
-                                    <span class="keyword" style="font-size: 1.1em;">난이도</span>
-                                    <span class="keyword" style="font-size: 1.2em;">매칭</span>
-                                    <span class="keyword" style="font-size: 1.4em;">서버</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 최근 게시물 -->
-                <div class="community-card">
-                    <h3>최근 커뮤니티 게시물</h3>
-                    <div class="recent-posts">
-                        <div class="post-item">
-                            <div class="post-title">[공략] 미티 신규 전용 무기 '태양의 분노' 활용 가이드</div>
-                            <div class="post-preview">최근 추가된 미티의 전용 무기 '태양의 분노'는 기본 공격력이 높을 뿐만 아니라 스킬 3 '불꽃 폭풍'의 쿨타임을 20% 감소시키는 특수 효과가 있습니다. 또한 화상 상태의 적에게 주는 데미지가 35% 증가하므로, '불꽃의 심장' 아티팩트와 함께 사용하면 시너지 효과가 극대화됩니다. 특히 PVP에서...</div>
-                            <div class="post-meta">
-                                <span class="post-author">작성자: 불꽃의달인</span>
-                                <span class="post-date">2025.07.24</span>
-                            </div>
-                        </div>
-                        <div class="post-item">
-                            <div class="post-title">[분석] '심해의 비밀' 이벤트 스토리 해석 및 향후 메인 스토리 전개 예측</div>
-                            <div class="post-preview">현재 진행 중인 '심해의 비밀' 이벤트는 단순한 여름 이벤트가 아닌 메인 스토리와 밀접하게 연결되어 있습니다. 특히 이벤트 스토리 3장에서 등장한 '심해의 왕관'은 게임 세계관의 고대 유물 중 하나로, 향후 메인 스토리 10장에서 중요한 역할을 할 것으로 예상됩니다. 또한 이벤트에서 암시된 '심연의 계약자'의 정체는...</div>
-                            <div class="post-meta">
-                                <span class="post-author">작성자: 스토리연구가</span>
-                                <span class="post-date">2025.07.23</span>
-                            </div>
-                        </div>
-                        <div class="post-item">
-                            <div class="post-title">[가이드] 신규 레이드 '심연의 왕좌' 완벽 공략 (1~3페이즈)</div>
-                            <div class="post-preview">이번 업데이트에서 추가된 최고난도 레이드 '심연의 왕좌'의 1~3페이즈 공략을 공유합니다. 1페이즈에서는 '물/번개' 속성 캐릭터가 필수이며, 특히 테라라의 '폭풍우 소환' 스킬이 보스의 방어막을 효과적으로 제거합니다. 2페이즈에서는 30초마다 발동되는 '심연의 부름' 패턴을 주의해야 하며, 이때 한요요의 '영혼 보호막'으로 팀을 보호하는 것이 중요합니다. 3페이즈에서는...</div>
-                            <div class="post-meta">
-                                <span class="post-author">작성자: 레이드마스터</span>
-                                <span class="post-date">2025.07.22</span>
-                            </div>
-                        </div>
-                    </div>
-                    <a href="https://arca.live/b/azurpromilia" target="_blank" class="view-more-button">커뮤니티 더 보기</a>
                 </div>
             </div>
         </section>
         
-        <!-- 정보 자동 수집 섹션 -->
-        <section id="data-collector-section" class="hidden">
-            <h2>정보 자동 수집</h2>
-            <div class="data-collector-container">
-                <!-- 데이터 소스 설정 -->
-                <div class="collector-card">
-                    <h3>데이터 소스 설정</h3>
-                    <div class="source-settings">
-                        <div class="setting-group">
-                            <label for="source-type">데이터 소스 유형</label>
-                            <select id="source-type" class="setting-input">
-                                <option value="website">웹사이트</option>
-                                <option value="api">API</option>
-                                <option value="rss">RSS 피드</option>
-                            </select>
-                        </div>
-                        <div class="setting-group">
-                            <label for="source-url">URL</label>
-                            <input type="text" id="source-url" class="setting-input" placeholder="https://example.com" value="https://arca.live/b/azurpromilia">
-                        </div>
-                        <div class="setting-group">
-                            <label for="source-selector">데이터 선택자 (CSS/XPath)</label>
-                            <input type="text" id="source-selector" class="setting-input" placeholder=".post-item" value=".article-list .list-item">
-                        </div>
-                    </div>
+        <section id="favorite" class="panel">
+            <h2>최애 찾기</h2>
+            <div class="selection-buttons">
+                <button id="select-char-tournament" class="btn btn-primary">캐릭터 최애 찾기</button>
+                <button id="select-kibo-tournament" class="btn btn-primary">키보 최애 찾기</button>
+            </div>
+        </section>
+
+        <!-- 상세 정보 섹션 -->
+        <section id="detail-section" class="panel hidden">
+            <button id="back-to-list-button" class="btn btn-secondary">목록으로</button>
+            <div id="item-detail"></div>
+        </section>
+
+        <!-- 미니게임 허브 섹션 -->
+        <section id="minigame" class="panel">
+            <h2>Mini Game</h2>
+            <p>소소한 재미 + 정보 암기를 위한 미니게임!</p>
+            <div class="game-grid">
+                <button id="open-favorite" class="game-btn">최애 찾기</button>
+                <button id="open-flashcard" class="game-btn">플래시 카드</button>
+            </div>
+
+            <!-- FlashCard Game Container (숨김) -->
+            <div id="flashcard-wrap" class="flashcard hidden">
+                <div class="fc-head">
+                    <span id="fc-counter">1 / 10</span>
+                    <span id="fc-score">0 점</span>
                 </div>
-                
-                <!-- 수집 설정 -->
-                <div class="collector-card">
-                    <h3>수집 설정</h3>
-                    <div class="collection-settings">
-                        <div class="setting-group">
-                            <label for="collection-interval">수집 주기</label>
-                            <select id="collection-interval" class="setting-input">
-                                <option value="hourly">매시간</option>
-                                <option value="daily" selected>매일</option>
-                                <option value="weekly">매주</option>
-                            </select>
-                        </div>
-                        <div class="setting-group">
-                            <label for="collection-time">수집 시간</label>
-                            <input type="time" id="collection-time" class="setting-input" value="03:00">
-                        </div>
-                        <div class="setting-group">
-                            <label for="data-limit">수집 데이터 제한</label>
-                            <input type="number" id="data-limit" class="setting-input" min="10" max="1000" value="100">
-                        </div>
-                        <div class="setting-group checkbox-group">
-                            <input type="checkbox" id="auto-categorize" checked>
-                            <label for="auto-categorize">자동 분류</label>
-                        </div>
-                        <div class="setting-group checkbox-group">
-                            <input type="checkbox" id="sentiment-analysis" checked>
-                            <label for="sentiment-analysis">감정 분석</label>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 수집 상태 -->
-                <div class="collector-card">
-                    <h3>수집 상태</h3>
-                    <div class="collection-status">
-                        <div class="status-item">
-                            <span class="status-label">마지막 수집:</span>
-                            <span class="status-value">2025-07-24 08:30</span>
-                        </div>
-                        <div class="status-item">
-                            <span class="status-label">다음 예정 수집:</span>
-                            <span class="status-value">2025-07-25 03:00</span>
-                        </div>
-                        <div class="status-item">
-                            <span class="status-label">수집된 데이터:</span>
-                            <span class="status-value">1,245 항목</span>
-                        </div>
-                        <div class="status-item">
-                            <span class="status-label">상태:</span>
-                            <span class="status-value status-active">활성화</span>
-                        </div>
-                        <div class="collection-actions">
-                            <button id="start-collection" class="action-button">지금 수집</button>
-                            <button id="pause-collection" class="action-button">일시 중지</button>
-                            <button id="reset-collection" class="action-button danger">초기화</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 수집 이력 -->
-                <div class="collector-card">
-                    <h3>수집 이력</h3>
-                    <div class="collection-history">
-                        <table class="history-table">
-                            <thead>
-                                <tr>
-                                    <th>날짜</th>
-                                    <th>소스</th>
-                                    <th>수집 항목</th>
-                                    <th>상태</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>2025-07-24 08:30</td>
-                                    <td>arca.live</td>
-                                    <td>87</td>
-                                    <td class="status-success">성공</td>
-                                </tr>
-                                <tr>
-                                    <td>2025-07-23 03:00</td>
-                                    <td>arca.live</td>
-                                    <td>124</td>
-                                    <td class="status-success">성공</td>
-                                </tr>
-                                <tr>
-                                    <td>2025-07-22 03:00</td>
-                                    <td>arca.live</td>
-                                    <td>98</td>
-                                    <td class="status-success">성공</td>
-                                </tr>
-                                <tr>
-                                    <td>2025-07-21 03:00</td>
-                                    <td>arca.live</td>
-                                    <td>0</td>
-                                    <td class="status-error">실패</td>
-                                </tr>
-                                <tr>
-                                    <td>2025-07-20 03:00</td>
-                                    <td>arca.live</td>
-                                    <td>112</td>
-                                    <td class="status-success">성공</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div class="history-pagination">
-                            <button class="pagination-button">이전</button>
-                            <span class="pagination-info">1/3 페이지</span>
-                            <button class="pagination-button">다음</button>
-                        </div>
-                    </div>
+                <img id="fc-image" alt="카드 이미지" />
+                <div id="fc-options" class="fc-options"></div>
+                <button id="fc-next" class="btn btn-primary hidden">다음</button>
+                <div id="fc-result" class="hidden"></div>
+            </div>
+
+            <!-- Daily Rank -->
+            <h3 id="rank-title" class="hidden">오늘의 랭킹</h3>
+            <ol id="rank-list"></ol>
+        </section>
+
+        <!-- 토너먼트 섹션 -->
+        <section id="tournament-section" class="panel hidden">
+            <h2 id="tournament-title">최애를 선택하세요!</h2>
+            <div id="matchup-container">
+                <div class="match-item" id="match-item-1"></div>
+                <div class="vs-divider">VS</div>
+                <div class="match-item" id="match-item-2"></div>
+            </div>
+            <div id="winner-display" class="hidden">
+                <div class="winner-content">
+                    <h2 class="winner-title">당신의 최애!</h2>
+                    <div id="final-winner"></div>
+                    <button id="restart-tournament" class="btn btn-primary">다시하기</button>
                 </div>
             </div>
+            <button id="back-to-main-menu" class="btn btn-secondary">메인 메뉴로</button>
         </section>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

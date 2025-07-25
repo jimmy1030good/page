@@ -1,4 +1,120 @@
+// --- Toast Alert System ---
+const Toast = {
+    container: null,
+    queue: [],
+    processing: false,
+    
+    // 토스트 초기화
+    init() {
+        this.container = document.getElementById('toast-container');
+        if (!this.container) {
+            console.error('Toast container not found');
+            return;
+        }
+    },
+    
+    // 토스트 생성 및 표시
+    show(message, type = 'info', duration = 5000) {
+        // 큐에 추가
+        this.queue.push({ message, type, duration });
+        
+        // 처리 중이 아니면 처리 시작
+        if (!this.processing) {
+            this.processQueue();
+        }
+    },
+    
+    // 큐 처리
+    processQueue() {
+        if (this.queue.length === 0) {
+            this.processing = false;
+            return;
+        }
+        
+        this.processing = true;
+        const { message, type, duration } = this.queue.shift();
+        
+        // 토스트 요소 생성
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        // 토스트 내용 생성
+        const content = document.createElement('div');
+        content.className = 'toast-content';
+        content.textContent = message;
+        
+        // 닫기 버튼 생성
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'toast-close';
+        closeBtn.textContent = '×';
+        closeBtn.addEventListener('click', () => this.close(toast));
+        
+        // 진행 표시줄 생성
+        const progress = document.createElement('div');
+        progress.className = 'toast-progress';
+        progress.style.animationDuration = `${duration}ms`;
+        
+        // 요소 조립
+        toast.appendChild(content);
+        toast.appendChild(closeBtn);
+        toast.appendChild(progress);
+        
+        // 컨테이너에 추가
+        this.container.appendChild(toast);
+        
+        // 자동 닫기 타이머 설정
+        setTimeout(() => {
+            if (toast.parentNode) {
+                this.close(toast);
+            }
+        }, duration);
+        
+        // 애니메이션 적용을 위한 지연
+        setTimeout(() => {
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateX(0)';
+        }, 10);
+    },
+    
+    // 토스트 닫기
+    close(toast) {
+        toast.classList.add('closing');
+        
+        // 애니메이션 완료 후 제거
+        toast.addEventListener('animationend', () => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+                
+                // 다음 토스트 처리
+                setTimeout(() => this.processQueue(), 100);
+            }
+        });
+    },
+    
+    // 성공 토스트
+    success(message, duration) {
+        this.show(message, 'success', duration);
+    },
+    
+    // 정보 토스트
+    info(message, duration) {
+        this.show(message, 'info', duration);
+    },
+    
+    // 경고 토스트
+    warning(message, duration) {
+        this.show(message, 'warning', duration);
+    },
+    
+    // 오류 토스트
+    error(message, duration) {
+        this.show(message, 'error', duration);
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
+    // 토스트 시스템 초기화
+    Toast.init();
     // --- DOM Elements ---
     // 경로 설정 및 오류 처리 개선
     const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
@@ -144,7 +260,40 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function setImageSource(imgElement, itemName) {
+    // WebP 지원 여부 확인 함수
+    function supportsWebP() {
+        const elem = document.createElement('canvas');
+        if (!!(elem.getContext && elem.getContext('2d'))) {
+            // WebP 지원 여부를 캔버스로 테스트
+            return elem.toDataURL('image/webp').indexOf('data:image/webp') === 0;
+        }
+        return false;
+    }
+    
+    // 전역 변수로 WebP 지원 여부 저장
+    const isWebPSupported = supportsWebP();
+    console.log("WebP 지원 여부:", isWebPSupported);
+    
+    /**
+     * 이미지 소스를 설정하는 함수 - WebP 지원 및 지연 로딩 적용
+     * @param {HTMLImageElement} imgElement - 이미지 요소
+     * @param {string} itemName - 아이템 이름
+     * @param {Object} options - 추가 옵션 (lazy: 지연 로딩 여부, size: 이미지 크기)
+     */
+    function setImageSource(imgElement, itemName, options = {}) {
+        // 기본 옵션 설정
+        const defaultOptions = {
+            lazy: true,
+            size: 'medium' // small, medium, large
+        };
+        
+        const opts = {...defaultOptions, ...options};
+        
+        // 지연 로딩 적용
+        if (opts.lazy) {
+            imgElement.loading = "lazy";
+        }
+        
         if (!itemName) {
             imgElement.src = imageBasePath + 'placeholder.png';
             return;
@@ -182,18 +331,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 console.log("Trying to load image from:", fullImageUrl);
                 
+                // WebP 지원 여부에 따라 이미지 URL 조정
+                let webpUrl = null;
+                
+                // 원본 이미지 URL에서 확장자 추출
+                const extension = fullImageUrl.split('.').pop().toLowerCase();
+                
+                // WebP 지원 및 이미지가 jpg, png, gif인 경우에만 WebP 변환 시도
+                if (isWebPSupported && ['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
+                    // 확장자를 webp로 변경
+                    webpUrl = fullImageUrl.substring(0, fullImageUrl.lastIndexOf('.')) + '.webp';
+                    console.log("WebP URL:", webpUrl);
+                }
+                
                 // 이미지 로드 시도
-                const img = new Image();
-                img.onload = () => {
-                    console.log("Image loaded successfully:", fullImageUrl);
-                    imgElement.src = fullImageUrl;
-                };
-                img.onerror = () => {
-                    console.log("Image load error, keeping placeholder");
-                    // 명시적으로 placeholder 이미지 유지
-                    imgElement.src = imageBasePath + 'placeholder.png';
-                };
-                img.src = fullImageUrl;
+                if (webpUrl) {
+                    // WebP 이미지 먼저 시도
+                    const webpImg = new Image();
+                    webpImg.onload = () => {
+                        console.log("WebP image loaded successfully:", webpUrl);
+                        imgElement.src = webpUrl;
+                    };
+                    webpImg.onerror = () => {
+                        console.log("WebP image load error, falling back to original format");
+                        loadOriginalImage();
+                    };
+                    webpImg.src = webpUrl;
+                } else {
+                    // WebP를 지원하지 않거나 원본이 WebP가 아닌 경우 원본 이미지 로드
+                    loadOriginalImage();
+                }
+                
+                // 원본 이미지 로드 함수
+                function loadOriginalImage() {
+                    const img = new Image();
+                    img.onload = () => {
+                        console.log("Original image loaded successfully:", fullImageUrl);
+                        imgElement.src = fullImageUrl;
+                    };
+                    img.onerror = () => {
+                        console.log("Image load error, keeping placeholder");
+                        // 명시적으로 placeholder 이미지 유지
+                        imgElement.src = imageBasePath + 'placeholder.png';
+                    };
+                    img.src = fullImageUrl;
+                }
             } else {
                 console.log("No image URL provided, using placeholder");
             }
@@ -274,6 +456,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     displayList('characters');
                     setupDynamicBackground();
+                    
+                    // 캐러셀 초기화
+                    initCarousel();
                 
                 if (loader) loader.classList.add('invisible');
                 if (mainContent) mainContent.classList.remove('hidden');
@@ -292,15 +477,39 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (displayError) {
                 console.error("Error displaying UI:", displayError);
                 if (loader) {
-                    loader.innerHTML = `<p style="color: red; font-weight: bold;">UI 표시 중 오류가 발생했습니다.</p>
-                                      <p>오류 메시지: ${displayError.message}</p>`;
+                    loader.textContent = ''; // 기존 내용 제거
+                    
+                    const errorMsg = document.createElement('p');
+                    errorMsg.style.color = 'red';
+                    errorMsg.style.fontWeight = 'bold';
+                    errorMsg.textContent = 'UI 표시 중 오류가 발생했습니다.';
+                    
+                    const errorDetail = document.createElement('p');
+                    errorDetail.textContent = `오류 메시지: ${displayError.message}`;
+                    
+                    loader.appendChild(errorMsg);
+                    loader.appendChild(errorDetail);
                 }
             }
 
         } catch (error) {
-            loader.innerHTML = `<p style="color: red; font-weight: bold;">데이터를 불러오는 데 실패했습니다. JSON 파일 경로를 확인하고, 로컬 서버가 실행 중인지 확인해주세요.</p>
-                               <p>오류 메시지: ${error.message}</p>
-                               <p>현재 URL: ${window.location.href}</p>`;
+            // innerHTML 대신 DOM 요소 생성 방식으로 변경
+            loader.textContent = ''; // 기존 내용 제거
+            
+            const errorMsg = document.createElement('p');
+            errorMsg.style.color = 'red';
+            errorMsg.style.fontWeight = 'bold';
+            errorMsg.textContent = '데이터를 불러오는 데 실패했습니다. JSON 파일 경로를 확인하고, 로컬 서버가 실행 중인지 확인해주세요.';
+            
+            const errorDetail = document.createElement('p');
+            errorDetail.textContent = `오류 메시지: ${error.message}`;
+            
+            const urlInfo = document.createElement('p');
+            urlInfo.textContent = `현재 URL: ${window.location.href}`;
+            
+            loader.appendChild(errorMsg);
+            loader.appendChild(errorDetail);
+            loader.appendChild(urlInfo);
             console.error("데이터 로딩 실패:", error);
         }
     }
@@ -310,7 +519,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!gameData) return;
         
         // 속성 필터 옵션 생성
-        attributeFiltersDiv.innerHTML = '';
+        attributeFiltersDiv.textContent = '';
         gameData.attributes.forEach(attr => {
             if (attr.count > 0) {
                 const option = createFilterOption(attr.name, attr.color, 'attribute');
@@ -319,7 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         // 종족 필터 옵션 생성
-        raceFiltersDiv.innerHTML = '';
+        raceFiltersDiv.textContent = '';
         gameData.races.forEach(race => {
             if (race.count > 0) {
                 const option = createFilterOption(race.name, null, 'race');
@@ -328,7 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         // 공개채널 링크만 표시 (필터 제거)
-        channelFiltersDiv.innerHTML = '';
+        channelFiltersDiv.textContent = '';
         
         // 공개채널 링크 정보
         const channelLinks = {
@@ -361,16 +570,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.value = name;
+        option.appendChild(checkbox);
         
-        let content = '';
         if (color) {
-            content += `<span class="color-dot" style="background-color: ${color}"></span>`;
+            const colorDot = document.createElement('span');
+            colorDot.className = 'color-dot';
+            colorDot.style.backgroundColor = color;
+            option.appendChild(colorDot);
         }
         
-        content += name;
-        
-        option.appendChild(checkbox);
-        option.innerHTML += content;
+        // 이름을 텍스트 노드로 추가
+        option.appendChild(document.createTextNode(name));
         
         return option;
     }
@@ -546,7 +756,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
-            itemListDiv.innerHTML = '';
+            itemListDiv.textContent = '';
             
             filteredItems.forEach(item => {
                 const itemName = item.name;
@@ -565,7 +775,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 const img = document.createElement('img');
-                setImageSource(img, itemName);
+                setImageSource(img, itemName, { lazy: true, size: 'small' });
                 img.alt = itemName;
                 img.onerror = function() {
                     this.src = imageBasePath + 'placeholder.png';
@@ -606,7 +816,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
-            activeFiltersDiv.innerHTML = '';
+            activeFiltersDiv.textContent = '';
             
             // 검색어 필터 태그
             if (activeFilters.search) {
@@ -635,14 +845,23 @@ document.addEventListener('DOMContentLoaded', () => {
     function addActiveFilterTag(type, value) {
         const tag = document.createElement('div');
         tag.classList.add('active-filter');
-        tag.innerHTML = `${type}: ${value} <span class="remove-filter" data-type="${type}" data-value="${value}">×</span>`;
+        
+        // 텍스트 노드 추가
+        tag.appendChild(document.createTextNode(`${type}: ${value} `));
+        
+        // 제거 버튼 생성
+        const removeBtn = document.createElement('span');
+        removeBtn.className = 'remove-filter';
+        removeBtn.dataset.type = type;
+        removeBtn.dataset.value = value;
+        removeBtn.textContent = '×';
         
         // 필터 제거 이벤트
-        const removeBtn = tag.querySelector('.remove-filter');
         removeBtn.addEventListener('click', function() {
             removeFilter(this.dataset.type, this.dataset.value);
         });
         
+        tag.appendChild(removeBtn);
         activeFiltersDiv.appendChild(tag);
     }
     
@@ -755,11 +974,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function displayDetail(item, type) {
         showScreen(detailSection);
-        itemDetailDiv.innerHTML = '';
+        itemDetailDiv.textContent = '';
 
         if (item) {
             const img = document.createElement('img');
-            setImageSource(img, item.name);
+            setImageSource(img, item.name, { lazy: true, size: 'large' });
             img.alt = item.name;
             img.onerror = function() {
                 this.src = imageBasePath + 'placeholder.png';
@@ -833,7 +1052,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let contestants = sourceData.map(item => item.name).filter(name => name && name.trim());
         
         if (contestants.length < 2) {
-            alert('토너먼트를 진행하기에 항목이 부족합니다.');
+            Toast.warning('토너먼트를 진행하기에 항목이 부족합니다.');
             showScreen(listSection);
             return;
         }
@@ -957,11 +1176,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderMatchup(itemName, element) {
-        element.innerHTML = '';
+        // 기존 내용 제거
+        while (element.firstChild) {
+            element.removeChild(element.firstChild);
+        }
         element.classList.remove('selected');
         
         const img = document.createElement('img');
-        setImageSource(img, itemName);
+        setImageSource(img, itemName, { lazy: true, size: 'medium' });
         img.alt = itemName;
         img.onerror = function() {
             this.src = imageBasePath + 'placeholder.png';
@@ -998,11 +1220,14 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreen(tournamentSection);
         matchupContainer.classList.add('hidden');
         winnerDisplay.classList.remove('hidden');
-        finalWinnerDiv.innerHTML = '';
+        // 기존 내용 제거
+        while (finalWinnerDiv.firstChild) {
+            finalWinnerDiv.removeChild(finalWinnerDiv.firstChild);
+        }
         tournamentTitle.textContent = `당신의 ${currentTournamentType === 'characters' ? '캐릭터' : '키보'} 최애!`;
 
         const img = document.createElement('img');
-        setImageSource(img, winnerName);
+        setImageSource(img, winnerName, { lazy: false, size: 'large' }); // 우승자 이미지는 즉시 로드
         img.alt = winnerName;
         img.onerror = function() {
             this.src = imageBasePath + 'placeholder.png';
@@ -1487,14 +1712,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // UI 업데이트
         updateCollectionStatus();
         
-        alert(`데이터 수집이 완료되었습니다. ${collectedItems}개의 항목이 수집되었습니다.`);
+        Toast.success(`데이터 수집이 완료되었습니다. ${collectedItems}개의 항목이 수집되었습니다.`);
     }
     
     // 데이터 수집 일시 중지
     function pauseCollection() {
         collectionStatus.isActive = false;
         updateCollectionStatus();
-        alert('데이터 수집이 일시 중지되었습니다.');
+        Toast.info('데이터 수집이 일시 중지되었습니다.');
     }
     
     // 데이터 수집 초기화
@@ -1503,7 +1728,7 @@ document.addEventListener('DOMContentLoaded', () => {
             collectionStatus.totalItems = 0;
             collectionStatus.history = [];
             updateCollectionStatus();
-            alert('데이터 수집이 초기화되었습니다.');
+            Toast.success('데이터 수집이 초기화되었습니다.');
         }
     }
     
@@ -1520,16 +1745,32 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 이력 테이블 업데이트
         const historyTableBody = document.querySelector('.history-table tbody');
-        historyTableBody.innerHTML = '';
+        historyTableBody.textContent = '';
         
         collectionStatus.history.forEach(item => {
             const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${item.date}</td>
-                <td>${item.source}</td>
-                <td>${item.items}</td>
-                <td class="status-${item.status}">${item.status === 'success' ? '성공' : '실패'}</td>
-            `;
+            
+            // 날짜 셀
+            const dateCell = document.createElement('td');
+            dateCell.textContent = item.date;
+            row.appendChild(dateCell);
+            
+            // 소스 셀
+            const sourceCell = document.createElement('td');
+            sourceCell.textContent = item.source;
+            row.appendChild(sourceCell);
+            
+            // 항목 수 셀
+            const itemsCell = document.createElement('td');
+            itemsCell.textContent = item.items;
+            row.appendChild(itemsCell);
+            
+            // 상태 셀
+            const statusCell = document.createElement('td');
+            statusCell.className = `status-${item.status}`;
+            statusCell.textContent = item.status === 'success' ? '성공' : '실패';
+            row.appendChild(statusCell);
+            
             historyTableBody.appendChild(row);
         });
     }
@@ -1572,7 +1813,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function displayCollection() {
         // 컬렉션 기능 비활성화됨
-        alert("컬렉션 기능이 비활성화되었습니다.");
+        Toast.info("컬렉션 기능이 비활성화되었습니다.");
     }
     
     // --- Event Listeners ---
@@ -1623,7 +1864,293 @@ document.addEventListener('DOMContentLoaded', () => {
     backToMainMenuBtn.addEventListener('click', () => showScreen(listSection));
     
     // 컬렉션 버튼 추가 코드 비활성화
+    
+    // --- Carousel 기능 구현 ---
+    function initCarousel() {
+        const carouselTrack = document.querySelector('.carousel-track');
+        if (!carouselTrack || !gameData) return;
+        
+        // 캐러셀 아이템 생성 및 추가
+        const characters = gameData.characters.slice(0, 10); // 최대 10개 캐릭터만 표시
+        
+        characters.forEach(character => {
+            const item = document.createElement('div');
+            item.classList.add('carousel-item');
+            item.dataset.id = character.id;
+            
+            const img = document.createElement('img');
+            setImageSource(img, character.name, { lazy: true, size: 'small' });
+            img.alt = character.name;
+            
+            const caption = document.createElement('div');
+            caption.classList.add('caption');
+            caption.textContent = character.name;
+            
+            item.appendChild(img);
+            item.appendChild(caption);
+            carouselTrack.appendChild(item);
+            
+            // 클릭 이벤트 추가
+            item.addEventListener('click', () => {
+                // 활성 아이템 업데이트
+                document.querySelectorAll('.carousel-item').forEach(el => {
+                    el.classList.remove('active');
+                });
+                item.classList.add('active');
+                
+                // 상세 정보 표시
+                const characterData = gameData.characters.find(c => c.id === character.id);
+                if (characterData) {
+                    displayDetail(characterData, 'characters');
+                }
+            });
+        });
+        
+        // 드래그 스크롤 기능 구현
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+        
+        const carousel = document.querySelector('.carousel-container');
+        
+        carousel.addEventListener('mousedown', (e) => {
+            isDown = true;
+            carousel.style.cursor = 'grabbing';
+            startX = e.pageX - carousel.offsetLeft;
+            scrollLeft = carousel.scrollLeft;
+        });
+        
+        carousel.addEventListener('mouseleave', () => {
+            isDown = false;
+            carousel.style.cursor = 'grab';
+        });
+        
+        carousel.addEventListener('mouseup', () => {
+            isDown = false;
+            carousel.style.cursor = 'grab';
+        });
+        
+        carousel.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - carousel.offsetLeft;
+            const walk = (x - startX) * 2; // 스크롤 속도 조절
+            carousel.scrollLeft = scrollLeft - walk;
+        });
+        
+        // 스크롤 이벤트로 활성 아이템 업데이트
+        carousel.addEventListener('scroll', () => {
+            const carouselItems = document.querySelectorAll('.carousel-item');
+            if (!carouselItems.length) return;
+            
+            // 현재 화면 중앙에 가장 가까운 아이템 찾기
+            const center = carousel.offsetLeft + carousel.offsetWidth / 2;
+            
+            let closestItem = null;
+            let closestDistance = Infinity;
+            
+            carouselItems.forEach(item => {
+                const itemCenter = item.offsetLeft + item.offsetWidth / 2;
+                const distance = Math.abs(itemCenter - center);
+                
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestItem = item;
+                }
+            });
+            
+            // 활성 아이템 업데이트
+            if (closestItem) {
+                carouselItems.forEach(item => {
+                    item.classList.remove('active');
+                });
+                closestItem.classList.add('active');
+            }
+        });
+    }
+    
+    // --- MiniNav Scroll Spy 기능 구현 ---
+    function initMiniNav() {
+        const sections = ["character", "keyboard", "boss"];
+        const miniNavLinks = document.querySelectorAll('.mini-nav-link');
+        let activeSection = sections[0];
+        
+        // 초기 활성화 상태 설정
+        updateActiveLink();
+        
+        // Intersection Observer 설정
+        const observerOptions = {
+            threshold: 0.6,
+            rootMargin: '-10% 0px -10% 0px'
+        };
+        
+        const sectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    activeSection = entry.target.id;
+                    updateActiveLink();
+                }
+            });
+        }, observerOptions);
+        
+        // 각 섹션 관찰 시작
+        sections.forEach(id => {
+            const section = document.getElementById(id);
+            if (section) {
+                sectionObserver.observe(section);
+            }
+        });
+        
+        // 활성 링크 업데이트 함수
+        function updateActiveLink() {
+            miniNavLinks.forEach(link => {
+                const href = link.getAttribute('href').substring(1); // '#' 제거
+                if (href === activeSection) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        }
+        
+        // 링크 클릭 시 스크롤 애니메이션 추가
+        miniNavLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                const targetSection = document.getElementById(targetId);
+                
+                if (targetSection) {
+                    window.scrollTo({
+                        top: targetSection.offsetTop - 70, // 스티키 네비게이션 높이 고려
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    }
 
     // --- Initial Load ---
     loadData();
+    
+    // 페이지 로드 후 MiniNav 초기화
+    document.addEventListener('DOMContentLoaded', initMiniNav);
+    
+    /************ Mini‑Game Hub 라우팅 ************/
+    document.getElementById('open-favorite').onclick = () => {
+        const favoriteBtn = document.querySelector('[data-target="favorite"]');
+        if (favoriteBtn) favoriteBtn.click();
+    };
+    
+    document.getElementById('open-flashcard').onclick = () => {
+        startFlashCard();
+    };
+    
+    /************ FlashCard Game ************/
+    const cards = []; // 실제 데이터로 교체될 예정
+    
+    function shuffle(arr) {
+        return [...arr].sort(() => Math.random() - 0.5);
+    }
+    
+    function startFlashCard() {
+        const wrap = document.getElementById('flashcard-wrap');
+        const img = document.getElementById('fc-image');
+        const opts = document.getElementById('fc-options');
+        const result = document.getElementById('fc-result');
+        const nextBtn = document.getElementById('fc-next');
+        const counter = document.getElementById('fc-counter');
+        const scoreEl = document.getElementById('fc-score');
+        
+        // 캐릭터 데이터를 카드로 변환
+        if (cards.length === 0 && gameData && gameData.characters) {
+            gameData.characters.forEach(char => {
+                if (char.name && char.imageUrl) {
+                    cards.push({
+                        id: char.id,
+                        name: char.name,
+                        img: char.imageUrl
+                    });
+                }
+            });
+        }
+        
+        let step = 0, score = 0, pool = shuffle(cards).slice(0, 10);
+        
+        wrap.classList.remove('hidden');
+        result.classList.add('hidden');
+        nextBtn.classList.add('hidden');
+        scoreEl.textContent = '0 점';
+        
+        function render() {
+            if (step >= pool.length) {
+                result.textContent = `총 ${score} 점!`;
+                result.classList.remove('hidden');
+                nextBtn.classList.add('hidden');
+                saveRank(score);
+                return;
+            }
+            
+            const current = pool[step];
+            img.src = current.img;
+            img.alt = current.name;
+            counter.textContent = `${step + 1} / ${pool.length}`;
+            
+            // 선택지 생성
+            opts.innerHTML = '';
+            const choices = shuffle([current, ...shuffle(cards.filter(c => c.id !== current.id)).slice(0, 3)]);
+            
+            choices.forEach(c => {
+                const btn = document.createElement('button');
+                btn.textContent = c.name;
+                btn.onclick = () => {
+                    if (c.id === current.id) {
+                        score++;
+                        scoreEl.textContent = `${score} 점`;
+                    }
+                    step++;
+                    render();
+                };
+                opts.appendChild(btn);
+            });
+        }
+        
+        render();
+    }
+    
+    /************ 랭킹 저장 (today 기준) ************/
+    function saveRank(newScore) {
+        const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+        const key = `flash_rank_${today}`;
+        const ranks = JSON.parse(localStorage.getItem(key) || '[]'); // [{name,score}]
+        const alias = localStorage.getItem('flash_alias') || prompt('닉네임 입력', 'Guest');
+        
+        localStorage.setItem('flash_alias', alias);
+        ranks.push({name: alias, score: newScore});
+        ranks.sort((a, b) => b.score - a.score);
+        localStorage.setItem(key, JSON.stringify(ranks.slice(0, 10)));
+        
+        renderRank(ranks.slice(0, 10));
+    }
+    
+    function renderRank(list) {
+        const title = document.getElementById('rank-title');
+        const ol = document.getElementById('rank-list');
+        
+        title.classList.remove('hidden');
+        ol.innerHTML = '';
+        
+        list.forEach((r, i) => {
+            const li = document.createElement('li');
+            li.textContent = `${i + 1}. ${r.name} — ${r.score}점`;
+            ol.appendChild(li);
+        });
+    }
+    
+    /* 페이지 최초 로드시 오늘 랭킹 표시(있다면) */
+    window.addEventListener('load', () => {
+        const today = new Date().toISOString().slice(0, 10);
+        const saved = JSON.parse(localStorage.getItem(`flash_rank_${today}`) || '[]');
+        if (saved.length) renderRank(saved);
+    });
 });
