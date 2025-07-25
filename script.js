@@ -1374,17 +1374,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleVote(winnerIndex, selectedElement) {
-        if (matchupContainer.style.pointerEvents === 'none') return;
-
+        // matchupContainer가 존재하는지 확인
+        if (!matchupContainer) {
+            console.error("matchupContainer not found");
+            return;
+        }
+        
+        // 이미 처리 중인 경우 중복 클릭 방지
+        if (matchupContainer.getAttribute('data-processing') === 'true') return;
+        
+        // 처리 중임을 표시
+        matchupContainer.setAttribute('data-processing', 'true');
         selectedElement.classList.add('selected');
+        
+        // 클릭 이벤트 비활성화
         matchupContainer.style.pointerEvents = 'none';
-
+    
         setTimeout(() => {
-            const winner = currentMatchup[winnerIndex];
-            tournamentWinners.push(winner);
-            selectedElement.classList.remove('selected');
-            matchupContainer.style.pointerEvents = 'auto';
-            nextMatch();
+            try {
+                // 승자 정보 저장
+                const winner = currentMatchup[winnerIndex];
+                if (winner) {
+                    tournamentWinners.push(winner);
+                    console.log(`${winner} 선택됨, 다음 매치로 진행`);
+                } else {
+                    console.error("Winner is undefined");
+                }
+                
+                // UI 상태 초기화
+                selectedElement.classList.remove('selected');
+                
+                // 클릭 이벤트 다시 활성화
+                matchupContainer.style.pointerEvents = 'auto';
+                matchupContainer.removeAttribute('data-processing');
+                
+                // 다음 매치로 진행
+                nextMatch();
+            } catch (error) {
+                console.error("Error in handleVote:", error);
+                // 오류 발생 시 UI 상태 복구
+                matchupContainer.style.pointerEvents = 'auto';
+                matchupContainer.removeAttribute('data-processing');
+            }
         }, 800);
     }
 
@@ -2420,20 +2451,65 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 요소가 존재하는지 확인 후 이벤트 리스너 추가
-    if (matchItem1Div) {
-        matchItem1Div.addEventListener('click', () => handleVote(0, matchItem1Div));
+    // 매치 아이템 클릭 이벤트 리스너 추가 함수
+    function setupMatchItemListeners() {
+        console.log("Setting up match item listeners");
+        
+        // 기존 이벤트 리스너 제거 (중복 방지)
+        if (matchItem1Div) {
+            const newMatchItem1 = matchItem1Div.cloneNode(true);
+            matchItem1Div.parentNode.replaceChild(newMatchItem1, matchItem1Div);
+            matchItem1Div = newMatchItem1;
+        }
+        
+        if (matchItem2Div) {
+            const newMatchItem2 = matchItem2Div.cloneNode(true);
+            matchItem2Div.parentNode.replaceChild(newMatchItem2, matchItem2Div);
+            matchItem2Div = newMatchItem2;
+        }
+        
+        // 새 이벤트 리스너 추가
+        if (matchItem1Div) {
+            matchItem1Div.addEventListener('click', function() {
+                console.log("Match item 1 clicked");
+                handleVote(0, matchItem1Div);
+            });
+        } else {
+            console.error("matchItem1Div not found");
+        }
+        
+        if (matchItem2Div) {
+            matchItem2Div.addEventListener('click', function() {
+                console.log("Match item 2 clicked");
+                handleVote(1, matchItem2Div);
+            });
+        } else {
+            console.error("matchItem2Div not found");
+        }
     }
-    if (matchItem2Div) {
-        matchItem2Div.addEventListener('click', () => handleVote(1, matchItem2Div));
-    }
+    
+    // 초기 이벤트 리스너 설정
+    setupMatchItemListeners();
+    
+    // nextMatch 함수 호출 후 이벤트 리스너 재설정을 위해 원래 함수를 저장
+    const originalNextMatch = nextMatch;
+    
+    // nextMatch 함수 오버라이드
+    nextMatch = function() {
+        originalNextMatch();
+        // 새 매치가 렌더링된 후 이벤트 리스너 재설정
+        setTimeout(setupMatchItemListeners, 100);
+    };
     
     // 요소가 존재하는지 확인 후 이벤트 리스너 추가
     if (restartTournamentBtn) {
         restartTournamentBtn.addEventListener('click', () => startNewTournament(currentTournamentType));
     }
     if (backToMainMenuBtn) {
-        backToMainMenuBtn.addEventListener('click', () => showScreen(listSection));
+        backToMainMenuBtn.addEventListener('click', () => {
+            // listSection 변수가 정의되어 있지 않으므로 character 섹션으로 이동
+            showScreen(character);
+        });
     }
     
     // 컬렉션 버튼 추가 코드 비활성화
@@ -2626,13 +2702,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     /************ FlashCard Game ************/
-    const cards = []; // 실제 데이터로 교체될 예정
+    let cards = []; // 실제 데이터로 교체될 예정
+    let isFlashCardGameActive = false; // 게임 활성화 상태 추적
+    let flashCardGameId = 0; // 게임 세션 ID (매 게임마다 증가)
     
     function shuffle(arr) {
         return [...arr].sort(() => Math.random() - 0.5);
     }
     
     function startFlashCard() {
+        // 이미 게임이 진행 중이면 중단
+        if (isFlashCardGameActive) {
+            console.log("이미 게임이 진행 중입니다.");
+            return;
+        }
+        
+        // 게임 세션 ID 증가 (새 게임 시작)
+        flashCardGameId++;
+        const currentGameId = flashCardGameId;
+        
+        // 게임 상태 초기화
+        isFlashCardGameActive = true;
+        
         const wrap = document.getElementById('flashcard-wrap');
         const img = document.getElementById('fc-image');
         const opts = document.getElementById('fc-options');
@@ -2645,11 +2736,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!wrap || !img || !opts || !result || !nextBtn || !counter || !scoreEl) {
             console.error("FlashCard 게임에 필요한 DOM 요소를 찾을 수 없습니다.");
             Toast.error("FlashCard 게임을 시작할 수 없습니다.");
+            isFlashCardGameActive = false;
             return;
         }
         
+        // 카드 배열 초기화 (매 게임마다 새로 생성)
+        cards = [];
+        
         // 캐릭터 데이터를 카드로 변환
-        if (cards.length === 0 && gameData && gameData.characters) {
+        if (gameData && gameData.characters) {
             gameData.characters.forEach(char => {
                 if (char.name && char.imageUrl) {
                     cards.push({
@@ -2665,22 +2760,52 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cards.length === 0) {
             console.error("FlashCard 게임에 필요한 카드 데이터가 없습니다.");
             Toast.error("캐릭터 데이터를 불러올 수 없습니다.");
+            isFlashCardGameActive = false;
             return;
         }
         
+        // 게임 상태 변수 초기화
         let step = 0, score = 0, pool = shuffle(cards).slice(0, 10);
         
+        // UI 초기화
         wrap.classList.remove('hidden');
         result.classList.add('hidden');
         nextBtn.classList.add('hidden');
         scoreEl.textContent = '0 점';
         
+        // 게임 종료 함수
+        function endGame() {
+            // 현재 게임 세션이 아니면 무시
+            if (currentGameId !== flashCardGameId) return;
+            
+            console.log("게임 종료: 점수 =", score);
+            isFlashCardGameActive = false;
+            
+            // 게임 종료 UI 표시
+            result.textContent = `총 ${score} 점!`;
+            result.classList.remove('hidden');
+            
+            // 다시 시작 버튼 표시
+            nextBtn.textContent = '다시 시작';
+            nextBtn.classList.remove('hidden');
+            nextBtn.onclick = () => {
+                startFlashCard(); // 새 게임 시작
+            };
+            
+            // 랭킹 저장
+            saveRank(score);
+        }
+        
         function render() {
+            // 현재 게임 세션이 아니면 렌더링 중단
+            if (currentGameId !== flashCardGameId) return;
+            
+            // 게임이 활성화되지 않았으면 렌더링 중단
+            if (!isFlashCardGameActive) return;
+            
+            // 모든 카드를 다 사용했으면 게임 종료
             if (step >= pool.length) {
-                result.textContent = `총 ${score} 점!`;
-                result.classList.remove('hidden');
-                nextBtn.classList.add('hidden');
-                saveRank(score);
+                endGame();
                 return;
             }
             
@@ -2697,6 +2822,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const btn = document.createElement('button');
                 btn.textContent = c.name;
                 btn.onclick = () => {
+                    // 현재 게임 세션이 아니면 클릭 무시
+                    if (currentGameId !== flashCardGameId) return;
+                    
+                    // 게임이 활성화되지 않았으면 클릭 무시
+                    if (!isFlashCardGameActive) return;
+                    
                     if (c.id === current.id) {
                         score++;
                         scoreEl.textContent = `${score} 점`;
@@ -2708,6 +2839,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         
+        // 게임 시작
         render();
     }
     
