@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const detailSection = safeGetElement('detail-section');
     const tournamentSection = safeGetElement('tournament-section');
     const statsSection = safeGetElement('stats');
+    const communitySection = safeGetElement('community');
     const minigameSection = safeGetElement('minigame');
     const itemListDiv = safeGetElement('item-list');
     const itemDetailDiv = safeGetElement('item-detail');
@@ -397,10 +398,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.onclick = () => {
-            const target = btn.dataset.target;
-            if (target === 'character') displayList('characters');
-            else if (target === 'keyboard') displayList('kibos');
-            else showScreen(safeGetElement(target));
+            const targetId = btn.dataset.target;
+            const section = safeGetElement(targetId);
+            if (targetId === 'character') displayList('characters');
+            else if (targetId === 'keyboard') displayList('kibos');
+            else if (section) showScreen(section);
         };
     });
 
