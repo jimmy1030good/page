@@ -98,25 +98,57 @@ document.addEventListener('DOMContentLoaded', () => {
         flashcard: { questions: [], currentIndex: 0, score: 0, totalQuestions: 10 }
     };
 
-    const jsonDataPath = './data.json';
-    const imageBasePath = './images/';
-
     // GitHub Pages 호환성을 위한 경로 처리
-    function getAssetPath(path) {
-        // GitHub Pages에서는 repository name이 경로에 포함될 수 있음
-        const basePath = window.location.pathname.includes('/page/') ? '/page/' : '/';
-        if (path.startsWith('./')) {
-            return basePath === '/' ? path : basePath + path.substring(2);
+    function getBasePath() {
+        const hostname = window.location.hostname;
+        const pathname = window.location.pathname;
+        
+        console.log('Hostname:', hostname, 'Pathname:', pathname);
+        
+        // GitHub Pages 환경 감지
+        if (hostname.includes('github.io')) {
+            // GitHub Pages에서는 절대 경로 사용
+            if (pathname.includes('/page/')) {
+                return '/page/';
+            }
+            return '/page/'; // 기본적으로 repository name 포함
         }
-        return path;
+        
+        // 로컬 개발 환경
+        return './';
     }
+    
+    function getAssetPath(relativePath) {
+        const basePath = getBasePath();
+        console.log('Getting asset path - Base:', basePath, 'Relative:', relativePath);
+        
+        if (basePath === './') {
+            return relativePath.startsWith('./') ? relativePath : './' + relativePath;
+        }
+        
+        // GitHub Pages 절대 경로
+        if (relativePath.startsWith('./')) {
+            return basePath + relativePath.substring(2);
+        }
+        return basePath + relativePath;
+    }
+    
+    const jsonDataPath = getAssetPath('data.json');
+    const imageBasePath = getAssetPath('images/');
     const getAttributeEmoji = attribute => ({ '불': '🔥', '물': '💧', '땅': '🌋', '번개': '⚡', '바람': '🌪️', '어둠': '🌑', '빛': '✨', '얼음': '❄️', '나무': '🌲' }[attribute] || '');
 
     function setImageSource(imgElement, itemName) {
-        imgElement.src = getAssetPath(`${imageBasePath}placeholder.png`);
+        const placeholderPath = imageBasePath + 'placeholder.png';
+        imgElement.src = placeholderPath;
+        
         const item = (state.gameData.characters.find(c => c.name === itemName) || state.gameData.kibos.find(k => k.name === itemName));
         if (item && item.imageUrl) {
-            imgElement.src = getAssetPath(item.imageUrl);
+            // 이미지 URL이 이미 전체 경로인지 확인
+            if (item.imageUrl.startsWith('http') || item.imageUrl.startsWith('/')) {
+                imgElement.src = item.imageUrl;
+            } else {
+                imgElement.src = getAssetPath(item.imageUrl);
+            }
         }
     }
 
@@ -151,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const attr = state.gameData.attributes.find(a => a.name === item.attribute);
             return `
             <div class="item-card" data-name="${item.name}" style="border-left-color:${attr ? attr.color : '#ccc'}">
-                <img src="${getAssetPath(item.imageUrl || imageBasePath + 'placeholder.png')}" alt="${item.name}" loading="lazy">
+                <img src="${item.imageUrl ? getAssetPath(item.imageUrl) : imageBasePath + 'placeholder.png'}" alt="${item.name}" loading="lazy">
                 <h3>${item.name}</h3>
                 <span class="attribute-tag">${getAttributeEmoji(item.attribute)}${item.attribute || '미공개'}</span>
                 <div class="item-info">
@@ -170,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const type = state.gameData.characters.some(c => c.name === item.name) ? 'characters' : 'kibos';
         const detailsHTML = Object.entries(item.details || {}).map(([key, value]) => `<strong>${key}:</strong><span>${value}</span>`).join('');
         elements.itemDetailDiv.innerHTML = `
-            <img src="${getAssetPath(item.imageUrl || imageBasePath + 'placeholder.png')}" alt="${item.name}">
+            <img src="${item.imageUrl ? getAssetPath(item.imageUrl) : imageBasePath + 'placeholder.png'}" alt="${item.name}">
             <h2>${item.name}</h2>
             <div class="info-grid">
                 <strong>속성:</strong><span>${getAttributeEmoji(item.attribute)}${item.attribute || '미공개'}</span>
@@ -349,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderMatchup(itemName, element) {
-        element.innerHTML = `<img src="${getAssetPath(imageBasePath + 'placeholder.png')}" alt="${itemName}"><h3>${itemName}</h3><div class="heart">♥</div>`;
+        element.innerHTML = `<img src="${imageBasePath + 'placeholder.png'}" alt="${itemName}"><h3>${itemName}</h3><div class="heart">♥</div>`;
         setImageSource(element.querySelector('img'), itemName);
     }
 
@@ -369,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.matchupContainer.classList.add('hidden');
         elements.winnerDisplay.classList.remove('hidden');
         elements.tournamentTitle.textContent = `당신의 최애!`;
-        elements.finalWinnerDiv.innerHTML = `<img src="${getAssetPath(imageBasePath + 'placeholder.png')}" alt="${winnerName}"><h3>${winnerName}</h3>`;
+        elements.finalWinnerDiv.innerHTML = `<img src="${imageBasePath + 'placeholder.png'}" alt="${winnerName}"><h3>${winnerName}</h3>`;
         setImageSource(elements.finalWinnerDiv.querySelector('img'), winnerName);
     }
 
