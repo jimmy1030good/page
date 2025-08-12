@@ -3,7 +3,7 @@ const Toast = {
     container: null,
     queue: [],
     processing: false,
-    
+
     init() {
         this.container = document.getElementById('toast-container');
     },
@@ -44,7 +44,7 @@ function safeGetElement(id) {
 
 document.addEventListener('DOMContentLoaded', () => {
     Toast.init();
-    
+
     const elements = {
         mainContent: safeGetElement('main-content'),
         loader: safeGetElement('loader'),
@@ -83,12 +83,16 @@ document.addEventListener('DOMContentLoaded', () => {
         fcOptions: safeGetElement('fc-options'),
         fcNextBtn: safeGetElement('fc-next'),
         fcResult: safeGetElement('fc-result'),
+        attributeChartCanvas: safeGetElement('attribute-chart-canvas'),
+        raceChartCanvas: safeGetElement('race-chart-canvas'),
+        channelChartCanvas: safeGetElement('channel-chart-canvas'),
+        typeChartCanvas: safeGetElement('type-chart-canvas'),
     };
 
     const state = {
         gameData: null,
         currentListType: 'characters',
-        activeFilters: { search: '', attributes: [], races: [] },
+        activeFilters: { search: '', attributes: [], races: [], channels: [] },
         charts: { attribute: null, race: null, channel: null, type: null },
         tournament: { type: '', contestants: [], matchup: [], winners: [] },
         flashcard: { questions: [], currentIndex: 0, score: 0, totalQuestions: 10 }
@@ -96,12 +100,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const jsonDataPath = './data.json';
     const imageBasePath = './images/';
-    const getAttributeEmoji = attribute => ({'불':'🔥','물':'💧','땅':'🌋','번개':'⚡','바람':'🌪️','어둠':'🌑','빛':'✨','얼음':'❄️','나무':'🌲'}[attribute] || '');
+
+    // GitHub Pages 호환성을 위한 경로 처리
+    function getAssetPath(path) {
+        // GitHub Pages에서는 repository name이 경로에 포함될 수 있음
+        const basePath = window.location.pathname.includes('/page/') ? '/page/' : '/';
+        if (path.startsWith('./')) {
+            return basePath === '/' ? path : basePath + path.substring(2);
+        }
+        return path;
+    }
+    const getAttributeEmoji = attribute => ({ '불': '🔥', '물': '💧', '땅': '🌋', '번개': '⚡', '바람': '🌪️', '어둠': '🌑', '빛': '✨', '얼음': '❄️', '나무': '🌲' }[attribute] || '');
 
     function setImageSource(imgElement, itemName) {
-        imgElement.src = `${imageBasePath}placeholder.png`;
+        imgElement.src = getAssetPath(`${imageBasePath}placeholder.png`);
         const item = (state.gameData.characters.find(c => c.name === itemName) || state.gameData.kibos.find(k => k.name === itemName));
-        if (item && item.imageUrl) imgElement.src = item.imageUrl;
+        if (item && item.imageUrl) {
+            imgElement.src = getAssetPath(item.imageUrl);
+        }
     }
 
     function showScreen(sectionElement) {
@@ -124,19 +140,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function filterItems() {
         const sourceData = state.currentListType === 'characters' ? state.gameData.characters : state.gameData.kibos;
-        const filtered = sourceData.filter(item => 
+        const filtered = sourceData.filter(item =>
             (!state.activeFilters.search || JSON.stringify(item).toLowerCase().includes(state.activeFilters.search)) &&
             (state.activeFilters.attributes.length === 0 || state.activeFilters.attributes.includes(item.attribute)) &&
-            (state.currentListType !== 'characters' || state.activeFilters.races.length === 0 || state.activeFilters.races.includes(item.race))
+            (state.currentListType !== 'characters' || state.activeFilters.races.length === 0 || state.activeFilters.races.includes(item.race)) &&
+            (state.activeFilters.channels.length === 0 || state.activeFilters.channels.some(channel => item.releaseChannel && item.releaseChannel.includes(channel)))
         );
         elements.resultCountSpan.textContent = filtered.length;
         elements.itemListDiv.innerHTML = filtered.map(item => {
             const attr = state.gameData.attributes.find(a => a.name === item.attribute);
             return `
             <div class="item-card" data-name="${item.name}" style="border-left-color:${attr ? attr.color : '#ccc'}">
-                <img src="${item.imageUrl || imageBasePath + 'placeholder.png'}" alt="${item.name}" loading="lazy">
+                <img src="${getAssetPath(item.imageUrl || imageBasePath + 'placeholder.png')}" alt="${item.name}" loading="lazy">
                 <h3>${item.name}</h3>
                 <span class="attribute-tag">${getAttributeEmoji(item.attribute)}${item.attribute || '미공개'}</span>
+                <div class="item-info">
+                    ${state.currentListType === 'characters' ? `<small>종족: ${item.race || '미공개'}</small>` : `<small>${item.note || ''}</small>`}
+                    <small>채널: ${item.releaseChannel || '미공개'}</small>
+                </div>
             </div>`;
         }).join('');
         elements.itemListDiv.querySelectorAll('.item-card').forEach(card => {
@@ -149,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const type = state.gameData.characters.some(c => c.name === item.name) ? 'characters' : 'kibos';
         const detailsHTML = Object.entries(item.details || {}).map(([key, value]) => `<strong>${key}:</strong><span>${value}</span>`).join('');
         elements.itemDetailDiv.innerHTML = `
-            <img src="${item.imageUrl || imageBasePath + 'placeholder.png'}" alt="${item.name}">
+            <img src="${getAssetPath(item.imageUrl || imageBasePath + 'placeholder.png')}" alt="${item.name}">
             <h2>${item.name}</h2>
             <div class="info-grid">
                 <strong>속성:</strong><span>${getAttributeEmoji(item.attribute)}${item.attribute || '미공개'}</span>
@@ -172,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.charts.channel = createChart(elements.channelChartCanvas, state.charts.channel, 'doughnut', { labels: state.gameData.releaseChannels.map(c => c.name), datasets: [{ data: state.gameData.releaseChannels.map(c => c.count), backgroundColor: ['#00BCD4', '#CDDC39', '#FF5722', '#9E9E9E'] }] }, chartOptions);
         state.charts.type = createChart(elements.typeChartCanvas, state.charts.type, 'pie', { labels: ['캐릭터', '키보'], datasets: [{ data: [state.gameData.characters.length, state.gameData.kibos.length], backgroundColor: ['#5c6bc0', '#26a69a'] }] }, chartOptions);
     }
-    
+
     function startFlashcardGame() {
         Object.assign(state.flashcard, { score: 0, currentIndex: 0, questions: [...state.gameData.characters].sort(() => 0.5 - Math.random()).slice(0, 10) });
         elements.flashcardWrap.classList.remove('hidden');
@@ -184,13 +205,13 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.fcOptions.innerHTML = '';
         elements.fcNextBtn.classList.add('hidden');
         if (state.flashcard.currentIndex >= state.flashcard.totalQuestions) return showFlashcardResult();
-        
+
         elements.fcCounter.textContent = `${state.flashcard.currentIndex + 1} / ${state.flashcard.totalQuestions}`;
         elements.fcScore.textContent = `${state.flashcard.score} 점`;
-        
+
         const question = state.flashcard.questions[state.flashcard.currentIndex];
         setImageSource(elements.fcImage, question.name);
-        
+
         const options = generateFlashcardOptions(question.name);
         options.forEach(name => {
             const button = document.createElement('button');
@@ -230,19 +251,84 @@ document.addEventListener('DOMContentLoaded', () => {
     function showFlashcardResult() {
         elements.flashcardWrap.classList.add('hidden');
         elements.fcResult.classList.remove('hidden');
-        elements.fcResult.innerHTML = `<h3>게임 종료!</h3><p>점수: ${state.flashcard.score}점</p><button id="restart-flashcard" class="btn btn-primary">다시하기</button>`;
+
+        // Save score to localStorage
+        saveFlashcardScore(state.flashcard.score);
+
+        elements.fcResult.innerHTML = `
+            <h3>게임 종료!</h3>
+            <p>점수: ${state.flashcard.score}점</p>
+            <button id="restart-flashcard" class="btn btn-primary">다시하기</button>
+        `;
         safeGetElement('restart-flashcard').onclick = startFlashcardGame;
+
+        // Update ranking display
+        updateRankingDisplay();
+    }
+
+    function saveFlashcardScore(score) {
+        const today = new Date().toDateString();
+        const scores = JSON.parse(localStorage.getItem('flashcardScores') || '{}');
+
+        if (!scores[today]) scores[today] = [];
+        scores[today].push({ score, timestamp: Date.now() });
+
+        // Keep only last 7 days
+        const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+        Object.keys(scores).forEach(date => {
+            scores[date] = scores[date].filter(entry => entry.timestamp > sevenDaysAgo);
+            if (scores[date].length === 0) delete scores[date];
+        });
+
+        localStorage.setItem('flashcardScores', JSON.stringify(scores));
+    }
+
+    function updateRankingDisplay() {
+        const rankListEl = safeGetElement('rank-list');
+        const rankTitleEl = safeGetElement('rank-title');
+
+        if (!rankListEl || !rankTitleEl) return;
+
+        const today = new Date().toDateString();
+        const scores = JSON.parse(localStorage.getItem('flashcardScores') || '{}');
+        const todayScores = scores[today] || [];
+
+        if (todayScores.length === 0) {
+            rankTitleEl.classList.add('hidden');
+            rankListEl.innerHTML = '';
+            return;
+        }
+
+        rankTitleEl.classList.remove('hidden');
+
+        // Sort scores and get top 5
+        const topScores = todayScores
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 5)
+            .map((entry, index) => ({
+                rank: index + 1,
+                score: entry.score,
+                time: new Date(entry.timestamp).toLocaleTimeString()
+            }));
+
+        rankListEl.innerHTML = topScores.map(entry => `
+            <li class="rank-item">
+                <span class="rank-number">${entry.rank}</span>
+                <span class="rank-score">${entry.score}점</span>
+                <span class="rank-time">${entry.time}</span>
+            </li>
+        `).join('');
     }
 
     function startNewTournament(type) {
         state.tournament.type = type;
         const sourceData = (type === 'characters' ? state.gameData.characters : state.gameData.kibos).filter(i => i.name);
         if (sourceData.length < 2) return Toast.error('항목이 부족합니다.');
-        
+
         showScreen(elements.tournamentSection);
         elements.winnerDisplay.classList.add('hidden');
         elements.matchupContainer.classList.remove('hidden');
-        
+
         const size = Math.pow(2, Math.floor(Math.log2(sourceData.length)));
         state.tournament.contestants = sourceData.map(i => i.name).sort(() => 0.5 - Math.random()).slice(0, size);
         state.tournament.winners = [];
@@ -263,7 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderMatchup(itemName, element) {
-        element.innerHTML = `<img src="${imageBasePath}placeholder.png" alt="${itemName}"><h3>${itemName}</h3><div class="heart">♥</div>`;
+        element.innerHTML = `<img src="${getAssetPath(imageBasePath + 'placeholder.png')}" alt="${itemName}"><h3>${itemName}</h3><div class="heart">♥</div>`;
         setImageSource(element.querySelector('img'), itemName);
     }
 
@@ -283,7 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.matchupContainer.classList.add('hidden');
         elements.winnerDisplay.classList.remove('hidden');
         elements.tournamentTitle.textContent = `당신의 최애!`;
-        elements.finalWinnerDiv.innerHTML = `<img src="${imageBasePath}placeholder.png" alt="${winnerName}"><h3>${winnerName}</h3>`;
+        elements.finalWinnerDiv.innerHTML = `<img src="${getAssetPath(imageBasePath + 'placeholder.png')}" alt="${winnerName}"><h3>${winnerName}</h3>`;
         setImageSource(elements.finalWinnerDiv.querySelector('img'), winnerName);
     }
 
@@ -308,6 +394,189 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.matchItem2Div.onclick = () => handleVote(1, elements.matchItem2Div);
     elements.restartTournamentBtn.onclick = () => startNewTournament(state.tournament.type);
     elements.backToMainMenuBtn.onclick = () => showScreen(elements.characterSection);
+
+    // Data loading function
+    async function loadData() {
+        try {
+            elements.loader.style.display = 'flex';
+            const response = await fetch(getAssetPath(jsonDataPath));
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            state.gameData = await response.json();
+
+            // Initialize filters
+            initializeFilters();
+
+            // Show main content
+            elements.loader.style.display = 'none';
+            elements.mainContent.classList.remove('hidden');
+
+            // Show character list by default
+            displayList('characters');
+
+            // Update community stats
+            updateCommunityStats();
+
+            // Update ranking display
+            updateRankingDisplay();
+
+            Toast.success('데이터 로딩 완료!');
+        } catch (error) {
+            console.error('데이터 로딩 실패:', error);
+            elements.loader.innerHTML = `
+                <div class="error-message">
+                    <h3>🚫 데이터 로딩 실패</h3>
+                    <p>데이터를 불러올 수 없습니다. 네트워크 연결을 확인하고 페이지를 새로고침해주세요.</p>
+                    <p class="error-details">오류: ${error.message}</p>
+                    <button onclick="location.reload()" class="btn btn-primary">🔄 새로고침</button>
+                </div>
+            `;
+            Toast.error('데이터 로딩에 실패했습니다.');
+        }
+    }
+
+    function initializeFilters() {
+        if (!state.gameData) return;
+
+        // Initialize attribute filters
+        if (elements.attributeFiltersDiv) {
+            elements.attributeFiltersDiv.innerHTML = state.gameData.attributes
+                .filter(attr => attr.count > 0)
+                .map(attr => `
+                    <div class="chip" data-value="${attr.name}">
+                        ${getAttributeEmoji(attr.name)} ${attr.name} (${attr.count})
+                    </div>
+                `).join('');
+
+            elements.attributeFiltersDiv.querySelectorAll('.chip').forEach(chip => {
+                chip.onclick = () => toggleFilter(chip, 'attributes');
+            });
+        }
+
+        // Initialize race filters
+        if (elements.raceFiltersDiv) {
+            elements.raceFiltersDiv.innerHTML = state.gameData.races
+                .map(race => `
+                    <div class="chip" data-value="${race.name}">
+                        ${race.name} (${race.count})
+                    </div>
+                `).join('');
+
+            elements.raceFiltersDiv.querySelectorAll('.chip').forEach(chip => {
+                chip.onclick = () => toggleFilter(chip, 'races');
+            });
+        }
+
+        // Initialize channel filters
+        const channelFiltersDiv = safeGetElement('channel-filters');
+        if (channelFiltersDiv) {
+            channelFiltersDiv.innerHTML = state.gameData.releaseChannels
+                .map(channel => `
+                    <div class="chip" data-value="${channel.name}">
+                        ${channel.name} (${channel.count})
+                    </div>
+                `).join('');
+
+            channelFiltersDiv.querySelectorAll('.chip').forEach(chip => {
+                chip.onclick = () => toggleFilter(chip, 'channels');
+            });
+        }
+    }
+
+    function toggleFilter(chipElement, filterType) {
+        const value = chipElement.dataset.value;
+        const isActive = chipElement.classList.contains('active');
+
+        if (isActive) {
+            chipElement.classList.remove('active');
+            const index = state.activeFilters[filterType].indexOf(value);
+            if (index > -1) state.activeFilters[filterType].splice(index, 1);
+        } else {
+            chipElement.classList.add('active');
+            if (!state.activeFilters[filterType].includes(value)) {
+                state.activeFilters[filterType].push(value);
+            }
+        }
+
+        updateActiveFiltersDisplay();
+    }
+
+    function updateActiveFiltersDisplay() {
+        if (!elements.activeFiltersDiv) return;
+
+        const allFilters = [
+            ...state.activeFilters.attributes.map(attr => ({ type: 'attribute', value: attr, display: `${getAttributeEmoji(attr)} ${attr}` })),
+            ...state.activeFilters.races.map(race => ({ type: 'race', value: race, display: race })),
+            ...(state.activeFilters.channels || []).map(channel => ({ type: 'channel', value: channel, display: channel }))
+        ];
+
+        elements.activeFiltersDiv.innerHTML = allFilters.map(filter => `
+            <span class="active-filter">
+                ${filter.display}
+                <span class="remove-filter" data-type="${filter.type}" data-value="${filter.value}">×</span>
+            </span>
+        `).join('');
+
+        elements.activeFiltersDiv.querySelectorAll('.remove-filter').forEach(btn => {
+            btn.onclick = () => removeFilter(btn.dataset.type, btn.dataset.value);
+        });
+    }
+
+    function removeFilter(type, value) {
+        const filterMap = { attribute: 'attributes', race: 'races', channel: 'channels' };
+        const filterKey = filterMap[type];
+
+        if (filterKey && state.activeFilters[filterKey]) {
+            const index = state.activeFilters[filterKey].indexOf(value);
+            if (index > -1) state.activeFilters[filterKey].splice(index, 1);
+        }
+
+        // Update chip visual state
+        const chip = document.querySelector(`[data-value="${value}"]`);
+        if (chip) chip.classList.remove('active');
+
+        updateActiveFiltersDisplay();
+        filterItems();
+    }
+
+    function updateCommunityStats() {
+        if (!state.gameData) return;
+
+        const totalCharactersEl = safeGetElement('total-characters');
+        const totalKibosEl = safeGetElement('total-kibos');
+        const totalChannelsEl = safeGetElement('total-channels');
+        const lastUpdatedEl = safeGetElement('last-updated');
+
+        if (totalCharactersEl) totalCharactersEl.textContent = state.gameData.characters.length;
+        if (totalKibosEl) totalKibosEl.textContent = state.gameData.kibos.length;
+        if (totalChannelsEl) totalChannelsEl.textContent = state.gameData.releaseChannels.length;
+        if (lastUpdatedEl) lastUpdatedEl.textContent = state.gameData.metadata?.lastUpdated || '알 수 없음';
+    }
+
+    // Search and filter event listeners
+    if (elements.searchInput) {
+        elements.searchInput.oninput = (e) => {
+            state.activeFilters.search = e.target.value.toLowerCase();
+        };
+    }
+
+    if (elements.searchButton) {
+        elements.searchButton.onclick = filterItems;
+    }
+
+    if (elements.applyFiltersBtn) {
+        elements.applyFiltersBtn.onclick = filterItems;
+    }
+
+    if (elements.resetFiltersBtn) {
+        elements.resetFiltersBtn.onclick = () => {
+            state.activeFilters = { search: '', attributes: [], races: [], channels: [] };
+            if (elements.searchInput) elements.searchInput.value = '';
+            document.querySelectorAll('.chip.active').forEach(chip => chip.classList.remove('active'));
+            updateActiveFiltersDisplay();
+            filterItems();
+        };
+    }
 
     // Initial Load
     loadData();
