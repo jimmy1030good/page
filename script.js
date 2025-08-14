@@ -44,9 +44,59 @@ function safeGetElement(id) {
 
 // 즉시 실행 - DOM 로드 대기하지 않음
 console.log('Script loaded immediately');
+console.log('Current location:', window.location.href);
+
+// 즉시 전역 함수 정의
+window.testFunction = function() {
+    console.log('Test function works!');
+    return 'SUCCESS';
+};
 
 // 전역 변수들
 let elements, state;
+
+// 즉시 전역 loadData 함수 정의
+window.loadData = async function() {
+    console.log('=== LOAD DATA STARTED ===');
+    try {
+        // 간단한 fetch 테스트
+        const response = await fetch('./data.json');
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Data loaded:', data);
+        
+        // 메인 콘텐츠 표시
+        const mainContent = document.getElementById('main-content');
+        const loader = document.getElementById('loader');
+        
+        if (loader) loader.style.display = 'none';
+        if (mainContent) mainContent.classList.remove('hidden');
+        
+        // 간단한 캐릭터 목록 표시
+        const itemList = document.getElementById('item-list');
+        if (itemList && data.characters) {
+            itemList.innerHTML = data.characters.map(char => `
+                <div class="item-card">
+                    <img src="${char.imageUrl || './images/placeholder.png'}" alt="${char.name}">
+                    <h3>${char.name}</h3>
+                    <span>${char.attribute}</span>
+                </div>
+            `).join('');
+        }
+        
+        console.log('=== LOAD DATA COMPLETED ===');
+        return 'SUCCESS';
+        
+    } catch (error) {
+        console.error('=== LOAD DATA FAILED ===', error);
+        return 'FAILED: ' + error.message;
+    }
+};
 
 // DOM이 준비되면 실행
 function initializeApp() {
@@ -499,10 +549,21 @@ function initializeApp() {
 window.loadData = async function loadData() {
         try {
             console.log('Starting data load...');
-            console.log('JSON path:', jsonDataPath);
+            
+            // 경로 확인
+            const basePath = window.location.pathname.endsWith('/') ? window.location.pathname : window.location.pathname + '/';
+            const jsonPath = basePath + 'data.json';
+            console.log('JSON path:', jsonPath);
             console.log('Current URL:', window.location.href);
             
-            elements.loader.style.display = 'flex';
+            // 요소 확인
+            const loader = document.getElementById('loader');
+            const mainContent = document.getElementById('main-content');
+            
+            if (loader) loader.style.display = 'flex';
+            
+            console.log('Fetching data from:', jsonPath);
+            const response = await fetch(jsonPath);
             
             console.log('Fetching data from:', jsonDataPath);
             const response = await fetch(jsonDataPath);
