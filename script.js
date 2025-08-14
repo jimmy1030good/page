@@ -784,8 +784,16 @@ setTimeout(() => {
             const itemList = document.getElementById('item-list');
             
             // 로더 숨기고 메인 콘텐츠 표시
-            if (loader) loader.style.display = 'none';
-            if (mainContent) mainContent.classList.remove('hidden');
+            if (loader) {
+                loader.style.display = 'none';
+                console.log('🔄 Loader hidden');
+            }
+            if (mainContent) {
+                mainContent.classList.remove('hidden');
+                mainContent.style.display = 'block';
+                mainContent.style.visibility = 'visible';
+                console.log('👁️ Main content shown');
+            }
             
             // 캐릭터 목록 생성
             if (itemList && data.characters) {
