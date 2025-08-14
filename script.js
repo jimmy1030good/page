@@ -489,11 +489,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Data loading function
     async function loadData() {
         try {
+            console.log('Starting data load...');
+            console.log('JSON path:', jsonDataPath);
+            console.log('Current URL:', window.location.href);
+            
             elements.loader.style.display = 'flex';
+            
+            console.log('Fetching data from:', jsonDataPath);
             const response = await fetch(jsonDataPath);
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
+            
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
+            console.log('Parsing JSON...');
             state.gameData = await response.json();
+            console.log('Data loaded successfully:', state.gameData);
 
             // Initialize filters
             initializeFilters();
