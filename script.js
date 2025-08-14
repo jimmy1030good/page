@@ -42,11 +42,18 @@ function safeGetElement(id) {
     return element;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM Content Loaded - Script starting...');
+// 즉시 실행 - DOM 로드 대기하지 않음
+console.log('Script loaded immediately');
+
+// 전역 변수들
+let elements, state;
+
+// DOM이 준비되면 실행
+function initializeApp() {
+    console.log('Initializing app...');
     Toast.init();
 
-    const elements = {
+    elements = {
         mainContent: safeGetElement('main-content'),
         loader: safeGetElement('loader'),
         characterSection: safeGetElement('character'),
@@ -90,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
         typeChartCanvas: safeGetElement('type-chart-canvas'),
     };
 
-    const state = {
+    state = {
         gameData: null,
         currentListType: 'characters',
         activeFilters: { search: '', attributes: [], races: [], channels: [] },
@@ -488,8 +495,8 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.restartTournamentBtn.onclick = () => startNewTournament(state.tournament.type);
     elements.backToMainMenuBtn.onclick = () => showScreen(elements.characterSection);
 
-    // Data loading function (make it global for debugging)
-    window.loadData = async function loadData() {
+// Data loading function (global)
+window.loadData = async function loadData() {
         try {
             console.log('Starting data load...');
             console.log('JSON path:', jsonDataPath);
@@ -687,4 +694,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Also make it globally accessible for debugging
     window.loadData = loadData;
-});
+}
+
+// DOM이 로드되면 초기화
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    initializeApp();
+}
+
+// 전역으로 노출
+window.initializeApp = initializeApp;
