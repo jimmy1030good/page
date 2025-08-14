@@ -101,17 +101,95 @@ document.addEventListener('DOMContentLoaded', () => {
     // 간단한 경로 처리 - 상대 경로 사용
     const jsonDataPath = './data.json';
     const imageBasePath = './images/';
-    
+
     console.log('Using paths - JSON:', jsonDataPath, 'Images:', imageBasePath);
     const getAttributeEmoji = attribute => ({ '불': '🔥', '물': '💧', '땅': '🌋', '번개': '⚡', '바람': '🌪️', '어둠': '🌑', '빛': '✨', '얼음': '❄️', '나무': '🌲' }[attribute] || '');
 
+    function loadImageWithFallback(imgElement, originalSrc, itemName) {
+        console.log('Loading image for', itemName, ':', originalSrc);
+        
+        const pathsToTry = [
+            originalSrc,
+            './' + originalSrc,
+            originalSrc.replace('images/', './images/'),
+            '/page/' + originalSrc,
+            imageBasePath + originalSrc.split('/').pop() // 파일명만 사용
+        ];
+        
+        let currentIndex = 0;
+        
+        const tryNextPath = () => {
+            if (currentIndex >= pathsToTry.length) {
+                console.warn('All image paths failed for:', itemName);
+                return;
+            }
+            
+            const pathToTry = pathsToTry[currentIndex++];
+            console.log('Trying path:', pathToTry);
+            
+            const testImg = new Image();
+            testImg.onload = () => {
+                console.log('Image loaded successfully:', pathToTry);
+                imgElement.src = pathToTry;
+            };
+            testImg.onerror = () => {
+                console.warn('Failed to load:', pathToTry);
+                tryNextPath();
+            };
+            testImg.src = pathToTry;
+        };
+        
+        tryNextPath();
+    }
+
     function setImageSource(imgElement, itemName) {
         const placeholderPath = imageBasePath + 'placeholder.png';
+        
+        // 기본 placeholder 설정
         imgElement.src = placeholderPath;
+        imgElement.onerror = () => {
+            console.warn('Failed to load placeholder image:', placeholderPath);
+            imgElement.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
+        };
 
         const item = (state.gameData.characters.find(c => c.name === itemName) || state.gameData.kibos.find(k => k.name === itemName));
         if (item && item.imageUrl) {
-            imgElement.src = item.imageUrl;
+            console.log('Loading image for', itemName, ':', item.imageUrl);
+            
+            // 이미지 로딩 테스트
+            const testImg = new Image();
+            testImg.onload = () => {
+                console.log('Image loaded successfully:', item.imageUrl);
+                imgElement.src = item.imageUrl;
+            };
+            testImg.onerror = () => {
+                console.warn('Failed to load image:', item.imageUrl);
+                // 다른 경로들을 시도해보기
+                const altPaths = [
+                    './' + item.imageUrl,
+                    item.imageUrl.replace('images/', './images/'),
+                    '/page/' + item.imageUrl
+                ];
+                
+                let pathIndex = 0;
+                const tryNextPath = () => {
+                    if (pathIndex < altPaths.length) {
+                        const altPath = altPaths[pathIndex++];
+                        console.log('Trying alternative path:', altPath);
+                        const altImg = new Image();
+                        altImg.onload = () => {
+                            console.log('Alternative path worked:', altPath);
+                            imgElement.src = altPath;
+                        };
+                        altImg.onerror = tryNextPath;
+                        altImg.src = altPath;
+                    } else {
+                        console.warn('All image paths failed for:', itemName);
+                    }
+                };
+                tryNextPath();
+            };
+            testImg.src = item.imageUrl;
         }
     }
 
@@ -146,7 +224,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const attr = state.gameData.attributes.find(a => a.name === item.attribute);
             return `
             <div class="item-card" data-name="${item.name}" style="border-left-color:${attr ? attr.color : '#ccc'}">
-                <img src="${item.imageUrl || imageBasePath + 'placeholder.png'}" alt="${item.name}" loading="lazy">
+                <img src="${imageBasePath + 'placeholder.png'}" alt="${item.name}" loading="lazy" 
+                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='"
+                     data-original-src="${item.imageUrl || ''}"
+                     data-item-name="${item.name}">
                 <h3>${item.name}</h3>
                 <span class="attribute-tag">${getAttributeEmoji(item.attribute)}${item.attribute || '미공개'}</span>
                 <div class="item-info">
@@ -157,6 +238,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }).join('');
         elements.itemListDiv.querySelectorAll('.item-card').forEach(card => {
             card.onclick = () => displayDetail(filtered.find(item => item.name === card.dataset.name));
+            
+            // 이미지 로딩 처리
+            const img = card.querySelector('img');
+            const originalSrc = img.dataset.originalSrc;
+            const itemName = img.dataset.itemName;
+            
+            if (originalSrc && originalSrc !== '') {
+                loadImageWithFallback(img, originalSrc, itemName);
+            }
         });
     }
 
@@ -165,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const type = state.gameData.characters.some(c => c.name === item.name) ? 'characters' : 'kibos';
         const detailsHTML = Object.entries(item.details || {}).map(([key, value]) => `<strong>${key}:</strong><span>${value}</span>`).join('');
         elements.itemDetailDiv.innerHTML = `
-            <img src="${item.imageUrl || imageBasePath + 'placeholder.png'}" alt="${item.name}">
+            <img src="${imageBasePath + 'placeholder.png'}" alt="${item.name}" id="detail-image">
             <h2>${item.name}</h2>
             <div class="info-grid">
                 <strong>속성:</strong><span>${getAttributeEmoji(item.attribute)}${item.attribute || '미공개'}</span>
@@ -173,6 +263,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 <strong>공개채널:</strong><span>${item.releaseChannel || '미공개'}</span>
                 ${detailsHTML}
             </div>`;
+        
+        // 이미지 로딩 처리
+        if (item.imageUrl) {
+            const detailImg = document.getElementById('detail-image');
+            loadImageWithFallback(detailImg, item.imageUrl, item.name);
+        }
     }
 
     function initializeCharts() {
