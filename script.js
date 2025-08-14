@@ -98,9 +98,10 @@ document.addEventListener('DOMContentLoaded', () => {
         flashcard: { questions: [], currentIndex: 0, score: 0, totalQuestions: 10 }
     };
 
-    // 간단한 경로 처리 - 상대 경로 사용
-    const jsonDataPath = './data.json';
-    const imageBasePath = './images/';
+    // GitHub Pages 절대 경로 사용
+    const basePath = window.location.pathname.endsWith('/') ? window.location.pathname : window.location.pathname + '/';
+    const jsonDataPath = basePath + 'data.json';
+    const imageBasePath = basePath + 'images/';
 
     console.log('Using paths - JSON:', jsonDataPath, 'Images:', imageBasePath);
     const getAttributeEmoji = attribute => ({ '불': '🔥', '물': '💧', '땅': '🌋', '번개': '⚡', '바람': '🌪️', '어둠': '🌑', '빛': '✨', '얼음': '❄️', '나무': '🌲' }[attribute] || '');
