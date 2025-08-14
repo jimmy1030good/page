@@ -783,10 +783,14 @@ setTimeout(() => {
             const loader = document.getElementById('loader');
             const itemList = document.getElementById('item-list');
             
-            // 로더 숨기고 메인 콘텐츠 표시
+            // 로더 완전히 제거
             if (loader) {
                 loader.style.display = 'none';
-                console.log('🔄 Loader hidden');
+                loader.style.visibility = 'hidden';
+                loader.style.opacity = '0';
+                loader.style.zIndex = '-1';
+                loader.remove(); // 완전히 제거
+                console.log('🔄 Loader completely removed');
             }
             if (mainContent) {
                 mainContent.classList.remove('hidden');
