@@ -763,3 +763,11 @@ if (document.readyState === 'loading') {
 
 // 전역으로 노출
 window.initializeApp = initializeApp;
+
+// 강제 실행 (3초 후)
+setTimeout(() => {
+    console.log('Force executing loadData...');
+    if (window.loadData) {
+        window.loadData();
+    }
+}, 3000);
