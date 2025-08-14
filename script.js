@@ -487,8 +487,8 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.restartTournamentBtn.onclick = () => startNewTournament(state.tournament.type);
     elements.backToMainMenuBtn.onclick = () => showScreen(elements.characterSection);
 
-    // Data loading function
-    async function loadData() {
+    // Data loading function (make it global for debugging)
+    window.loadData = async function loadData() {
         try {
             console.log('Starting data load...');
             console.log('JSON path:', jsonDataPath);
