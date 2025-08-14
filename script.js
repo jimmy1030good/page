@@ -764,36 +764,76 @@ if (document.readyState === 'loading') {
 // 전역으로 노출
 window.initializeApp = initializeApp;
 
-// 강제 실행 (3초 후)
+// 강제 실행 (즉시)
 setTimeout(() => {
-    console.log('Force executing loadData...');
-    if (window.loadData) {
-        window.loadData();
-    } else {
-        console.log('loadData not found, trying manual execution...');
-        // 수동으로 데이터 로딩
-        fetch('./data.json')
-            .then(r => r.json())
-            .then(data => {
-                console.log('Manual data load success:', data);
-                const mainContent = document.getElementById('main-content');
-                const loader = document.getElementById('loader');
-                const itemList = document.getElementById('item-list');
-                
-                if (loader) loader.style.display = 'none';
-                if (mainContent) mainContent.classList.remove('hidden');
-                
-                if (itemList && data.characters) {
-                    itemList.innerHTML = data.characters.map(char => `
-                        <div class="item-card">
-                            <img src="${char.imageUrl || './images/placeholder.png'}" alt="${char.name}">
-                            <h3>${char.name}</h3>
-                            <span class="attribute-tag">${char.attribute}</span>
+    console.log('🚀 Force executing data load...');
+    
+    // 직접 데이터 로딩 및 표시
+    fetch('./data.json')
+        .then(response => {
+            console.log('📡 Response status:', response.status);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            console.log('✅ Data loaded successfully:', data);
+            
+            // UI 요소 가져오기
+            const mainContent = document.getElementById('main-content');
+            const loader = document.getElementById('loader');
+            const itemList = document.getElementById('item-list');
+            
+            // 로더 숨기고 메인 콘텐츠 표시
+            if (loader) loader.style.display = 'none';
+            if (mainContent) mainContent.classList.remove('hidden');
+            
+            // 캐릭터 목록 생성
+            if (itemList && data.characters) {
+                itemList.innerHTML = data.characters.map(char => `
+                    <div class="item-card" style="border-left: 4px solid ${getCharacterColor(char.attribute)};">
+                        <img src="${char.imageUrl || './images/placeholder.png'}" 
+                             alt="${char.name}"
+                             onerror="this.src='./images/placeholder.png';">
+                        <h3>${char.name}</h3>
+                        <span class="attribute-tag">${getAttributeEmoji(char.attribute)} ${char.attribute}</span>
+                        <div class="item-info">
+                            <small>종족: ${char.race || '미공개'}</small>
+                            <small>채널: ${char.releaseChannel || '미공개'}</small>
                         </div>
-                    `).join('');
-                    console.log('Characters displayed successfully!');
-                }
-            })
-            .catch(e => console.error('Manual load failed:', e));
-    }
-}, 3000);
+                    </div>
+                `).join('');
+                
+                console.log(`🎨 ${data.characters.length}개 캐릭터 표시 완료!`);
+            }
+        })
+        .catch(error => {
+            console.error('❌ Data loading failed:', error);
+            const loader = document.getElementById('loader');
+            if (loader) {
+                loader.innerHTML = `
+                    <div class="error-message">
+                        <h3>🚫 데이터 로딩 실패</h3>
+                        <p>데이터를 불러올 수 없습니다: ${error.message}</p>
+                        <button onclick="location.reload()" class="btn btn-primary">🔄 새로고침</button>
+                    </div>
+                `;
+            }
+        });
+}, 1000);
+
+// 유틸리티 함수들
+function getAttributeEmoji(attribute) {
+    const emojis = {
+        '불': '🔥', '물': '💧', '땅': '🌋', '번개': '⚡', 
+        '바람': '🌪️', '어둠': '🌑', '빛': '✨', '얼음': '❄️', '나무': '🌲'
+    };
+    return emojis[attribute] || '❓';
+}
+
+function getCharacterColor(attribute) {
+    const colors = {
+        '불': '#FF5722', '물': '#2196F3', '땅': '#795548', '번개': '#FFEB3B',
+        '바람': '#4CAF50', '어둠': '#9C27B0', '빛': '#FFC107', '얼음': '#00BCD4', '나무': '#8BC34A'
+    };
+    return colors[attribute] || '#ccc';
+}
