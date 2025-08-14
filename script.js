@@ -564,9 +564,6 @@ window.loadData = async function loadData() {
             
             console.log('Fetching data from:', jsonPath);
             const response = await fetch(jsonPath);
-            
-            console.log('Fetching data from:', jsonDataPath);
-            const response = await fetch(jsonDataPath);
             console.log('Response status:', response.status);
             console.log('Response ok:', response.ok);
             
