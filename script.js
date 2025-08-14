@@ -769,5 +769,31 @@ setTimeout(() => {
     console.log('Force executing loadData...');
     if (window.loadData) {
         window.loadData();
+    } else {
+        console.log('loadData not found, trying manual execution...');
+        // 수동으로 데이터 로딩
+        fetch('./data.json')
+            .then(r => r.json())
+            .then(data => {
+                console.log('Manual data load success:', data);
+                const mainContent = document.getElementById('main-content');
+                const loader = document.getElementById('loader');
+                const itemList = document.getElementById('item-list');
+                
+                if (loader) loader.style.display = 'none';
+                if (mainContent) mainContent.classList.remove('hidden');
+                
+                if (itemList && data.characters) {
+                    itemList.innerHTML = data.characters.map(char => `
+                        <div class="item-card">
+                            <img src="${char.imageUrl || './images/placeholder.png'}" alt="${char.name}">
+                            <h3>${char.name}</h3>
+                            <span class="attribute-tag">${char.attribute}</span>
+                        </div>
+                    `).join('');
+                    console.log('Characters displayed successfully!');
+                }
+            })
+            .catch(e => console.error('Manual load failed:', e));
     }
 }, 3000);
