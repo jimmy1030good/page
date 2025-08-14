@@ -43,6 +43,7 @@ function safeGetElement(id) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM Content Loaded - Script starting...');
     Toast.init();
 
     const elements = {
@@ -683,4 +684,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial Load
     loadData();
+    
+    // Also make it globally accessible for debugging
+    window.loadData = loadData;
 });
