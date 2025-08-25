@@ -240,12 +240,23 @@ function initializeApp() {
                 const attr = state.gameData.attributes.find(a => a.name === item.attribute);
                 const borderColor = attr ? attr.color : getCharacterColor(item.attribute);
                 
+                // GitHub Pages 경로 처리
+                let imageSrc = './images/placeholder.png';
+                if (item.imageUrl) {
+                    // 절대 경로로 변환
+                    if (item.imageUrl.startsWith('images/') || item.imageUrl.startsWith('kibo_image/')) {
+                        imageSrc = './' + item.imageUrl;
+                    } else {
+                        imageSrc = item.imageUrl;
+                    }
+                }
+                
                 return `
                 <div class="item-card" data-name="${item.name}" style="border-left: 4px solid ${borderColor};">
-                    <img src="${item.imageUrl || './images/placeholder.png'}" 
+                    <img src="${imageSrc}" 
                          alt="${item.name}" 
                          loading="lazy" 
-                         onerror="this.onerror=null; this.src='./images/placeholder.png';"
+                         onerror="handleImageError(this, '${item.imageUrl || ''}')"
                          data-original-src="${item.imageUrl || ''}"
                          data-item-name="${item.name}">
                     <h3>${item.name}</h3>
@@ -531,6 +542,9 @@ window.loadData = async function() {
         state.gameData = await response.json();
         console.log('Data loaded successfully:', state.gameData);
 
+        // 이미지 경로 정규화
+        normalizeImagePaths();
+
         // Initialize filters
         initializeFilters();
 
@@ -779,6 +793,72 @@ function getCharacterColor(attribute) {
     };
     return colors[attribute] || '#ccc';
 }
+
+// 이미지 경로 정규화 함수
+function normalizeImagePaths() {
+    if (!state.gameData) return;
+    
+    console.log('Normalizing image paths...');
+    
+    // 캐릭터 이미지 경로 정규화
+    state.gameData.characters.forEach(char => {
+        if (char.imageUrl && !char.imageUrl.startsWith('http') && !char.imageUrl.startsWith('./')) {
+            char.imageUrl = './' + char.imageUrl;
+        }
+        console.log(`Character ${char.name}: ${char.imageUrl}`);
+    });
+    
+    // 키보 이미지 경로 정규화
+    state.gameData.kibos.forEach(kibo => {
+        if (kibo.imageUrl && !kibo.imageUrl.startsWith('http') && !kibo.imageUrl.startsWith('./')) {
+            kibo.imageUrl = './' + kibo.imageUrl;
+        }
+        console.log(`Kibo ${kibo.name}: ${kibo.imageUrl}`);
+    });
+}
+
+// 전역 이미지 오류 처리 함수
+window.handleImageError = function(imgElement, originalSrc) {
+    console.log('Image loading failed for:', originalSrc);
+    
+    if (!imgElement.dataset.retryAttempted) {
+        imgElement.dataset.retryAttempted = 'true';
+        
+        // 다양한 경로 시도
+        const pathsToTry = [
+            './images/placeholder.png',
+            'images/placeholder.png',
+            '/page/images/placeholder.png',
+            'https://via.placeholder.com/200x200/ddd/999?text=No+Image'
+        ];
+        
+        let currentIndex = 0;
+        
+        const tryNextPath = () => {
+            if (currentIndex < pathsToTry.length) {
+                const pathToTry = pathsToTry[currentIndex++];
+                console.log('Trying fallback path:', pathToTry);
+                
+                const testImg = new Image();
+                testImg.onload = () => {
+                    console.log('Fallback image loaded:', pathToTry);
+                    imgElement.src = pathToTry;
+                };
+                testImg.onerror = () => {
+                    console.log('Fallback failed:', pathToTry);
+                    tryNextPath();
+                };
+                testImg.src = pathToTry;
+            } else {
+                // 모든 경로 실패시 SVG placeholder 사용
+                console.log('All fallback paths failed, using SVG placeholder');
+                imgElement.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
+            }
+        };
+        
+        tryNextPath();
+    }
+};
 
 // DOM이 로드되면 초기화
 if (document.readyState === 'loading') {

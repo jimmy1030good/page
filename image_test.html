@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이미지 테스트</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .test-item { border: 1px solid #ddd; padding: 15px; border-radius: 8px; text-align: center; }
+        .test-item img { width: 150px; height: 150px; object-fit: contain; border: 1px solid #eee; }
+        .test-item h3 { margin: 10px 0 5px 0; }
+        .test-item p { margin: 5px 0; font-size: 0.9em; color: #666; }
+        .status { padding: 5px 10px; border-radius: 4px; font-size: 0.8em; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>이미지 로딩 테스트</h1>
+    <div id="test-results"></div>
+
+    <script>
+        async function testImages() {
+            try {
+                const response = await fetch('./data.json');
+                const data = await response.json();
+                
+                const testContainer = document.getElementById('test-results');
+                
+                // 캐릭터 이미지 테스트
+                const allItems = [...data.characters, ...data.kibos];
+                
+                testContainer.innerHTML = `
+                    <h2>총 ${allItems.length}개 이미지 테스트</h2>
+                    <div class="test-grid">
+                        ${allItems.map(item => `
+                            <div class="test-item">
+                                <img src="${item.imageUrl}" 
+                                     alt="${item.name}"
+                                     onload="markSuccess(this)"
+                                     onerror="markError(this, '${item.imageUrl}')">
+                                <h3>${item.name}</h3>
+                                <p>원본 경로: ${item.imageUrl}</p>
+                                <div class="status" id="status-${item.id}">로딩중...</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+            } catch (error) {
+                document.getElementById('test-results').innerHTML = `
+                    <h2>데이터 로딩 실패</h2>
+                    <p>오류: ${error.message}</p>
+                `;
+            }
+        }
+        
+        window.markSuccess = function(img) {
+            const item = img.closest('.test-item');
+            const status = item.querySelector('.status');
+            status.textContent = '✅ 로딩 성공';
+            status.className = 'status success';
+        };
+        
+        window.markError = function(img, originalSrc) {
+            const item = img.closest('.test-item');
+            const status = item.querySelector('.status');
+            
+            // 대체 경로들 시도
+            const fallbackPaths = [
+                './' + originalSrc,
+                originalSrc.replace('images/', './images/'),
+                originalSrc.replace('kibo_image/', './kibo_image/'),
+                './images/placeholder.png'
+            ];
+            
+            let currentIndex = 0;
+            
+            const tryNext = () => {
+                if (currentIndex < fallbackPaths.length) {
+                    const nextPath = fallbackPaths[currentIndex++];
+                    console.log(`Trying fallback: ${nextPath}`);
+                    
+                    const testImg = new Image();
+                    testImg.onload = () => {
+                        img.src = nextPath;
+                        status.textContent = `✅ 대체 경로 성공: ${nextPath}`;
+                        status.className = 'status success';
+                    };
+                    testImg.onerror = tryNext;
+                    testImg.src = nextPath;
+                } else {
+                    status.textContent = '❌ 모든 경로 실패';
+                    status.className = 'status error';
+                    img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
+                }
+            };
+            
+            tryNext();
+        };
+        
+        // 페이지 로드시 테스트 실행
+        testImages();
+    </script>
+</body>
+</html>
