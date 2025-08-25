@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아주르 정보 뷰어 - 최종 테스트</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div id="loader" class="loader-container">
+        <div class="spinner"></div>
+        <p>데이터 로딩중...</p>
+    </div>
+
+    <div id="toast-container"></div>
+    
+    <header>
+        <h1>아주르 정보 뷰어</h1>
+        <nav>
+            <button data-target="character" class="nav-btn active">캐릭터</button>
+            <button data-target="keyboard" class="nav-btn">키보</button>
+            <button data-target="stats" class="nav-btn">통계</button>
+            <button data-target="community" class="nav-btn">커뮤니티</button>
+            <button data-target="minigame" class="nav-btn">미니게임</button>
+        </nav>
+    </header>
+
+    <main id="main-content" class="hidden">
+        <section id="character" class="panel">
+            <div class="filter-container">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="이름 또는 설명 검색...">
+                    <button id="search-button" class="btn btn-primary">검색</button>
+                </div>
+
+                <div class="filter-panel">
+                    <div class="filter-group">
+                        <h3>속성</h3>
+                        <div class="chip-group attribute-filters" id="attribute-filters">
+                            <!-- 속성 필터 옵션들이 자동으로 추가됩니다 -->
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <h3>종족</h3>
+                        <div class="chip-group race-filters" id="race-filters">
+                            <!-- 종족 필터 옵션들이 자동으로 추가됩니다 -->
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <h3>공개채널</h3>
+                        <div class="chip-group channel-filters" id="channel-filters">
+                            <!-- 공개채널 필터 옵션들이 자동으로 추가됩니다 -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-actions">
+                    <button id="apply-filters" class="btn btn-primary">필터 적용</button>
+                    <button id="reset-filters" class="btn btn-secondary">필터 초기화</button>
+                </div>
+
+                <div class="filter-summary">
+                    <span id="result-count">0</span>개 결과
+                    <div id="active-filters">
+                        <!-- 활성화된 필터 태그들이 자동으로 추가됩니다 -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="item-list"></div>
+        </section>
+
+        <section id="keyboard" class="panel hidden">
+            <h2>키보드 캐릭터</h2>
+            <div class="keyboard-list"></div>
+        </section>
+
+        <section id="stats" class="panel hidden">
+            <h2>통계</h2>
+            <div class="stats-container">
+                <div class="stats-card">
+                    <h3>속성별 분포</h3>
+                    <div class="chart-container">
+                        <canvas id="attribute-chart-canvas"></canvas>
+                    </div>
+                </div>
+                <div class="stats-card">
+                    <h3>종족별 분포</h3>
+                    <div class="chart-container">
+                        <canvas id="race-chart-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="community" class="panel hidden">
+            <h2>커뮤니티</h2>
+            <div class="community-container">
+                <div class="community-card">
+                    <h3>🔥 커뮤니티 링크</h3>
+                    <div class="community-links">
+                        <a href="https://arca.live/b/azurpromilia" target="_blank" rel="noopener noreferrer" class="community-link arcalive">
+                            <div class="link-icon">🏛️</div>
+                            <div class="link-content">
+                                <h4>아카라이브 아주르 프로밀리아</h4>
+                                <p>공식 커뮤니티에서 최신 정보와 토론을 확인하세요</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="community-card">
+                    <h3>📊 커뮤니티 활동</h3>
+                    <div class="community-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">총 캐릭터</span>
+                            <span class="stat-value" id="total-characters">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">총 키보</span>
+                            <span class="stat-value" id="total-kibos">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="minigame" class="panel hidden">
+            <h2>미니게임 허브</h2>
+            <p>소소한 재미와 정보 암기를 위한 미니게임 모음</p>
+            <div class="game-grid">
+                <button id="open-favorite" class="game-btn teal"><span>💖</span> 최애 찾기</button>
+                <button id="open-flashcard" class="game-btn orange"><span>🂠</span> 플래시 카드</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="./script.js"></script>
+</body>
+</html>
+</script>

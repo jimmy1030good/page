@@ -42,61 +42,11 @@ function safeGetElement(id) {
     return element;
 }
 
-// 즉시 실행 - DOM 로드 대기하지 않음
-console.log('Script loaded immediately');
-console.log('Current location:', window.location.href);
-
-// 즉시 전역 함수 정의
-window.testFunction = function() {
-    console.log('Test function works!');
-    return 'SUCCESS';
-};
-
 // 전역 변수들
 let elements, state;
 
-// 즉시 전역 loadData 함수 정의
-window.loadData = async function() {
-    console.log('=== LOAD DATA STARTED ===');
-    try {
-        // 간단한 fetch 테스트
-        const response = await fetch('./data.json');
-        console.log('Response status:', response.status);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log('Data loaded:', data);
-        
-        // 메인 콘텐츠 표시
-        const mainContent = document.getElementById('main-content');
-        const loader = document.getElementById('loader');
-        
-        if (loader) loader.style.display = 'none';
-        if (mainContent) mainContent.classList.remove('hidden');
-        
-        // 간단한 캐릭터 목록 표시
-        const itemList = document.getElementById('item-list');
-        if (itemList && data.characters) {
-            itemList.innerHTML = data.characters.map(char => `
-                <div class="item-card">
-                    <img src="${char.imageUrl || './images/placeholder.png'}" alt="${char.name}">
-                    <h3>${char.name}</h3>
-                    <span>${char.attribute}</span>
-                </div>
-            `).join('');
-        }
-        
-        console.log('=== LOAD DATA COMPLETED ===');
-        return 'SUCCESS';
-        
-    } catch (error) {
-        console.error('=== LOAD DATA FAILED ===', error);
-        return 'FAILED: ' + error.message;
-    }
-};
+console.log('Script loaded, initializing...');
+console.log('Current location:', window.location.href);
 
 // DOM이 준비되면 실행
 function initializeApp() {
@@ -545,54 +495,57 @@ function initializeApp() {
     elements.restartTournamentBtn.onclick = () => startNewTournament(state.tournament.type);
     elements.backToMainMenuBtn.onclick = () => showScreen(elements.characterSection);
 
-// Data loading function (global)
-window.loadData = async function loadData() {
-        try {
-            console.log('Starting data load...');
-            
-            // 경로 확인
-            const basePath = window.location.pathname.endsWith('/') ? window.location.pathname : window.location.pathname + '/';
-            const jsonPath = basePath + 'data.json';
-            console.log('JSON path:', jsonPath);
-            console.log('Current URL:', window.location.href);
-            
-            // 요소 확인
-            const loader = document.getElementById('loader');
-            const mainContent = document.getElementById('main-content');
-            
-            if (loader) loader.style.display = 'flex';
-            
-            console.log('Fetching data from:', jsonPath);
-            const response = await fetch(jsonPath);
-            console.log('Response status:', response.status);
-            console.log('Response ok:', response.ok);
-            
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+// 전역 데이터 로딩 함수
+window.loadData = async function() {
+    try {
+        console.log('Starting data load...');
+        
+        // 경로 확인
+        const basePath = window.location.pathname.endsWith('/') ? window.location.pathname : window.location.pathname + '/';
+        const jsonPath = basePath + 'data.json';
+        console.log('JSON path:', jsonPath);
+        console.log('Current URL:', window.location.href);
+        
+        // 요소 확인
+        const loader = document.getElementById('loader');
+        const mainContent = document.getElementById('main-content');
+        
+        if (loader) loader.style.display = 'flex';
+        
+        console.log('Fetching data from:', jsonPath);
+        const response = await fetch(jsonPath);
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+        
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-            console.log('Parsing JSON...');
-            state.gameData = await response.json();
-            console.log('Data loaded successfully:', state.gameData);
+        console.log('Parsing JSON...');
+        state.gameData = await response.json();
+        console.log('Data loaded successfully:', state.gameData);
 
-            // Initialize filters
-            initializeFilters();
+        // Initialize filters
+        initializeFilters();
 
-            // Show main content
-            elements.loader.style.display = 'none';
-            elements.mainContent.classList.remove('hidden');
+        // Show main content
+        if (loader) loader.style.display = 'none';
+        if (mainContent) mainContent.classList.remove('hidden');
 
-            // Show character list by default
-            displayList('characters');
+        // Show character list by default
+        displayList('characters');
 
-            // Update community stats
-            updateCommunityStats();
+        // Update community stats
+        updateCommunityStats();
 
-            // Update ranking display
-            updateRankingDisplay();
+        // Update ranking display
+        updateRankingDisplay();
 
-            Toast.success('데이터 로딩 완료!');
-        } catch (error) {
-            console.error('데이터 로딩 실패:', error);
-            elements.loader.innerHTML = `
+        Toast.success('데이터 로딩 완료!');
+        return 'SUCCESS';
+    } catch (error) {
+        console.error('데이터 로딩 실패:', error);
+        const loader = document.getElementById('loader');
+        if (loader) {
+            loader.innerHTML = `
                 <div class="error-message">
                     <h3>🚫 데이터 로딩 실패</h3>
                     <p>데이터를 불러올 수 없습니다. 네트워크 연결을 확인하고 페이지를 새로고침해주세요.</p>
@@ -600,9 +553,11 @@ window.loadData = async function loadData() {
                     <button onclick="location.reload()" class="btn btn-primary">🔄 새로고침</button>
                 </div>
             `;
-            Toast.error('데이터 로딩에 실패했습니다.');
         }
+        Toast.error('데이터 로딩에 실패했습니다.');
+        return 'FAILED: ' + error.message;
     }
+};
 
     function initializeFilters() {
         if (!state.gameData) return;
@@ -722,6 +677,55 @@ window.loadData = async function loadData() {
         if (lastUpdatedEl) lastUpdatedEl.textContent = state.gameData.metadata?.lastUpdated || '알 수 없음';
     }
 
+    function updateActiveFiltersDisplay() {
+        if (!elements.activeFiltersDiv) return;
+        
+        const activeFilters = [];
+        
+        // Add search filter
+        if (state.activeFilters.search) {
+            activeFilters.push({
+                type: 'search',
+                value: state.activeFilters.search,
+                display: `검색: "${state.activeFilters.search}"`
+            });
+        }
+        
+        // Add attribute filters
+        state.activeFilters.attributes.forEach(attr => {
+            activeFilters.push({
+                type: 'attributes',
+                value: attr,
+                display: `${getAttributeEmoji(attr)} ${attr}`
+            });
+        });
+        
+        // Add race filters
+        state.activeFilters.races.forEach(race => {
+            activeFilters.push({
+                type: 'races',
+                value: race,
+                display: `종족: ${race}`
+            });
+        });
+        
+        // Add channel filters
+        state.activeFilters.channels.forEach(channel => {
+            activeFilters.push({
+                type: 'channels',
+                value: channel,
+                display: `채널: ${channel}`
+            });
+        });
+        
+        elements.activeFiltersDiv.innerHTML = activeFilters.map(filter => `
+            <div class="active-filter">
+                ${filter.display}
+                <span class="remove-filter" onclick="removeActiveFilter('${filter.type}', '${filter.value}')">×</span>
+            </div>
+        `).join('');
+    }
+
     // Search and filter event listeners
     if (elements.searchInput) {
         elements.searchInput.oninput = (e) => {
@@ -749,89 +753,7 @@ window.loadData = async function loadData() {
 
     // Initial Load
     loadData();
-    
-    // Also make it globally accessible for debugging
-    window.loadData = loadData;
 }
-
-// DOM이 로드되면 초기화
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeApp);
-} else {
-    initializeApp();
-}
-
-// 전역으로 노출
-window.initializeApp = initializeApp;
-
-// 강제 실행 (즉시)
-setTimeout(() => {
-    console.log('🚀 Force executing data load...');
-    
-    // 직접 데이터 로딩 및 표시
-    fetch('./data.json')
-        .then(response => {
-            console.log('📡 Response status:', response.status);
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            return response.json();
-        })
-        .then(data => {
-            console.log('✅ Data loaded successfully:', data);
-            
-            // UI 요소 가져오기
-            const mainContent = document.getElementById('main-content');
-            const loader = document.getElementById('loader');
-            const itemList = document.getElementById('item-list');
-            
-            // 로더 완전히 제거
-            if (loader) {
-                loader.style.display = 'none';
-                loader.style.visibility = 'hidden';
-                loader.style.opacity = '0';
-                loader.style.zIndex = '-1';
-                loader.remove(); // 완전히 제거
-                console.log('🔄 Loader completely removed');
-            }
-            if (mainContent) {
-                mainContent.classList.remove('hidden');
-                mainContent.style.display = 'block';
-                mainContent.style.visibility = 'visible';
-                console.log('👁️ Main content shown');
-            }
-            
-            // 캐릭터 목록 생성
-            if (itemList && data.characters) {
-                itemList.innerHTML = data.characters.map(char => `
-                    <div class="item-card" style="border-left: 4px solid ${getCharacterColor(char.attribute)};">
-                        <img src="${char.imageUrl || './images/placeholder.png'}" 
-                             alt="${char.name}"
-                             onerror="this.src='./images/placeholder.png';">
-                        <h3>${char.name}</h3>
-                        <span class="attribute-tag">${getAttributeEmoji(char.attribute)} ${char.attribute}</span>
-                        <div class="item-info">
-                            <small>종족: ${char.race || '미공개'}</small>
-                            <small>채널: ${char.releaseChannel || '미공개'}</small>
-                        </div>
-                    </div>
-                `).join('');
-                
-                console.log(`🎨 ${data.characters.length}개 캐릭터 표시 완료!`);
-            }
-        })
-        .catch(error => {
-            console.error('❌ Data loading failed:', error);
-            const loader = document.getElementById('loader');
-            if (loader) {
-                loader.innerHTML = `
-                    <div class="error-message">
-                        <h3>🚫 데이터 로딩 실패</h3>
-                        <p>데이터를 불러올 수 없습니다: ${error.message}</p>
-                        <button onclick="location.reload()" class="btn btn-primary">🔄 새로고침</button>
-                    </div>
-                `;
-            }
-        });
-}, 1000);
 
 // 유틸리티 함수들
 function getAttributeEmoji(attribute) {
@@ -848,4 +770,11 @@ function getCharacterColor(attribute) {
         '바람': '#4CAF50', '어둠': '#9C27B0', '빛': '#FFC107', '얼음': '#00BCD4', '나무': '#8BC34A'
     };
     return colors[attribute] || '#ccc';
+}
+
+// DOM이 로드되면 초기화
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    initializeApp();
 }
