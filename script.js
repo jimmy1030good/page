@@ -221,6 +221,8 @@ function initializeApp() {
     }
 
     function filterItems() {
+        if (!state.gameData) return;
+        
         const sourceData = state.currentListType === 'characters' ? state.gameData.characters : state.gameData.kibos;
         const filtered = sourceData.filter(item =>
             (!state.activeFilters.search || JSON.stringify(item).toLowerCase().includes(state.activeFilters.search)) &&
@@ -228,35 +230,41 @@ function initializeApp() {
             (state.currentListType !== 'characters' || state.activeFilters.races.length === 0 || state.activeFilters.races.includes(item.race)) &&
             (state.activeFilters.channels.length === 0 || state.activeFilters.channels.some(channel => item.releaseChannel && item.releaseChannel.includes(channel)))
         );
-        elements.resultCountSpan.textContent = filtered.length;
-        elements.itemListDiv.innerHTML = filtered.map(item => {
-            const attr = state.gameData.attributes.find(a => a.name === item.attribute);
-            return `
-            <div class="item-card" data-name="${item.name}" style="border-left-color:${attr ? attr.color : '#ccc'}">
-                <img src="${imageBasePath + 'placeholder.png'}" alt="${item.name}" loading="lazy" 
-                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='"
-                     data-original-src="${item.imageUrl || ''}"
-                     data-item-name="${item.name}">
-                <h3>${item.name}</h3>
-                <span class="attribute-tag">${getAttributeEmoji(item.attribute)}${item.attribute || '미공개'}</span>
-                <div class="item-info">
-                    ${state.currentListType === 'characters' ? `<small>종족: ${item.race || '미공개'}</small>` : `<small>${item.note || ''}</small>`}
-                    <small>채널: ${item.releaseChannel || '미공개'}</small>
-                </div>
-            </div>`;
-        }).join('');
-        elements.itemListDiv.querySelectorAll('.item-card').forEach(card => {
-            card.onclick = () => displayDetail(filtered.find(item => item.name === card.dataset.name));
+        
+        if (elements.resultCountSpan) {
+            elements.resultCountSpan.textContent = filtered.length;
+        }
+        
+        if (elements.itemListDiv) {
+            elements.itemListDiv.innerHTML = filtered.map(item => {
+                const attr = state.gameData.attributes.find(a => a.name === item.attribute);
+                const borderColor = attr ? attr.color : getCharacterColor(item.attribute);
+                
+                return `
+                <div class="item-card" data-name="${item.name}" style="border-left: 4px solid ${borderColor};">
+                    <img src="${item.imageUrl || './images/placeholder.png'}" 
+                         alt="${item.name}" 
+                         loading="lazy" 
+                         onerror="this.onerror=null; this.src='./images/placeholder.png';"
+                         data-original-src="${item.imageUrl || ''}"
+                         data-item-name="${item.name}">
+                    <h3>${item.name}</h3>
+                    <span class="attribute-tag">${getAttributeEmoji(item.attribute)} ${item.attribute || '미공개'}</span>
+                    <div class="item-info">
+                        ${state.currentListType === 'characters' ? `<small>종족: ${item.race || '미공개'}</small>` : `<small>${item.note || ''}</small>`}
+                        <small>채널: ${item.releaseChannel || '미공개'}</small>
+                    </div>
+                </div>`;
+            }).join('');
             
-            // 이미지 로딩 처리
-            const img = card.querySelector('img');
-            const originalSrc = img.dataset.originalSrc;
-            const itemName = img.dataset.itemName;
-            
-            if (originalSrc && originalSrc !== '') {
-                loadImageWithFallback(img, originalSrc, itemName);
-            }
-        });
+            // 카드 클릭 이벤트 추가
+            elements.itemListDiv.querySelectorAll('.item-card').forEach(card => {
+                card.onclick = () => {
+                    const item = filtered.find(item => item.name === card.dataset.name);
+                    if (item) displayDetail(item);
+                };
+            });
+        }
     }
 
     function displayDetail(item) {
