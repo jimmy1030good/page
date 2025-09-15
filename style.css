@@ -224,23 +224,55 @@ img {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: var(--color-background);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     z-index: var(--z-index-modal);
     transition: opacity var(--transition-slow);
+    color: white;
 }
 
 .spinner {
-    border: 8px solid var(--color-text-disabled);
-    border-top: 8px solid var(--color-primary);
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid white;
     border-radius: 50%;
     width: 60px;
     height: 60px;
     animation: spin 1s linear infinite;
     margin-bottom: var(--space-4);
+}
+
+.loader-container p {
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.error-message {
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: var(--shadow-xl);
+    text-align: center;
+    color: var(--color-text-primary);
+    max-width: 400px;
+}
+
+.error-message h3 {
+    color: var(--color-error);
+    margin-bottom: 15px;
+}
+
+.error-details {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    background: #f5f5f5;
+    padding: 10px;
+    border-radius: 8px;
+    margin: 10px 0;
+    font-family: monospace;
 }
 
 @keyframes spin {
@@ -459,6 +491,19 @@ section h2::after {
     color: var(--color-text-secondary);
     font-size: var(--font-size-xs);
     margin-top: var(--space-1);
+}
+
+.item-info {
+    margin-top: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.item-info small {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    text-align: center;
 }
 
 /* --- Detail Section --- */
@@ -739,16 +784,16 @@ section h2::after {
     .match-item {
         width: 100%;
         max-width: 400px;
-        min-width: 200px; /* 모바일에서 최소 너비 설정 */
+        min-width: 200px;
     }
     
     .vs-divider {
         margin: var(--space-3) 0;
-        font-size: var(--font-size-xl); /* 모바일에서 VS 크기 줄임 */
+        font-size: var(--font-size-xl);
     }
     
     .selection-buttons button {
-        width: 100%; /* 모바일에서 버튼 너비 100% */
+        width: 100%;
         max-width: 300px;
     }
     
@@ -758,6 +803,32 @@ section h2::after {
     
     .collection-stats, .stats-container {
         grid-template-columns: 1fr;
+    }
+    
+    .community-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .community-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .game-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .fc-options {
+        grid-template-columns: 1fr;
+    }
+    
+    #toast-container {
+        left: 10px;
+        right: 10px;
+        top: 10px;
+    }
+    
+    .toast {
+        min-width: auto;
     }
 }
 
@@ -800,6 +871,28 @@ section h2::after {
     
     .search-box button {
         margin-top: var(--space-2);
+    }
+    
+    .community-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-item {
+        padding: 12px;
+    }
+    
+    .stat-value {
+        font-size: 1.2rem;
+    }
+    
+    .community-link {
+        padding: 12px;
+    }
+    
+    .link-icon {
+        font-size: 1.5rem;
+        margin-right: 10px;
+        min-width: 40px;
     }
 }
 
@@ -1372,7 +1465,7 @@ section h2::after {
     color: var(--color-text-secondary);
 }
 
-/* --- 커뮤니티 핫 토픽 대시보드 스타일 --- */
+/* --- 커뮤니티 섹션 스타일 --- */
 .community-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -1395,6 +1488,338 @@ section h2::after {
     text-align: center;
     padding-bottom: 10px;
     border-bottom: 1px solid #eee;
+}
+
+.community-links {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.community-link {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    border: 2px solid transparent;
+}
+
+.community-link:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.community-link.arcalive {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.community-link.official {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.community-link.youtube {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+    color: #333;
+}
+
+.link-icon {
+    font-size: 2rem;
+    margin-right: 15px;
+    min-width: 50px;
+    text-align: center;
+}
+
+.link-content h4 {
+    margin: 0 0 5px 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.link-content p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.community-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    color: white;
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* --- 미니게임 랭킹 스타일 --- */
+.rank-container {
+    margin-top: 20px;
+}
+
+.rank-board {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.rank-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color var(--transition-fast);
+}
+
+.rank-item:last-child {
+    border-bottom: none;
+}
+
+.rank-item:hover {
+    background-color: #f8f9fa;
+}
+
+.rank-number {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--color-primary);
+    min-width: 30px;
+}
+
+.rank-score {
+    font-weight: 600;
+    color: var(--color-success);
+}
+
+.rank-time {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+}
+
+/* 게임 버튼 스타일 개선 */
+.game-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.game-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 20px;
+    border: none;
+    border-radius: 16px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.game-btn span {
+    font-size: 2rem;
+}
+
+.game-btn.teal {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.game-btn.orange {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.game-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* 플래시카드 게임 스타일 */
+.flashcard {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+    margin-top: 20px;
+}
+
+.fc-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+#fc-image {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-md);
+}
+
+.fc-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.fc-option-btn {
+    padding: 15px 20px;
+    border: 2px solid var(--color-primary);
+    border-radius: 12px;
+    background: white;
+    color: var(--color-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.fc-option-btn:hover:not(:disabled) {
+    background: var(--color-primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.fc-option-btn.correct {
+    background: var(--color-success);
+    color: white;
+    border-color: var(--color-success);
+}
+
+.fc-option-btn.incorrect {
+    background: var(--color-error);
+    color: white;
+    border-color: var(--color-error);
+}
+
+.fc-option-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* --- 토스트 알림 시스템 --- */
+#toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: var(--z-index-tooltip);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.toast {
+    min-width: 300px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    transform: translateX(100%);
+    animation: slideIn 0.3s ease forwards;
+    position: relative;
+}
+
+.toast.closing {
+    animation: slideOut 0.3s ease forwards;
+}
+
+.toast-content {
+    padding: 16px 20px;
+    font-weight: 500;
+}
+
+.toast-close {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #999;
+    padding: 4px;
+}
+
+.toast-close:hover {
+    color: #666;
+}
+
+.toast-progress {
+    height: 3px;
+    background: linear-gradient(90deg, transparent, rgba(0,0,0,0.1));
+    animation: progress linear;
+}
+
+.toast.success {
+    border-left: 4px solid var(--color-success);
+}
+
+.toast.success .toast-content {
+    color: var(--color-success);
+}
+
+.toast.error {
+    border-left: 4px solid var(--color-error);
+}
+
+.toast.error .toast-content {
+    color: var(--color-error);
+}
+
+.toast.info {
+    border-left: 4px solid var(--color-info);
+}
+
+.toast.info .toast-content {
+    color: var(--color-info);
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes slideOut {
+    from { transform: translateX(0); }
+    to { transform: translateX(100%); }
+}
+
+@keyframes progress {
+    from { width: 100%; }
+    to { width: 0%; }
 }
 
 /* 핫 토픽 목록 스타일 */
