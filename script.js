@@ -1,4 +1,4 @@
-// --- Toast Alert System ---
+﻿// --- Toast Alert System ---
 const Toast = {
     container: null,
     queue: [],
@@ -20,7 +20,7 @@ const Toast = {
         const { message, type, duration } = this.queue.shift();
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
-        toast.innerHTML = `<div class="toast-content">${message}</div><button class="toast-close">×</button><div class="toast-progress" style="animation-duration: ${duration}ms"></div>`;
+        toast.innerHTML = `<div class="toast-content">${message}</div><button class="toast-close">횞</button><div class="toast-progress" style="animation-duration: ${duration}ms"></div>`;
         this.container.appendChild(toast);
         toast.querySelector('.toast-close').onclick = () => this.close(toast);
         setTimeout(() => this.close(toast), duration);
@@ -42,13 +42,13 @@ function safeGetElement(id) {
     return element;
 }
 
-// 전역 변수들
+// ?꾩뿭 蹂?섎뱾
 let elements, state;
 
 console.log('Script loaded, initializing...');
 console.log('Current location:', window.location.href);
 
-// DOM이 준비되면 실행
+// DOM??以鍮꾨릺硫??ㅽ뻾
 function initializeApp() {
     console.log('Initializing app...');
     Toast.init();
@@ -106,13 +106,13 @@ function initializeApp() {
         flashcard: { questions: [], currentIndex: 0, score: 0, totalQuestions: 10 }
     };
 
-    // GitHub Pages 절대 경로 사용
+    // GitHub Pages ?덈? 寃쎈줈 ?ъ슜
     const basePath = window.location.pathname.endsWith('/') ? window.location.pathname : window.location.pathname + '/';
     const jsonDataPath = basePath + 'data.json';
     const imageBasePath = basePath + 'images/';
 
     console.log('Using paths - JSON:', jsonDataPath, 'Images:', imageBasePath);
-    const getAttributeEmoji = attribute => ({ '불': '🔥', '물': '💧', '땅': '🌋', '번개': '⚡', '바람': '🌪️', '어둠': '🌑', '빛': '✨', '얼음': '❄️', '나무': '🌲' }[attribute] || '');
+    const getAttributeEmoji = attribute => ({ '遺?: '?뵦', '臾?: '?뮛', '??: '?뙅', '踰덇컻': '??, '諛붾엺': '?뙦截?, '?대몺': '?뙌', '鍮?: '??, '?쇱쓬': '?꾬툘', '?섎Т': '?뙯' }[attribute] || '');
 
     function loadImageWithFallback(imgElement, originalSrc, itemName) {
         console.log('Loading image for', itemName, ':', originalSrc);
@@ -122,7 +122,7 @@ function initializeApp() {
             './' + originalSrc,
             originalSrc.replace('images/', './images/'),
             '/page/' + originalSrc,
-            imageBasePath + originalSrc.split('/').pop() // 파일명만 사용
+            imageBasePath + originalSrc.split('/').pop() // ?뚯씪紐낅쭔 ?ъ슜
         ];
         
         let currentIndex = 0;
@@ -154,7 +154,7 @@ function initializeApp() {
     function setImageSource(imgElement, itemName) {
         const placeholderPath = imageBasePath + 'placeholder.png';
         
-        // 기본 placeholder 설정
+        // 湲곕낯 placeholder ?ㅼ젙
         imgElement.src = placeholderPath;
         imgElement.onerror = () => {
             console.warn('Failed to load placeholder image:', placeholderPath);
@@ -165,7 +165,7 @@ function initializeApp() {
         if (item && item.imageUrl) {
             console.log('Loading image for', itemName, ':', item.imageUrl);
             
-            // 이미지 로딩 테스트
+            // ?대?吏 濡쒕뵫 ?뚯뒪??
             const testImg = new Image();
             testImg.onload = () => {
                 console.log('Image loaded successfully:', item.imageUrl);
@@ -173,7 +173,7 @@ function initializeApp() {
             };
             testImg.onerror = () => {
                 console.warn('Failed to load image:', item.imageUrl);
-                // 다른 경로들을 시도해보기
+                // ?ㅻⅨ 寃쎈줈?ㅼ쓣 ?쒕룄?대낫湲?
                 const altPaths = [
                     './' + item.imageUrl,
                     item.imageUrl.replace('images/', './images/'),
@@ -240,10 +240,10 @@ function initializeApp() {
                 const attr = state.gameData.attributes.find(a => a.name === item.attribute);
                 const borderColor = attr ? attr.color : getCharacterColor(item.attribute);
                 
-                // GitHub Pages 경로 처리
+                // GitHub Pages 寃쎈줈 泥섎━
                 let imageSrc = './images/placeholder.png';
                 if (item.imageUrl) {
-                    // 절대 경로로 변환
+                    // ?덈? 寃쎈줈濡?蹂??
                     if (item.imageUrl.startsWith('images/') || item.imageUrl.startsWith('kibo_image/')) {
                         imageSrc = './' + item.imageUrl;
                     } else {
@@ -260,15 +260,15 @@ function initializeApp() {
                          data-original-src="${item.imageUrl || ''}"
                          data-item-name="${item.name}">
                     <h3>${item.name}</h3>
-                    <span class="attribute-tag">${getAttributeEmoji(item.attribute)} ${item.attribute || '미공개'}</span>
+                    <span class="attribute-tag">${getAttributeEmoji(item.attribute)} ${item.attribute || '誘멸났媛?}</span>
                     <div class="item-info">
-                        ${state.currentListType === 'characters' ? `<small>종족: ${item.race || '미공개'}</small>` : `<small>${item.note || ''}</small>`}
-                        <small>채널: ${item.releaseChannel || '미공개'}</small>
+                        ${state.currentListType === 'characters' ? `<small>醫낆”: ${item.race || '誘멸났媛?}</small>` : `<small>${item.note || ''}</small>`}
+                        <small>梨꾨꼸: ${item.releaseChannel || '誘멸났媛?}</small>
                     </div>
                 </div>`;
             }).join('');
             
-            // 카드 클릭 이벤트 추가
+            // 移대뱶 ?대┃ ?대깽??異붽?
             elements.itemListDiv.querySelectorAll('.item-card').forEach(card => {
                 card.onclick = () => {
                     const item = filtered.find(item => item.name === card.dataset.name);
@@ -286,13 +286,13 @@ function initializeApp() {
             <img src="${imageBasePath + 'placeholder.png'}" alt="${item.name}" id="detail-image">
             <h2>${item.name}</h2>
             <div class="info-grid">
-                <strong>속성:</strong><span>${getAttributeEmoji(item.attribute)}${item.attribute || '미공개'}</span>
-                <strong>${type === 'characters' ? '종족' : '비고'}:</strong><span>${type === 'characters' ? item.race : item.note}</span>
-                <strong>공개채널:</strong><span>${item.releaseChannel || '미공개'}</span>
+                <strong>?띿꽦:</strong><span>${getAttributeEmoji(item.attribute)}${item.attribute || '誘멸났媛?}</span>
+                <strong>${type === 'characters' ? '醫낆”' : '鍮꾧퀬'}:</strong><span>${type === 'characters' ? item.race : item.note}</span>
+                <strong>怨듦컻梨꾨꼸:</strong><span>${item.releaseChannel || '誘멸났媛?}</span>
                 ${detailsHTML}
             </div>`;
         
-        // 이미지 로딩 처리
+        // ?대?吏 濡쒕뵫 泥섎━
         if (item.imageUrl) {
             const detailImg = document.getElementById('detail-image');
             loadImageWithFallback(detailImg, item.imageUrl, item.name);
@@ -308,9 +308,9 @@ function initializeApp() {
             return new Chart(canvas.getContext('2d'), { type, data, options });
         };
         state.charts.attribute = createChart(elements.attributeChartCanvas, state.charts.attribute, 'pie', { labels: state.gameData.attributes.map(a => a.name), datasets: [{ data: state.gameData.attributes.map(a => a.count), backgroundColor: state.gameData.attributes.map(a => a.color) }] }, chartOptions);
-        state.charts.race = createChart(elements.raceChartCanvas, state.charts.race, 'bar', { labels: state.gameData.races.map(r => r.name), datasets: [{ label: '캐릭터 수', data: state.gameData.races.map(r => r.count), backgroundColor: ['#FF9800', '#9C27B0', '#2196F3', '#4CAF50', '#F44336', '#3F51B5'] }] }, { ...chartOptions, plugins: { legend: { display: false } } });
+        state.charts.race = createChart(elements.raceChartCanvas, state.charts.race, 'bar', { labels: state.gameData.races.map(r => r.name), datasets: [{ label: '罹먮┃????, data: state.gameData.races.map(r => r.count), backgroundColor: ['#FF9800', '#9C27B0', '#2196F3', '#4CAF50', '#F44336', '#3F51B5'] }] }, { ...chartOptions, plugins: { legend: { display: false } } });
         state.charts.channel = createChart(elements.channelChartCanvas, state.charts.channel, 'doughnut', { labels: state.gameData.releaseChannels.map(c => c.name), datasets: [{ data: state.gameData.releaseChannels.map(c => c.count), backgroundColor: ['#00BCD4', '#CDDC39', '#FF5722', '#9E9E9E'] }] }, chartOptions);
-        state.charts.type = createChart(elements.typeChartCanvas, state.charts.type, 'pie', { labels: ['캐릭터', '키보'], datasets: [{ data: [state.gameData.characters.length, state.gameData.kibos.length], backgroundColor: ['#5c6bc0', '#26a69a'] }] }, chartOptions);
+        state.charts.type = createChart(elements.typeChartCanvas, state.charts.type, 'pie', { labels: ['罹먮┃??, '?ㅻ낫'], datasets: [{ data: [state.gameData.characters.length, state.gameData.kibos.length], backgroundColor: ['#5c6bc0', '#26a69a'] }] }, chartOptions);
     }
 
     function startFlashcardGame() {
@@ -326,7 +326,7 @@ function initializeApp() {
         if (state.flashcard.currentIndex >= state.flashcard.totalQuestions) return showFlashcardResult();
 
         elements.fcCounter.textContent = `${state.flashcard.currentIndex + 1} / ${state.flashcard.totalQuestions}`;
-        elements.fcScore.textContent = `${state.flashcard.score} 점`;
+        elements.fcScore.textContent = `${state.flashcard.score} ??;
 
         const question = state.flashcard.questions[state.flashcard.currentIndex];
         setImageSource(elements.fcImage, question.name);
@@ -358,12 +358,12 @@ function initializeApp() {
         });
         if (selected === correct) {
             state.flashcard.score += 10;
-            Toast.success('정답입니다!');
+            Toast.success('?뺣떟?낅땲??');
         } else {
             button.classList.add('incorrect');
-            Toast.error('오답입니다!');
+            Toast.error('?ㅻ떟?낅땲??');
         }
-        elements.fcScore.textContent = `${state.flashcard.score} 점`;
+        elements.fcScore.textContent = `${state.flashcard.score} ??;
         elements.fcNextBtn.classList.remove('hidden');
     }
 
@@ -375,9 +375,9 @@ function initializeApp() {
         saveFlashcardScore(state.flashcard.score);
 
         elements.fcResult.innerHTML = `
-            <h3>게임 종료!</h3>
-            <p>점수: ${state.flashcard.score}점</p>
-            <button id="restart-flashcard" class="btn btn-primary">다시하기</button>
+            <h3>寃뚯엫 醫낅즺!</h3>
+            <p>?먯닔: ${state.flashcard.score}??/p>
+            <button id="restart-flashcard" class="btn btn-primary">?ㅼ떆?섍린</button>
         `;
         safeGetElement('restart-flashcard').onclick = startFlashcardGame;
 
@@ -433,7 +433,7 @@ function initializeApp() {
         rankListEl.innerHTML = topScores.map(entry => `
             <li class="rank-item">
                 <span class="rank-number">${entry.rank}</span>
-                <span class="rank-score">${entry.score}점</span>
+                <span class="rank-score">${entry.score}??/span>
                 <span class="rank-time">${entry.time}</span>
             </li>
         `).join('');
@@ -442,7 +442,7 @@ function initializeApp() {
     function startNewTournament(type) {
         state.tournament.type = type;
         const sourceData = (type === 'characters' ? state.gameData.characters : state.gameData.kibos).filter(i => i.name);
-        if (sourceData.length < 2) return Toast.error('항목이 부족합니다.');
+        if (sourceData.length < 2) return Toast.error('??ぉ??遺議깊빀?덈떎.');
 
         showScreen(elements.tournamentSection);
         elements.winnerDisplay.classList.add('hidden');
@@ -461,14 +461,14 @@ function initializeApp() {
             state.tournament.winners = [];
         }
         const roundSize = state.tournament.contestants.length + state.tournament.winners.length;
-        elements.tournamentTitle.textContent = `${roundSize === 2 ? "결승" : `${roundSize}강`} - ${state.tournament.type === 'characters' ? '캐릭터' : '키보'} 최애 찾기`;
+        elements.tournamentTitle.textContent = `${roundSize === 2 ? "寃곗듅" : `${roundSize}媛?} - ${state.tournament.type === 'characters' ? '罹먮┃?? : '?ㅻ낫'} 理쒖븷 李얘린`;
         state.tournament.matchup = [state.tournament.contestants.pop(), state.tournament.contestants.pop()];
         renderMatchup(state.tournament.matchup[0], elements.matchItem1Div);
         renderMatchup(state.tournament.matchup[1], elements.matchItem2Div);
     }
 
     function renderMatchup(itemName, element) {
-        element.innerHTML = `<img src="${imageBasePath + 'placeholder.png'}" alt="${itemName}"><h3>${itemName}</h3><div class="heart">♥</div>`;
+        element.innerHTML = `<img src="${imageBasePath + 'placeholder.png'}" alt="${itemName}"><h3>${itemName}</h3><div class="heart">??/div>`;
         setImageSource(element.querySelector('img'), itemName);
     }
 
@@ -487,7 +487,7 @@ function initializeApp() {
     function displayWinner(winnerName) {
         elements.matchupContainer.classList.add('hidden');
         elements.winnerDisplay.classList.remove('hidden');
-        elements.tournamentTitle.textContent = `당신의 최애!`;
+        elements.tournamentTitle.textContent = `?뱀떊??理쒖븷!`;
         elements.finalWinnerDiv.innerHTML = `<img src="${imageBasePath + 'placeholder.png'}" alt="${winnerName}"><h3>${winnerName}</h3>`;
         setImageSource(elements.finalWinnerDiv.querySelector('img'), winnerName);
     }
@@ -514,18 +514,18 @@ function initializeApp() {
     elements.restartTournamentBtn.onclick = () => startNewTournament(state.tournament.type);
     elements.backToMainMenuBtn.onclick = () => showScreen(elements.characterSection);
 
-// 전역 데이터 로딩 함수
+// ?꾩뿭 ?곗씠??濡쒕뵫 ?⑥닔
 window.loadData = async function() {
     try {
         console.log('Starting data load...');
         
-        // 경로 확인
+        // 寃쎈줈 ?뺤씤
         const basePath = window.location.pathname.endsWith('/') ? window.location.pathname : window.location.pathname + '/';
         const jsonPath = basePath + 'data.json';
         console.log('JSON path:', jsonPath);
         console.log('Current URL:', window.location.href);
         
-        // 요소 확인
+        // ?붿냼 ?뺤씤
         const loader = document.getElementById('loader');
         const mainContent = document.getElementById('main-content');
         
@@ -539,10 +539,11 @@ window.loadData = async function() {
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
         console.log('Parsing JSON...');
-        state.gameData = await response.json();
-        console.log('Data loaded successfully:', state.gameData);
+        const raw = await response.json();
+        state.gameData = (window.__normalizeRawData ? window.__normalizeRawData(raw) : raw);
+        console.log('Data loaded successfully (normalized):', state.gameData);
 
-        // 이미지 경로 정규화
+        // ?대?吏 寃쎈줈 ?뺢퇋??
         normalizeImagePaths();
 
         // Initialize filters
@@ -561,22 +562,22 @@ window.loadData = async function() {
         // Update ranking display
         updateRankingDisplay();
 
-        Toast.success('데이터 로딩 완료!');
+        Toast.success('?곗씠??濡쒕뵫 ?꾨즺!');
         return 'SUCCESS';
     } catch (error) {
-        console.error('데이터 로딩 실패:', error);
+        console.error('?곗씠??濡쒕뵫 ?ㅽ뙣:', error);
         const loader = document.getElementById('loader');
         if (loader) {
             loader.innerHTML = `
                 <div class="error-message">
-                    <h3>🚫 데이터 로딩 실패</h3>
-                    <p>데이터를 불러올 수 없습니다. 네트워크 연결을 확인하고 페이지를 새로고침해주세요.</p>
-                    <p class="error-details">오류: ${error.message}</p>
-                    <button onclick="location.reload()" class="btn btn-primary">🔄 새로고침</button>
+                    <h3>?슟 ?곗씠??濡쒕뵫 ?ㅽ뙣</h3>
+                    <p>?곗씠?곕? 遺덈윭?????놁뒿?덈떎. ?ㅽ듃?뚰겕 ?곌껐???뺤씤?섍퀬 ?섏씠吏瑜??덈줈怨좎묠?댁＜?몄슂.</p>
+                    <p class="error-details">?ㅻ쪟: ${error.message}</p>
+                    <button onclick="location.reload()" class="btn btn-primary">?봽 ?덈줈怨좎묠</button>
                 </div>
             `;
         }
-        Toast.error('데이터 로딩에 실패했습니다.');
+        Toast.error('?곗씠??濡쒕뵫???ㅽ뙣?덉뒿?덈떎.');
         return 'FAILED: ' + error.message;
     }
 };
@@ -659,7 +660,7 @@ window.loadData = async function() {
         elements.activeFiltersDiv.innerHTML = allFilters.map(filter => `
             <span class="active-filter">
                 ${filter.display}
-                <span class="remove-filter" data-type="${filter.type}" data-value="${filter.value}">×</span>
+                <span class="remove-filter" data-type="${filter.type}" data-value="${filter.value}">횞</span>
             </span>
         `).join('');
 
@@ -696,7 +697,7 @@ window.loadData = async function() {
         if (totalCharactersEl) totalCharactersEl.textContent = state.gameData.characters.length;
         if (totalKibosEl) totalKibosEl.textContent = state.gameData.kibos.length;
         if (totalChannelsEl) totalChannelsEl.textContent = state.gameData.releaseChannels.length;
-        if (lastUpdatedEl) lastUpdatedEl.textContent = state.gameData.metadata?.lastUpdated || '알 수 없음';
+        if (lastUpdatedEl) lastUpdatedEl.textContent = state.gameData.metadata?.lastUpdated || '?????놁쓬';
     }
 
     function updateActiveFiltersDisplay() {
@@ -709,7 +710,7 @@ window.loadData = async function() {
             activeFilters.push({
                 type: 'search',
                 value: state.activeFilters.search,
-                display: `검색: "${state.activeFilters.search}"`
+                display: `寃?? "${state.activeFilters.search}"`
             });
         }
         
@@ -727,7 +728,7 @@ window.loadData = async function() {
             activeFilters.push({
                 type: 'races',
                 value: race,
-                display: `종족: ${race}`
+                display: `醫낆”: ${race}`
             });
         });
         
@@ -736,14 +737,14 @@ window.loadData = async function() {
             activeFilters.push({
                 type: 'channels',
                 value: channel,
-                display: `채널: ${channel}`
+                display: `梨꾨꼸: ${channel}`
             });
         });
         
         elements.activeFiltersDiv.innerHTML = activeFilters.map(filter => `
             <div class="active-filter">
                 ${filter.display}
-                <span class="remove-filter" onclick="removeActiveFilter('${filter.type}', '${filter.value}')">×</span>
+                <span class="remove-filter" onclick="removeActiveFilter('${filter.type}', '${filter.value}')">횞</span>
             </div>
         `).join('');
     }
@@ -777,30 +778,30 @@ window.loadData = async function() {
     loadData();
 }
 
-// 유틸리티 함수들
+// ?좏떥由ы떚 ?⑥닔??
 function getAttributeEmoji(attribute) {
     const emojis = {
-        '불': '🔥', '물': '💧', '땅': '🌋', '번개': '⚡', 
-        '바람': '🌪️', '어둠': '🌑', '빛': '✨', '얼음': '❄️', '나무': '🌲'
+        '遺?: '?뵦', '臾?: '?뮛', '??: '?뙅', '踰덇컻': '??, 
+        '諛붾엺': '?뙦截?, '?대몺': '?뙌', '鍮?: '??, '?쇱쓬': '?꾬툘', '?섎Т': '?뙯'
     };
-    return emojis[attribute] || '❓';
+    return emojis[attribute] || '??;
 }
 
 function getCharacterColor(attribute) {
     const colors = {
-        '불': '#FF5722', '물': '#2196F3', '땅': '#795548', '번개': '#FFEB3B',
-        '바람': '#4CAF50', '어둠': '#9C27B0', '빛': '#FFC107', '얼음': '#00BCD4', '나무': '#8BC34A'
+        '遺?: '#FF5722', '臾?: '#2196F3', '??: '#795548', '踰덇컻': '#FFEB3B',
+        '諛붾엺': '#4CAF50', '?대몺': '#9C27B0', '鍮?: '#FFC107', '?쇱쓬': '#00BCD4', '?섎Т': '#8BC34A'
     };
     return colors[attribute] || '#ccc';
 }
 
-// 이미지 경로 정규화 함수
+// ?대?吏 寃쎈줈 ?뺢퇋???⑥닔
 function normalizeImagePaths() {
     if (!state.gameData) return;
     
     console.log('Normalizing image paths...');
     
-    // 캐릭터 이미지 경로 정규화
+    // 罹먮┃???대?吏 寃쎈줈 ?뺢퇋??
     state.gameData.characters.forEach(char => {
         if (char.imageUrl && !char.imageUrl.startsWith('http') && !char.imageUrl.startsWith('./')) {
             char.imageUrl = './' + char.imageUrl;
@@ -808,7 +809,7 @@ function normalizeImagePaths() {
         console.log(`Character ${char.name}: ${char.imageUrl}`);
     });
     
-    // 키보 이미지 경로 정규화
+    // ?ㅻ낫 ?대?吏 寃쎈줈 ?뺢퇋??
     state.gameData.kibos.forEach(kibo => {
         if (kibo.imageUrl && !kibo.imageUrl.startsWith('http') && !kibo.imageUrl.startsWith('./')) {
             kibo.imageUrl = './' + kibo.imageUrl;
@@ -817,14 +818,14 @@ function normalizeImagePaths() {
     });
 }
 
-// 전역 이미지 오류 처리 함수
+// ?꾩뿭 ?대?吏 ?ㅻ쪟 泥섎━ ?⑥닔
 window.handleImageError = function(imgElement, originalSrc) {
     console.log('Image loading failed for:', originalSrc);
     
     if (!imgElement.dataset.retryAttempted) {
         imgElement.dataset.retryAttempted = 'true';
         
-        // 다양한 경로 시도
+        // ?ㅼ뼇??寃쎈줈 ?쒕룄
         const pathsToTry = [
             './images/placeholder.png',
             'images/placeholder.png',
@@ -850,7 +851,7 @@ window.handleImageError = function(imgElement, originalSrc) {
                 };
                 testImg.src = pathToTry;
             } else {
-                // 모든 경로 실패시 SVG placeholder 사용
+                // 紐⑤뱺 寃쎈줈 ?ㅽ뙣??SVG placeholder ?ъ슜
                 console.log('All fallback paths failed, using SVG placeholder');
                 imgElement.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
             }
@@ -860,9 +861,94 @@ window.handleImageError = function(imgElement, originalSrc) {
     }
 };
 
-// DOM이 로드되면 초기화
+// DOM??濡쒕뱶?섎㈃ 珥덇린??
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeApp);
 } else {
     initializeApp();
 }
+(function(){
+  if (typeof window === 'undefined') return;
+  // Normalizes various raw CSV-derived JSON shapes to the app's expected shape
+  function normalizeRawData(raw){
+    try{
+      if (raw && Array.isArray(raw.characters) && Array.isArray(raw.kibos)) return raw;
+      const rows = (arr)=> Array.isArray(arr)? arr : [];
+      const pick = (row, patterns)=>{
+        if (!row) return '';
+        const keys = Object.keys(row);
+        for (const k of keys){
+          const lower = (k||'').toString().toLowerCase();
+          if (patterns.some(p=> lower.includes(p))) return (row[k]||'').toString().trim();
+        }
+        return '';
+      };
+      const buildCharacters = ()=>{
+        const out=[];
+        for (const r of rows(raw.characters)){
+          const name = pick(r, ['캐릭','char','name']);
+          if (!name) continue;
+          const attribute = pick(r, ['속성','attr']);
+          const race = pick(r, ['종족','race']);
+          const release = pick(r, ['공개','채널','channel']);
+          out.push({ name, attribute, race, releaseChannel: release, imageUrl: ''});
+        }
+        // If empty, try to parse from characterDetails pivot-like rows
+        if (out.length===0){
+          const det = rows(raw.characterDetails);
+          // Collect column names from the first row (header-like)
+          if (det.length){
+            const firstKey = Object.keys(det[0])[0];
+            const cols = Object.keys(det[0]).filter(k=>k!==firstKey);
+            const block = {};
+            for(const row of det){
+              const label = row[firstKey];
+              if (!label) continue;
+              block[label] = row;
+            }
+            for (const col of cols){
+              const name = (det[0][col]||'').toString().trim();
+              if (!name) continue;
+              const attribute = (block['속성']?.[col] || block['�Ӽ�']?.[col] || '').toString().trim();
+              const race      = (block['종족']?.[col] || block['����']?.[col] || '').toString().trim();
+              const release   = (block['공개채널']?.[col] || block['����ä��']?.[col] || '').toString().trim();
+              out.push({ name, attribute, race, releaseChannel: release, imageUrl:'' });
+            }
+          }
+        }
+        return out;
+      };
+      const buildKibos = ()=>{
+        const src = rows(raw.kibo || raw.kibos);
+        const out=[];
+        for(const r of src){
+          const name = pick(r, ['키보','kibo','name']);
+          if (!name) continue;
+          const attribute = pick(r, ['속성','attr']);
+          const release = pick(r, ['공개','채널','channel']);
+          const note = pick(r, ['비고','note']);
+          out.push({ name, attribute, note, releaseChannel: release, imageUrl:'', altName:'' });
+        }
+        return out;
+      };
+      const characters = buildCharacters();
+      const kibos = buildKibos();
+      const aggregate = (arr, field)=>{
+        const map = new Map();
+        for(const o of arr){
+          const v=(o?.[field]||'').toString();
+          v.split(/\s*&\s*|,\s*/).forEach(p=>{ p=p.trim(); if(p) map.set(p,(map.get(p)||0)+1); });
+        }
+        return Array.from(map, ([name,count])=>({ name, count, color: undefined }));
+      };
+      const attributes = aggregate(characters,'attribute');
+      const races = Array.from(new Set(characters.map(c=>c.race).filter(Boolean))).map(n=>({name:n, count: characters.filter(c=>c.race===n).length}));
+      const releaseChannels = aggregate(characters,'releaseChannel');
+      return { characters, kibos, attributes, races, releaseChannels, metadata: raw?.metadata||{} };
+    }catch(e){
+      console.warn('normalizeRawData fallback failed:', e);
+      return raw;
+    }
+  }
+  window.__normalizeRawData = normalizeRawData;
+})();
