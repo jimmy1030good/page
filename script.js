@@ -433,10 +433,50 @@ function initializeApp() {
         rankListEl.innerHTML = topScores.map(entry => `
             <li class="rank-item">
                 <span class="rank-number">${entry.rank}</span>
-                <span class="rank-score">${entry.score}??/span>
+                <span class="rank-score">${entry.score}점</span>
                 <span class="rank-time">${entry.time}</span>
             </li>
         `).join('');
+    }
+
+    // --- Community Embedding ---
+    function openCommunity(url) {
+        const iframe = document.getElementById('community-iframe');
+        const fallback = document.getElementById('community-fallback');
+        const openNew = document.getElementById('community-open-new');
+        if (openNew) openNew.href = url;
+        if (!iframe) return;
+
+        let triedProxy = false;
+        const useProxy = () => {
+            triedProxy = true;
+            try {
+                const u = new URL(url);
+                // Read-only proxy view to bypass X-Frame-Options/CSP
+                const proxied = `https://r.jina.ai/http://${u.host}${u.pathname}`;
+                iframe.src = proxied;
+                if (fallback) fallback.style.display = 'none';
+            } catch (_) {
+                if (fallback) fallback.style.display = 'block';
+            }
+        };
+
+        iframe.onload = () => {
+            setTimeout(() => {
+                try {
+                    const loc = iframe.contentWindow.location.href;
+                    if (loc === 'about:blank' || loc === 'about:blank#blocked') {
+                        if (!triedProxy) useProxy();
+                        else if (fallback) fallback.style.display = 'block';
+                    }
+                } catch (_) {
+                    // Cross-origin access throws; assume loaded OK
+                }
+            }, 600);
+        };
+
+        if (fallback) fallback.style.display = 'none';
+        iframe.src = url;
     }
 
     function startNewTournament(type) {
@@ -500,6 +540,15 @@ function initializeApp() {
             else if (targetId === 'keyboard') displayList('kibos');
             else showScreen(elements[`${targetId}Section`] || safeGetElement(targetId));
         };
+    });
+
+    // Wire community links to in-page viewer with fallback
+    document.querySelectorAll('.community-link').forEach(a => {
+        a.addEventListener('click', (e) => {
+            e.preventDefault();
+            openCommunity(a.href);
+            showScreen(elements.communitySection);
+        });
     });
 
     elements.backToListBtn.onclick = () => showScreen(state.currentListType === 'characters' ? elements.characterSection : elements.keyboardSection);
