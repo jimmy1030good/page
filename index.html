@@ -1,252 +1,190 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>아주르 정보 뷰어</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./style.css">
-    <meta name="description" content="아주르 프로밀리아 캐릭터 및 키보 정보를 확인할 수 있는 웹 뷰어입니다.">
-    <meta name="keywords" content="아주르 프로밀리아, 캐릭터, 키보, 게임">
-    <meta property="og:title" content="아주르 정보 뷰어">
-    <meta property="og:description" content="아주르 프로밀리아 캐릭터 및 키보 정보 뷰어">
-    <meta property="og:type" content="website">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>아주르 정보 뷰어</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.final.v2.css">
+  <meta name="description" content="아주르프로밀리아 캐릭터/키보 정보 보기">
+  <meta name="keywords" content="아주르프로밀리아, 캐릭터, 키보, 게임">
+  <meta property="og:title" content="아주르 정보 뷰어">
+  <meta property="og:description" content="아주르프로밀리아 캐릭터/키보 정보 뷰어">
 </head>
 <body>
-    <div id="loader" class="loader-container">
-        <div class="spinner"></div>
-        <p>데이터 로딩중...</p>
-    </div>
+  <div id="loader" class="loader-container">
+    <div class="spinner"></div>
+    <p>로딩 중...</p>
+  </div>
 
-    <div id="dynamic-background"></div>
-    
-    <!-- 토스트 알림 컨테이너 -->
-    <div id="toast-container"></div>
-    <header>
-        <h1>아주르 정보 뷰어</h1>
-        <nav>
-            <button data-target="character" class="nav-btn">캐릭터</button>
-            <button data-target="keyboard" class="nav-btn">키보</button>
-            <button data-target="stats" class="nav-btn">통계</button>
-            <button data-target="community" class="nav-btn">커뮤니티</button>
-            <button data-target="minigame" class="nav-btn">미니게임</button>
-        </nav>
-    </header>
-    <main id="main-content" class="hidden">
-        <!-- ───────── MAIN ────────── -->
-        <section id="character" class="panel">
-            <div class="filter-container">
-                <div class="search-box">
-                    <input type="text" id="search-input" placeholder="이름 또는 설명 검색...">
-                    <button id="search-button" class="btn btn-primary">검색</button>
-                </div>
-                
-                <div class="filter-panel">
-                    <div class="filter-group">
-                        <h3>속성</h3>
-                        <div class="chip-group attribute-filters" id="attribute-filters">
-                            <!-- 속성 필터 옵션들이 자동으로 추가됩니다 -->
-                        </div>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <h3>종족</h3>
-                        <div class="chip-group race-filters" id="race-filters">
-                            <!-- 종족 필터 옵션들이 자동으로 추가됩니다 -->
-                        </div>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <h3>공개채널</h3>
-                        <div class="chip-group channel-filters" id="channel-filters">
-                            <!-- 공개채널 필터 옵션들이 자동으로 추가됩니다 -->
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="filter-actions">
-                    <button id="apply-filters" class="btn btn-primary">필터 적용</button>
-                    <button id="reset-filters" class="btn btn-secondary">필터 초기화</button>
-                </div>
-                
-                <div class="filter-summary">
-                    <span id="result-count">0</span>개 결과
-                    <div id="active-filters">
-                        <!-- 활성화된 필터 태그들이 자동으로 추가됩니다 -->
-                    </div>
-                </div>
-            </div>
-            
-            <!-- MiniNav 추가 -->
-            <nav id="mini-nav" class="sticky top-0 bg-backdrop-40 backdrop-blur z-50">
-                <a href="#character" class="mini-nav-link">캐릭터</a>
-                <a href="#keyboard" class="mini-nav-link">키보</a>
-                <a href="#boss" class="mini-nav-link">보스</a>
-            </nav>
-            
-            <div id="item-list"></div>
-            
-            <!-- 캐러셀 추가 -->
-            <div class="carousel-container">
-                <div class="carousel-track">
-                    <!-- 썸네일 이미지들이 자동으로 추가됩니다 -->
-                </div>
-            </div>
-        </section>
-        
-        <section id="keyboard" class="panel">
-            <h2>키보드 캐릭터</h2>
-            <div class="section-content">
-                <p>아주르 프로밀리아의 키보드 캐릭터 정보를 확인하세요.</p>
-                <div class="keyboard-list"></div>
-            </div>
-        </section>
-        
-        <section id="stats" class="panel">
-            <h2>통계</h2>
-            <div class="stats-container">
-                <div class="stats-card">
-                    <h3>속성별 분포</h3>
-                    <div class="chart-container">
-                        <canvas id="attribute-chart-canvas"></canvas>
-                    </div>
-                </div>
-                
-                <div class="stats-card">
-                    <h3>종족별 분포</h3>
-                    <div class="chart-container">
-                        <canvas id="race-chart-canvas"></canvas>
-                    </div>
-                </div>
-                
-                <div class="stats-card">
-                    <h3>공개채널별 분포</h3>
-                    <div class="chart-container">
-                        <canvas id="channel-chart-canvas"></canvas>
-                    </div>
-                </div>
-                
-                <div class="stats-card">
-                    <h3>캐릭터 vs 키보 비율</h3>
-                    <div class="chart-container">
-                        <canvas id="type-chart-canvas"></canvas>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <section id="community" class="panel">
-            <h2>커뮤니티</h2>
-            <div class="community-container">
-                <div class="community-card">
-                    <h3>🔥 커뮤니티 링크</h3>
-                    <div class="community-links">
-                        <a href="https://arca.live/b/azurpromilia" target="_blank" rel="noopener noreferrer" class="community-link arcalive">
-                            <div class="link-icon">🏛️</div>
-                            <div class="link-content">
-                                <h4>아카라이브 아주르 프로밀리아</h4>
-                                <p>공식 커뮤니티에서 최신 정보와 토론을 확인하세요</p>
-                            </div>
-                        </a>
-                        
-                        <a href="https://azurpromilia.com" target="_blank" rel="noopener noreferrer" class="community-link official">
-                            <div class="link-icon">🌐</div>
-                            <div class="link-content">
-                                <h4>공식 홈페이지</h4>
-                                <p>게임 공식 정보와 업데이트를 확인하세요</p>
-                            </div>
-                        </a>
-                        
-                        <a href="https://www.youtube.com/@AzurPromilia" target="_blank" rel="noopener noreferrer" class="community-link youtube">
-                            <div class="link-icon">📺</div>
-                            <div class="link-content">
-                                <h4>공식 유튜브</h4>
-                                <p>PV와 게임 영상을 시청하세요</p>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                
-                <div class="community-card">
-                    <h3>📊 커뮤니티 활동</h3>
-                    <div class="community-stats">
-                        <div class="stat-item">
-                            <span class="stat-label">총 캐릭터</span>
-                            <span class="stat-value" id="total-characters">-</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">총 키보</span>
-                            <span class="stat-value" id="total-kibos">-</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">공개 채널</span>
-                            <span class="stat-value" id="total-channels">-</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">마지막 업데이트</span>
-                            <span class="stat-value" id="last-updated">-</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
+  <div id="toast-container"></div>
 
-        <!-- 상세 정보 섹션 -->
-        <section id="detail-section" class="panel hidden">
-            <button id="back-to-list-button" class="btn btn-secondary">목록으로</button>
-            <div id="item-detail"></div>
-        </section>
+  <header>
+    <h1>아주르 정보 뷰어</h1>
+    <nav>
+      <button data-target="character" class="nav-btn">캐릭터</button>
+      <button data-target="keyboard" class="nav-btn">키보</button>
+      <button data-target="stats" class="nav-btn">통계</button>
+      <button data-target="community" class="nav-btn">커뮤니티</button>
+      <button data-target="minigame" class="nav-btn">미니게임</button>
+    </nav>
+  </header>
 
-        <!-- 미니게임 허브 섹션 -->
-        <section id="minigame" class="panel">
-            <h2>미니게임 허브</h2>
-            <p>소소한 재미와 정보 암기를 위한 미니게임 모음</p>
-            <div class="game-grid">
-                <button id="open-favorite" class="game-btn teal"><span>💖</span> 최애 찾기</button>
-                <button id="open-flashcard" class="game-btn orange"><span>🂠</span> 플래시 카드</button>
-            </div>
+  <main id="main-content" class="hidden">
+    <section id="character" class="panel">
+      <div class="filter-container">
+        <div class="search-box">
+          <input type="text" id="search-input" placeholder="이름 또는 키워드 검색...">
+          <button id="search-button" class="btn btn-primary">검색</button>
+        </div>
 
-            <!-- FlashCard Game Container (숨김) -->
-            <div id="flashcard-wrap" class="flashcard hidden">
-                <div class="fc-head">
-                    <span id="fc-counter">1 / 10</span>
-                    <span id="fc-score">0 점</span>
-                </div>
-                <img id="fc-image" alt="카드 이미지" />
-                <div id="fc-options" class="fc-options"></div>
-                <button id="fc-next" class="btn btn-primary hidden">다음</button>
-                <div id="fc-result" class="hidden"></div>
-            </div>
+        <div class="filter-panel">
+          <div class="filter-group">
+            <h3>속성</h3>
+            <div class="chip-group attribute-filters" id="attribute-filters"></div>
+          </div>
+          <div class="filter-group">
+            <h3>종족</h3>
+            <div class="chip-group race-filters" id="race-filters"></div>
+          </div>
+        </div>
 
-            <!-- Daily Rank -->
-            <h3 id="rank-title" class="hidden">오늘의 랭킹</h3>
-            <div class="rank-container">
-                <ol id="rank-list" class="rank-board"></ol>
-            </div>
-        </section>
+        <div class="filter-actions">
+          <button id="apply-filters" class="btn btn-primary">필터 적용</button>
+          <button id="reset-filters" class="btn btn-secondary">필터 초기화</button>
+        </div>
 
-        <!-- 토너먼트 섹션 -->
-        <section id="tournament-section" class="panel hidden">
-            <h2 id="tournament-title">최애를 선택하세요!</h2>
-            <div id="matchup-container">
-                <div class="match-item" id="match-item-1"></div>
-                <div class="vs-divider">VS</div>
-                <div class="match-item" id="match-item-2"></div>
-            </div>
-            <div id="winner-display" class="hidden">
-                <div class="winner-content">
-                    <h2 class="winner-title">당신의 최애!</h2>
-                    <div id="final-winner"></div>
-                    <button id="restart-tournament" class="btn btn-primary">다시하기</button>
-                </div>
-            </div>
-            <button id="back-to-main-menu" class="btn btn-secondary">메인 메뉴로</button>
-        </section>
-    </main>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="./script.js"></script>
+        <div class="filter-summary">
+          <span id="result-count">0</span> 개 결과
+          <div id="active-filters"></div>
+        </div>
+      </div>
+
+      <div id="item-list"></div>
+    </section>
+
+    <section id="keyboard" class="panel">
+      <h2>키보</h2>
+      <div class="section-content">
+        <div class="keyboard-list"></div>
+      </div>
+    </section>
+
+    <section id="stats" class="panel">
+      <h2>통계</h2>
+      <div class="stats-container">
+        <div class="stats-card">
+          <canvas id="attribute-chart-canvas" class="chart-container"></canvas>
+        </div>
+        <div class="stats-card">
+          <canvas id="race-chart-canvas" class="chart-container"></canvas>
+        </div>
+        <div class="stats-card">
+          <canvas id="channel-chart-canvas" class="chart-container"></canvas>
+        </div>
+        <div class="stats-card">
+          <canvas id="kibo-attribute-chart-canvas" class="chart-container"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section id="community" class="panel">
+      <h2>커뮤니티</h2>
+      <div class="community-card">
+        <div class="community-stats">
+          <div class="stat-item">
+            <span class="stat-label">총 캐릭터</span>
+            <span class="stat-value" id="total-characters">-</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">총 키보</span>
+            <span class="stat-value" id="total-kibos">-</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">공개 채널</span>
+            <span class="stat-value" id="total-channels">-</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">마지막 업데이트</span>
+            <span class="stat-value" id="last-updated">-</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="community-links" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap">
+        <a href="https://azurpromilia.com" class="community-link btn btn-secondary" target="_blank" rel="noopener">공식 사이트</a>
+        <a href="https://x.com/AzurPromilia" class="community-link btn btn-secondary" target="_blank" rel="noopener">X(트위터)</a>
+        <a href="https://www.youtube.com/@AzurPromilia" class="community-link btn btn-secondary" target="_blank" rel="noopener">유튜브</a>
+        <a href="https://arca.live/b/azurpromilia" class="community-link btn btn-secondary" target="_blank" rel="noopener">아카라이브</a>
+      </div>
+
+      <div id="community-viewer" style="margin-top:12px">
+        <iframe id="community-iframe" title="viewer" style="width:100%;height:520px;border:0;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.08)"></iframe>
+        <div id="community-fallback" style="display:none;margin-top:8px;color:#607d8b">
+          임베드가 차단된 페이지입니다. 
+          <a id="community-open-new" target="_blank" rel="noopener">새 탭에서 열기</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="detail-section" class="panel hidden">
+      <button id="back-to-list-button" class="btn btn-secondary">목록으로</button>
+      <div id="item-detail"></div>
+    </section>
+
+    <section id="minigame" class="panel">
+      <h2>미니게임</h2>
+      <div class="game-grid" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px">
+        <button id="open-favorite" class="btn btn-primary">최애 찾기</button>
+        <button id="open-flashcard" class="btn btn-secondary">플래시 카드</button>
+      </div>
+
+      <!-- Tournament -->
+      <div id="tournament" class="hidden">
+        <div id="matchup-container">
+          <div class="match-item" id="match-item-1"></div>
+          <div class="vs-divider">VS</div>
+          <div class="match-item" id="match-item-2"></div>
+        </div>
+        <div id="winner-display" class="hidden" style="text-align:center; margin-top:12px">
+          <div class="winner-content">
+            <h3 class="winner-title">당신의 최애!</h3>
+            <div id="final-winner"></div>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; justify-content:center; margin-top:12px">
+          <button id="restart-tournament" class="btn btn-primary">다시 하기</button>
+          <button id="back-to-main-menu" class="btn btn-secondary">메인으로</button>
+        </div>
+      </div>
+
+      <!-- Flashcard -->
+      <div id="flashcard-wrap" class="hidden" style="text-align:center">
+        <div class="fc-head" style="display:flex; gap:10px; justify-content:center; margin-bottom:8px">
+          <span id="fc-counter">1 / 10</span>
+          <span id="fc-score">0 점</span>
+        </div>
+        <img id="fc-image" alt="카드 이미지" style="max-height:320px" />
+        <div id="fc-options" class="fc-options" style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:10px"></div>
+        <div id="fc-result" class="hidden" style="margin-top:8px; font-weight:700"></div>
+        <div style="margin-top:10px">
+          <button id="fc-next" class="btn btn-primary hidden">다음</button>
+        </div>
+      </div>
+
+      <div id="score-save" class="hidden" style="margin-top:12px; display:flex; gap:8px; align-items:center; justify-content:center">
+        <input id="score-nick" placeholder="닉네임" style="padding:10px;border:1px solid #e0e6f0;border-radius:10px;min-width:220px" />
+        <button id="score-save-btn" class="btn btn-primary">점수 저장</button>
+      </div>
+
+      <h3 id="rank-title" class="hidden">오늘의 점수</h3>
+      <ol id="rank-list" class="rank-board"></ol>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
