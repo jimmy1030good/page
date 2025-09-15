@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>간단 테스트</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .character-card { display: inline-block; margin: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 8px; text-align: center; }
+        .character-card img { width: 100px; height: 100px; object-fit: contain; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>🧪 간단 테스트</h1>
+    
+    <div class="test-section">
+        <h3>1. 직접 이미지 테스트</h3>
+        <div class="character-card">
+            <img src="images/terara.gif" alt="테라라" onerror="this.style.border='2px solid red';" onload="this.style.border='2px solid green';">
+            <div>테라라</div>
+        </div>
+        <div class="character-card">
+            <img src="images/han_yoyo.gif" alt="한요요" onerror="this.style.border='2px solid red';" onload="this.style.border='2px solid green';">
+            <div>한요요</div>
+        </div>
+        <div class="character-card">
+            <img src="images/shalle.gif" alt="샬레" onerror="this.style.border='2px solid red';" onload="this.style.border='2px solid green';">
+            <div>샬레</div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h3>2. 데이터 로딩 테스트</h3>
+        <button onclick="loadData()">데이터 로드</button>
+        <div id="data-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>3. 동적 캐릭터 생성</h3>
+        <div id="dynamic-characters"></div>
+    </div>
+
+    <script>
+        async function loadData() {
+            const resultDiv = document.getElementById('data-result');
+            const dynamicDiv = document.getElementById('dynamic-characters');
+            
+            try {
+                console.log('데이터 로딩 시작...');
+                const response = await fetch('./data.json');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('데이터 로딩 성공:', data);
+                
+                resultDiv.innerHTML = `<div class="success">✅ 데이터 로딩 성공! 캐릭터 ${data.characters.length}개</div>`;
+                
+                // 동적으로 캐릭터 생성
+                dynamicDiv.innerHTML = data.characters.slice(0, 5).map(char => `
+                    <div class="character-card">
+                        <img src="${char.imageUrl}" alt="${char.name}" 
+                             onerror="this.style.border='2px solid red'; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2RkZCIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1zaXplPSIxMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5PIElNRzwvdGV4dD48L3N2Zz4=';" 
+                             onload="this.style.border='2px solid green';">
+                        <div><strong>${char.name}</strong></div>
+                        <div>${char.attribute} | ${char.race}</div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('데이터 로딩 실패:', error);
+                resultDiv.innerHTML = `<div class="error">❌ 데이터 로딩 실패: ${error.message}</div>`;
+            }
+        }
+        
+        // 페이지 로드 시 자동 실행
+        window.onload = () => {
+            console.log('페이지 로드 완료');
+            loadData();
+        };
+    </script>
+</body>
+</html>

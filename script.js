@@ -42,61 +42,11 @@ function safeGetElement(id) {
     return element;
 }
 
-// 즉시 실행 - DOM 로드 대기하지 않음
-console.log('Script loaded immediately');
-console.log('Current location:', window.location.href);
-
-// 즉시 전역 함수 정의
-window.testFunction = function() {
-    console.log('Test function works!');
-    return 'SUCCESS';
-};
-
 // 전역 변수들
 let elements, state;
 
-// 즉시 전역 loadData 함수 정의
-window.loadData = async function() {
-    console.log('=== LOAD DATA STARTED ===');
-    try {
-        // 간단한 fetch 테스트
-        const response = await fetch('./data.json');
-        console.log('Response status:', response.status);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log('Data loaded:', data);
-        
-        // 메인 콘텐츠 표시
-        const mainContent = document.getElementById('main-content');
-        const loader = document.getElementById('loader');
-        
-        if (loader) loader.style.display = 'none';
-        if (mainContent) mainContent.classList.remove('hidden');
-        
-        // 간단한 캐릭터 목록 표시
-        const itemList = document.getElementById('item-list');
-        if (itemList && data.characters) {
-            itemList.innerHTML = data.characters.map(char => `
-                <div class="item-card">
-                    <img src="${char.imageUrl || './images/placeholder.png'}" alt="${char.name}">
-                    <h3>${char.name}</h3>
-                    <span>${char.attribute}</span>
-                </div>
-            `).join('');
-        }
-        
-        console.log('=== LOAD DATA COMPLETED ===');
-        return 'SUCCESS';
-        
-    } catch (error) {
-        console.error('=== LOAD DATA FAILED ===', error);
-        return 'FAILED: ' + error.message;
-    }
-};
+console.log('Script loaded, initializing...');
+console.log('Current location:', window.location.href);
 
 // DOM이 준비되면 실행
 function initializeApp() {
@@ -271,6 +221,8 @@ function initializeApp() {
     }
 
     function filterItems() {
+        if (!state.gameData) return;
+        
         const sourceData = state.currentListType === 'characters' ? state.gameData.characters : state.gameData.kibos;
         const filtered = sourceData.filter(item =>
             (!state.activeFilters.search || JSON.stringify(item).toLowerCase().includes(state.activeFilters.search)) &&
@@ -278,35 +230,52 @@ function initializeApp() {
             (state.currentListType !== 'characters' || state.activeFilters.races.length === 0 || state.activeFilters.races.includes(item.race)) &&
             (state.activeFilters.channels.length === 0 || state.activeFilters.channels.some(channel => item.releaseChannel && item.releaseChannel.includes(channel)))
         );
-        elements.resultCountSpan.textContent = filtered.length;
-        elements.itemListDiv.innerHTML = filtered.map(item => {
-            const attr = state.gameData.attributes.find(a => a.name === item.attribute);
-            return `
-            <div class="item-card" data-name="${item.name}" style="border-left-color:${attr ? attr.color : '#ccc'}">
-                <img src="${imageBasePath + 'placeholder.png'}" alt="${item.name}" loading="lazy" 
-                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='"
-                     data-original-src="${item.imageUrl || ''}"
-                     data-item-name="${item.name}">
-                <h3>${item.name}</h3>
-                <span class="attribute-tag">${getAttributeEmoji(item.attribute)}${item.attribute || '미공개'}</span>
-                <div class="item-info">
-                    ${state.currentListType === 'characters' ? `<small>종족: ${item.race || '미공개'}</small>` : `<small>${item.note || ''}</small>`}
-                    <small>채널: ${item.releaseChannel || '미공개'}</small>
-                </div>
-            </div>`;
-        }).join('');
-        elements.itemListDiv.querySelectorAll('.item-card').forEach(card => {
-            card.onclick = () => displayDetail(filtered.find(item => item.name === card.dataset.name));
+        
+        if (elements.resultCountSpan) {
+            elements.resultCountSpan.textContent = filtered.length;
+        }
+        
+        if (elements.itemListDiv) {
+            elements.itemListDiv.innerHTML = filtered.map(item => {
+                const attr = state.gameData.attributes.find(a => a.name === item.attribute);
+                const borderColor = attr ? attr.color : getCharacterColor(item.attribute);
+                
+                // GitHub Pages 경로 처리
+                let imageSrc = './images/placeholder.png';
+                if (item.imageUrl) {
+                    // 절대 경로로 변환
+                    if (item.imageUrl.startsWith('images/') || item.imageUrl.startsWith('kibo_image/')) {
+                        imageSrc = './' + item.imageUrl;
+                    } else {
+                        imageSrc = item.imageUrl;
+                    }
+                }
+                
+                return `
+                <div class="item-card" data-name="${item.name}" style="border-left: 4px solid ${borderColor};">
+                    <img src="${imageSrc}" 
+                         alt="${item.name}" 
+                         loading="lazy" 
+                         onerror="handleImageError(this, '${item.imageUrl || ''}')"
+                         data-original-src="${item.imageUrl || ''}"
+                         data-item-name="${item.name}">
+                    <h3>${item.name}</h3>
+                    <span class="attribute-tag">${getAttributeEmoji(item.attribute)} ${item.attribute || '미공개'}</span>
+                    <div class="item-info">
+                        ${state.currentListType === 'characters' ? `<small>종족: ${item.race || '미공개'}</small>` : `<small>${item.note || ''}</small>`}
+                        <small>채널: ${item.releaseChannel || '미공개'}</small>
+                    </div>
+                </div>`;
+            }).join('');
             
-            // 이미지 로딩 처리
-            const img = card.querySelector('img');
-            const originalSrc = img.dataset.originalSrc;
-            const itemName = img.dataset.itemName;
-            
-            if (originalSrc && originalSrc !== '') {
-                loadImageWithFallback(img, originalSrc, itemName);
-            }
-        });
+            // 카드 클릭 이벤트 추가
+            elements.itemListDiv.querySelectorAll('.item-card').forEach(card => {
+                card.onclick = () => {
+                    const item = filtered.find(item => item.name === card.dataset.name);
+                    if (item) displayDetail(item);
+                };
+            });
+        }
     }
 
     function displayDetail(item) {
@@ -545,54 +514,60 @@ function initializeApp() {
     elements.restartTournamentBtn.onclick = () => startNewTournament(state.tournament.type);
     elements.backToMainMenuBtn.onclick = () => showScreen(elements.characterSection);
 
-// Data loading function (global)
-window.loadData = async function loadData() {
-        try {
-            console.log('Starting data load...');
-            
-            // 경로 확인
-            const basePath = window.location.pathname.endsWith('/') ? window.location.pathname : window.location.pathname + '/';
-            const jsonPath = basePath + 'data.json';
-            console.log('JSON path:', jsonPath);
-            console.log('Current URL:', window.location.href);
-            
-            // 요소 확인
-            const loader = document.getElementById('loader');
-            const mainContent = document.getElementById('main-content');
-            
-            if (loader) loader.style.display = 'flex';
-            
-            console.log('Fetching data from:', jsonPath);
-            const response = await fetch(jsonPath);
-            console.log('Response status:', response.status);
-            console.log('Response ok:', response.ok);
-            
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+// 전역 데이터 로딩 함수
+window.loadData = async function() {
+    try {
+        console.log('Starting data load...');
+        
+        // 경로 확인
+        const basePath = window.location.pathname.endsWith('/') ? window.location.pathname : window.location.pathname + '/';
+        const jsonPath = basePath + 'data.json';
+        console.log('JSON path:', jsonPath);
+        console.log('Current URL:', window.location.href);
+        
+        // 요소 확인
+        const loader = document.getElementById('loader');
+        const mainContent = document.getElementById('main-content');
+        
+        if (loader) loader.style.display = 'flex';
+        
+        console.log('Fetching data from:', jsonPath);
+        const response = await fetch(jsonPath);
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+        
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-            console.log('Parsing JSON...');
-            state.gameData = await response.json();
-            console.log('Data loaded successfully:', state.gameData);
+        console.log('Parsing JSON...');
+        state.gameData = await response.json();
+        console.log('Data loaded successfully:', state.gameData);
 
-            // Initialize filters
-            initializeFilters();
+        // 이미지 경로 정규화
+        normalizeImagePaths();
 
-            // Show main content
-            elements.loader.style.display = 'none';
-            elements.mainContent.classList.remove('hidden');
+        // Initialize filters
+        initializeFilters();
 
-            // Show character list by default
-            displayList('characters');
+        // Show main content
+        if (loader) loader.style.display = 'none';
+        if (mainContent) mainContent.classList.remove('hidden');
 
-            // Update community stats
-            updateCommunityStats();
+        // Show character list by default
+        displayList('characters');
 
-            // Update ranking display
-            updateRankingDisplay();
+        // Update community stats
+        updateCommunityStats();
 
-            Toast.success('데이터 로딩 완료!');
-        } catch (error) {
-            console.error('데이터 로딩 실패:', error);
-            elements.loader.innerHTML = `
+        // Update ranking display
+        updateRankingDisplay();
+
+        Toast.success('데이터 로딩 완료!');
+        return 'SUCCESS';
+    } catch (error) {
+        console.error('데이터 로딩 실패:', error);
+        const loader = document.getElementById('loader');
+        if (loader) {
+            loader.innerHTML = `
                 <div class="error-message">
                     <h3>🚫 데이터 로딩 실패</h3>
                     <p>데이터를 불러올 수 없습니다. 네트워크 연결을 확인하고 페이지를 새로고침해주세요.</p>
@@ -600,9 +575,11 @@ window.loadData = async function loadData() {
                     <button onclick="location.reload()" class="btn btn-primary">🔄 새로고침</button>
                 </div>
             `;
-            Toast.error('데이터 로딩에 실패했습니다.');
         }
+        Toast.error('데이터 로딩에 실패했습니다.');
+        return 'FAILED: ' + error.message;
     }
+};
 
     function initializeFilters() {
         if (!state.gameData) return;
@@ -722,6 +699,55 @@ window.loadData = async function loadData() {
         if (lastUpdatedEl) lastUpdatedEl.textContent = state.gameData.metadata?.lastUpdated || '알 수 없음';
     }
 
+    function updateActiveFiltersDisplay() {
+        if (!elements.activeFiltersDiv) return;
+        
+        const activeFilters = [];
+        
+        // Add search filter
+        if (state.activeFilters.search) {
+            activeFilters.push({
+                type: 'search',
+                value: state.activeFilters.search,
+                display: `검색: "${state.activeFilters.search}"`
+            });
+        }
+        
+        // Add attribute filters
+        state.activeFilters.attributes.forEach(attr => {
+            activeFilters.push({
+                type: 'attributes',
+                value: attr,
+                display: `${getAttributeEmoji(attr)} ${attr}`
+            });
+        });
+        
+        // Add race filters
+        state.activeFilters.races.forEach(race => {
+            activeFilters.push({
+                type: 'races',
+                value: race,
+                display: `종족: ${race}`
+            });
+        });
+        
+        // Add channel filters
+        state.activeFilters.channels.forEach(channel => {
+            activeFilters.push({
+                type: 'channels',
+                value: channel,
+                display: `채널: ${channel}`
+            });
+        });
+        
+        elements.activeFiltersDiv.innerHTML = activeFilters.map(filter => `
+            <div class="active-filter">
+                ${filter.display}
+                <span class="remove-filter" onclick="removeActiveFilter('${filter.type}', '${filter.value}')">×</span>
+            </div>
+        `).join('');
+    }
+
     // Search and filter event listeners
     if (elements.searchInput) {
         elements.searchInput.oninput = (e) => {
@@ -749,89 +775,7 @@ window.loadData = async function loadData() {
 
     // Initial Load
     loadData();
-    
-    // Also make it globally accessible for debugging
-    window.loadData = loadData;
 }
-
-// DOM이 로드되면 초기화
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeApp);
-} else {
-    initializeApp();
-}
-
-// 전역으로 노출
-window.initializeApp = initializeApp;
-
-// 강제 실행 (즉시)
-setTimeout(() => {
-    console.log('🚀 Force executing data load...');
-    
-    // 직접 데이터 로딩 및 표시
-    fetch('./data.json')
-        .then(response => {
-            console.log('📡 Response status:', response.status);
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            return response.json();
-        })
-        .then(data => {
-            console.log('✅ Data loaded successfully:', data);
-            
-            // UI 요소 가져오기
-            const mainContent = document.getElementById('main-content');
-            const loader = document.getElementById('loader');
-            const itemList = document.getElementById('item-list');
-            
-            // 로더 완전히 제거
-            if (loader) {
-                loader.style.display = 'none';
-                loader.style.visibility = 'hidden';
-                loader.style.opacity = '0';
-                loader.style.zIndex = '-1';
-                loader.remove(); // 완전히 제거
-                console.log('🔄 Loader completely removed');
-            }
-            if (mainContent) {
-                mainContent.classList.remove('hidden');
-                mainContent.style.display = 'block';
-                mainContent.style.visibility = 'visible';
-                console.log('👁️ Main content shown');
-            }
-            
-            // 캐릭터 목록 생성
-            if (itemList && data.characters) {
-                itemList.innerHTML = data.characters.map(char => `
-                    <div class="item-card" style="border-left: 4px solid ${getCharacterColor(char.attribute)};">
-                        <img src="${char.imageUrl || './images/placeholder.png'}" 
-                             alt="${char.name}"
-                             onerror="this.src='./images/placeholder.png';">
-                        <h3>${char.name}</h3>
-                        <span class="attribute-tag">${getAttributeEmoji(char.attribute)} ${char.attribute}</span>
-                        <div class="item-info">
-                            <small>종족: ${char.race || '미공개'}</small>
-                            <small>채널: ${char.releaseChannel || '미공개'}</small>
-                        </div>
-                    </div>
-                `).join('');
-                
-                console.log(`🎨 ${data.characters.length}개 캐릭터 표시 완료!`);
-            }
-        })
-        .catch(error => {
-            console.error('❌ Data loading failed:', error);
-            const loader = document.getElementById('loader');
-            if (loader) {
-                loader.innerHTML = `
-                    <div class="error-message">
-                        <h3>🚫 데이터 로딩 실패</h3>
-                        <p>데이터를 불러올 수 없습니다: ${error.message}</p>
-                        <button onclick="location.reload()" class="btn btn-primary">🔄 새로고침</button>
-                    </div>
-                `;
-            }
-        });
-}, 1000);
 
 // 유틸리티 함수들
 function getAttributeEmoji(attribute) {
@@ -848,4 +792,77 @@ function getCharacterColor(attribute) {
         '바람': '#4CAF50', '어둠': '#9C27B0', '빛': '#FFC107', '얼음': '#00BCD4', '나무': '#8BC34A'
     };
     return colors[attribute] || '#ccc';
+}
+
+// 이미지 경로 정규화 함수
+function normalizeImagePaths() {
+    if (!state.gameData) return;
+    
+    console.log('Normalizing image paths...');
+    
+    // 캐릭터 이미지 경로 정규화
+    state.gameData.characters.forEach(char => {
+        if (char.imageUrl && !char.imageUrl.startsWith('http') && !char.imageUrl.startsWith('./')) {
+            char.imageUrl = './' + char.imageUrl;
+        }
+        console.log(`Character ${char.name}: ${char.imageUrl}`);
+    });
+    
+    // 키보 이미지 경로 정규화
+    state.gameData.kibos.forEach(kibo => {
+        if (kibo.imageUrl && !kibo.imageUrl.startsWith('http') && !kibo.imageUrl.startsWith('./')) {
+            kibo.imageUrl = './' + kibo.imageUrl;
+        }
+        console.log(`Kibo ${kibo.name}: ${kibo.imageUrl}`);
+    });
+}
+
+// 전역 이미지 오류 처리 함수
+window.handleImageError = function(imgElement, originalSrc) {
+    console.log('Image loading failed for:', originalSrc);
+    
+    if (!imgElement.dataset.retryAttempted) {
+        imgElement.dataset.retryAttempted = 'true';
+        
+        // 다양한 경로 시도
+        const pathsToTry = [
+            './images/placeholder.png',
+            'images/placeholder.png',
+            '/page/images/placeholder.png',
+            'https://via.placeholder.com/200x200/ddd/999?text=No+Image'
+        ];
+        
+        let currentIndex = 0;
+        
+        const tryNextPath = () => {
+            if (currentIndex < pathsToTry.length) {
+                const pathToTry = pathsToTry[currentIndex++];
+                console.log('Trying fallback path:', pathToTry);
+                
+                const testImg = new Image();
+                testImg.onload = () => {
+                    console.log('Fallback image loaded:', pathToTry);
+                    imgElement.src = pathToTry;
+                };
+                testImg.onerror = () => {
+                    console.log('Fallback failed:', pathToTry);
+                    tryNextPath();
+                };
+                testImg.src = pathToTry;
+            } else {
+                // 모든 경로 실패시 SVG placeholder 사용
+                console.log('All fallback paths failed, using SVG placeholder');
+                imgElement.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
+            }
+        };
+        
+        tryNextPath();
+    }
+};
+
+// DOM이 로드되면 초기화
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    initializeApp();
 }
